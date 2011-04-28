@@ -1,11 +1,11 @@
 <?php
 
-class course_format_page_lib_hierarchy {
+class course_format_flexpage_lib_hierarchy {
     protected $flat = array();
     protected $nested = array();
 
     /**
-     * @var course_format_page_model_page[]
+     * @var course_format_flexpage_model_page[]
      */
     protected $pages = array();
 

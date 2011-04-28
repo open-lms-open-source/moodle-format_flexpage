@@ -3,8 +3,8 @@
  * Format Version
  *
  * @author Mark Nielsen
- * @package format_page
+ * @package format_flexpage
  */
 
-$plugin->version  = 2009080300;
+$plugin->version  = 2011042800;
 $plugin->requires = 2011033000;

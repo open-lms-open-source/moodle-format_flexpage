@@ -1,7 +1,7 @@
 <?php
 
 // @todo implement condition_availability or w/e
-class course_format_page_model_page {
+class course_format_flexpage_model_page {
     /**
      * Publish the page
      */
@@ -39,16 +39,18 @@ class course_format_page_model_page {
     protected $name;
     protected $altname;
     protected $display;
-    protected $parent;
-    protected $sortorder;
+    protected $parentid;
+    protected $weight;
     protected $template;
     protected $showbuttons;
     protected $releasecode;
     protected $availablefrom;
     protected $availableuntil;
 
-    // @todo implement this as a separate class that implements the moodle interface?
-    protected $conditions = array();
+    /**
+     * @var condition_info_controller
+     */
+    protected $conditions;
 
     public function __construct(array $options = array()) {
         $this->set_options($options);
@@ -74,12 +76,12 @@ class course_format_page_model_page {
         return $this->display;
     }
 
-    public function get_parent() {
-        return $this->parent;
+    public function get_parentid() {
+        return $this->parentid;
     }
 
-    public function get_sortorder() {
-        return $this->sortorder;
+    public function get_weight() {
+        return $this->weight;
     }
 
     public function get_template() {
@@ -90,25 +92,25 @@ class course_format_page_model_page {
         return $this->showbuttons;
     }
 
-    public function set_conditions(array $conditions) {
-        $this->conditions = $conditions;
-
-        if (!is_null($this->releasecode)) {
-            $this->conditions[] = new condition_releasecode($this->releasecode);
-        }
-        if (!empty($this->availablefrom) or !empty($this->availableuntil)) {
-            $this->conditions[] = new condition_daterange(
-                $this->availablefrom,
-                $this->availableuntil
-            );
-        }
+    public function get_availablefrom() {
+        return $this->availablefrom;
     }
 
-    public function is_available($inmenu = false) {
-        // This method should take into consideration the following:
-        //      1. The user's capabilities
-        //      2. Page display settings (in or not in a menu)
-        //      3. Page availability conditions (parent pages too?)
+    public function get_availableuntil() {
+        return $this->availableuntil;
+    }
+
+    public function get_releasecode() {
+        return $this->releasecode;
+    }
+
+    /**
+     * Get condition information
+     *
+     * @return condition_info_controller
+     */
+    public function get_conditions() {
+        return $this->conditions;
     }
 
     public function set_options(array $options) {
@@ -126,12 +128,23 @@ class course_format_page_model_page {
         return $this;
     }
 
-    /**
-     * Get conditions associated with the object.
-     *
-     * @return array|condition_base[]
-     */
-    public function get_conditions() {
-        $this->conditions;
+    public function set_conditions(array $conditions) {
+        if (!is_null($this->releasecode)) {
+            $conditions[] = new condition_releasecode($this->releasecode);
+        }
+        if (!empty($this->availablefrom) or !empty($this->availableuntil)) {
+            $conditions[] = new condition_daterange(
+                $this->availablefrom,
+                $this->availableuntil
+            );
+        }
+        $this->conditions = new condition_info_controller($conditions);
+    }
+
+    public function is_available($inmenu = false) {
+        // This method should take into consideration the following:
+        //      1. The user's capabilities
+        //      2. Page display settings (in or not in a menu)
+        //      3. Page availability conditions (parent pages too?)
     }
 }

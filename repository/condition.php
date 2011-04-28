@@ -1,6 +1,6 @@
 <?php
 
-class course_format_page_respository_condition {
+class course_format_flexpage_respository_condition {
 /*
     public function get_conditions($courseid) {
         global $DB;
@@ -55,9 +55,9 @@ class course_format_page_respository_condition {
         return $this->get_conditions($courseid);
     }
 
-    // @todo only allow param of type course_format_page_model_page ?
+    // @todo only allow param of type course_format_flexpage_model_page ?
     public function get_page_condtions($param) {
-        if ($param instanceof course_format_page_model_page) {
+        if ($param instanceof course_format_flexpage_model_page) {
             $pageid = $param->get_id();
         } else if (is_number($param)) {
             $pageid = $param;
@@ -67,7 +67,7 @@ class course_format_page_respository_condition {
         // Pass through current() because conditions are keyed by pageid
         $conditions = current($this->get_conditions(null, $pageid));
 
-        if ($param instanceof course_format_page_model_page) {
+        if ($param instanceof course_format_flexpage_model_page) {
             $param->set_conditions($conditions);
         } else {
             return $conditions;
@@ -146,7 +146,7 @@ class course_format_page_respository_condition {
     public function delete_page_conditions($param) {
         global $DB;
 
-        if ($param instanceof course_format_page_model_page) {
+        if ($param instanceof course_format_flexpage_model_page) {
             $pageid = $param->get_id();
         } else if (is_number($param)) {
             $pageid = $param;
@@ -156,11 +156,12 @@ class course_format_page_respository_condition {
         $DB->delete_records('format_page_gradeitem', array('pageid' => $pageid));
         $DB->delete_records('format_page_completion', array('pageid' => $pageid));
 
-        if ($param instanceof course_format_page_model_page) {
+        if ($param instanceof course_format_flexpage_model_page) {
             $param->set_conditions(array());
         }
     }
 
+    // @todo delete
     public function save_page_conditions($pageid, condition_base $condition) {
         global $DB;
 
@@ -171,19 +172,12 @@ class course_format_page_respository_condition {
                 'grademin' => $condition->get_min(),
                 'grademax'=> $condition->get_max()
             ), false);
-
-            // Store in memory
-            // $this->conditions[] = $condition;
-
         } else if ($condition instanceof condition_completion) {
             $DB->insert_record('format_page_completion', (object) array(
                 'coursesectionid' => $pageid,
                 'sourcecmid' => $condition->get_cmid(),
                 'requiredcompletion' => $condition->get_requiredcompletion()
             ), false);
-
-            // Store in memory
-            // $this->conditions[] = $condition;
         } else {
             throw new coding_exception('Unsupported condition: '.get_class($condition));
         }

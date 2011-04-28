@@ -2,7 +2,7 @@
 /**
  * Format Upgrade Path
  *
- * @package format_page
+ * @package format_flexpage
  */
-function xmldb_format_page_upgrade($oldversion=0) {
+function xmldb_format_flexpage_upgrade($oldversion=0) {
 }

@@ -1,3 +1,3 @@
 <?php
 
-$string['pluginname'] = 'Page';
+$string['pluginname'] = 'Flexpage';
