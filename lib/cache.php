@@ -112,36 +112,6 @@ class course_format_flexpage_lib_cache {
         // 6. Serialize and store in database
     }
 
-    public function _sort(course_format_flexpage_model_page $a, course_format_flexpage_model_page $b, $recursive = false) {
-        $this->counts['_sort']++;
-        // Comparing the same page, they are equal
-        if ($a->get_id() == $b->get_id()) {
-            return 0;
-        }
-        // Pages have same parent, use weight
-        if ($a->get_parentid() == $b->get_parentid()) {
-            return ($a->get_weight() < $b->get_weight()) ? -1 : 1;
-
-        // If $b is a child/grandchild of $a, then it goes below
-        } else if (!$recursive and $this->is_child($a, $b)) {
-            return -1;
-
-        // If $a is a child/grandchild of $b, then it goes above
-        } else if (!$recursive and $this->is_child($b, $a)) {
-            return 1;
-
-        // Pages are not in the same decendants path, crawl up to the same hierarchy
-        // depth, once there, we can use weight to sort them
-        } else if ($this->get_depth($a) > $this->get_depth($b)) {
-            $aparent = $this->get_page($a->get_parentid());
-            $bparent = $b;
-        } else {
-            $aparent = $a;
-            $bparent = $this->get_page($b->get_parentid());
-        }
-        return $this->_sort($aparent, $bparent, true);
-    }
-
     public function get_depth(course_format_flexpage_model_page $page, $depth = 0) {
         $this->counts['get_depth']++;
 
