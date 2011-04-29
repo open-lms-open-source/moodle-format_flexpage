@@ -1,8 +1,15 @@
 <?php
+/**
+ * @see course_format_flexpage_repository_page
+ */
+require_once($CFG->dirroot.'/course/format/flexpage/repository/page.php');
 
-// @todo require repository/page.php
+/**
+ * @see course_format_flexpage_repository_condition
+ */
+require_once($CFG->dirroot.'/course/format/flexpage/repository/condition.php');
 
-class course_format_flexpage_lib_info {
+class course_format_flexpage_lib_cache {
     protected $courseid;
     protected $flat = array();
     protected $nested = array();
@@ -13,7 +20,7 @@ class course_format_flexpage_lib_info {
     protected $pages = array();
 
     /**
-     * @var course_format_flexpage_lib_info
+     * @var course_format_flexpage_lib_cache
      */
     protected static $instance;
 
@@ -25,12 +32,12 @@ class course_format_flexpage_lib_info {
         } else {
             $course = $course;
         }
-        if (!self::$instance instanceof course_format_flexpage_lib_info or self::$instance->get_courseid() != $course->id) {
+        if (!self::$instance instanceof course_format_flexpage_lib_cache or self::$instance->get_courseid() != $course->id) {
             if ($info = $DB->get_field('format_page_info', 'info', array('courseid' => $course->id))) {
                 $info = unserialize($info);
             }
-            if (!$info instanceof course_format_flexpage_lib_info) {
-                $info = new course_format_flexpage_lib_info($course->id);
+            if (!$info instanceof course_format_flexpage_lib_cache) {
+                $info = new course_format_flexpage_lib_cache($course->id);
                 $info->rebuild();
                 // @todo Serialize and store in DB here?
             }
@@ -39,50 +46,43 @@ class course_format_flexpage_lib_info {
         return self::$instance;
     }
 
-    protected function __construct($courseid) {
-        // @todo we don't actually want the whole course object to be serialized into the db
-        $this->course = $courseid;
+    public function __construct($courseid) {
+        $this->courseid = $courseid;
     }
 
     public function get_courseid() {
         return $this->courseid;
     }
 
-    public function get_hierarchy() {
-        return $this->hierarchy;
-    }
-
-    public function get_flat() {
-        return $this->flat;
-    }
-
-    public function get_nested() {
-        return $this->nested;
-    }
-
     public function get_page_parents($pageid) {
         // return array of parents of a page
     }
 
+    public function get_pages() {
+        return $this->pages;
+    }
     public function get_page($pageid) {
-        if (!array_key_exists($page, $this->pages)) {
+        if (!array_key_exists($pageid, $this->pages)) {
             // @todo Better error recovery?
             throw new coding_exception("Page with id = $pageid does not exist in cache");
         }
         return $this->pages[$pageid];
     }
 
-    public function rebuild() {
-        // @todo break all of these into functions for testing
+    public function rebuild(course_format_flexpage_repository_page $pagerepo = null,
+                            course_format_flexpage_repository_condition $condrepo = null) {
 
-        $pagerepo = new course_format_flexpage_respository_page();
-        $pages    = $pagerepo->get_pages($this->get_courseid());
-
-        $condrepo   = new course_format_flexpage_respository_condition();
-        $conditions = $condrepo->get_course_conditions($this->get_courseid());
+        if (is_null($pagerepo)) {
+            $pagerepo = new course_format_flexpage_repository_page();
+        }
+        if (is_null($condrepo)) {
+            $condrepo = new course_format_flexpage_repository_condition();
+        }
+        $this->pages = $pagerepo->get_pages($this->get_courseid(), 'parentid, weight');
+        $conditions  = $condrepo->get_course_conditions($this->get_courseid());
 
         // Associate conditions to pages
-        foreach ($pages as $page) {
+        foreach ($this->pages as $page) {
             if (array_key_exists($page->get_id(), $conditions)) {
                 $pageconditions = $conditions[$page->get_id()];
             } else {
@@ -91,11 +91,75 @@ class course_format_flexpage_lib_info {
             $page->set_conditions($pageconditions);
         }
 
+        $this->counts = array('_sort' => 0, 'get_depth' => 0, 'is_child' => 0);
+        $pages = $this->pages;
+        $microtime = microtime();
+        uasort($this->pages, array($this, '_sort'));
+        $difftime = microtime_diff($microtime, microtime());
+        mtrace("Execution took ".$difftime." seconds");
+
+        print_object($this->counts);
+
+        $this->counts = array('_sort' => 0, 'get_depth' => 0, 'is_child' => 0);
+        uasort($pages, array($this, '_sort2'));
+        print_object($this->counts);
+
         // 1. (DON'T NEED TO ANYMORE) Prune bad condition data
         // 2. DONE Pull all pages, setup classes
         // 3. DONE Pull all conditions, reorganize and associate to pages
         // 4. Build hierarchy arrays, store only IDs
         // 5. While building hierarchy arrays, I'm sure we can repair weight
         // 6. Serialize and store in database
+    }
+
+    public function _sort(course_format_flexpage_model_page $a, course_format_flexpage_model_page $b, $recursive = false) {
+        $this->counts['_sort']++;
+        // Comparing the same page, they are equal
+        if ($a->get_id() == $b->get_id()) {
+            return 0;
+        }
+        // Pages have same parent, use weight
+        if ($a->get_parentid() == $b->get_parentid()) {
+            return ($a->get_weight() < $b->get_weight()) ? -1 : 1;
+
+        // If $b is a child/grandchild of $a, then it goes below
+        } else if (!$recursive and $this->is_child($a, $b)) {
+            return -1;
+
+        // If $a is a child/grandchild of $b, then it goes above
+        } else if (!$recursive and $this->is_child($b, $a)) {
+            return 1;
+
+        // Pages are not in the same decendants path, crawl up to the same hierarchy
+        // depth, once there, we can use weight to sort them
+        } else if ($this->get_depth($a) > $this->get_depth($b)) {
+            $aparent = $this->get_page($a->get_parentid());
+            $bparent = $b;
+        } else {
+            $aparent = $a;
+            $bparent = $this->get_page($b->get_parentid());
+        }
+        return $this->_sort($aparent, $bparent, true);
+    }
+
+    public function get_depth(course_format_flexpage_model_page $page, $depth = 0) {
+        $this->counts['get_depth']++;
+
+        while ($page->get_parentid() > 0) {
+            $depth++;
+            $page = $this->get_page($page->get_parentid());
+        }
+        return $depth;
+    }
+
+    public function is_child(course_format_flexpage_model_page $parent, course_format_flexpage_model_page $child) {
+        $this->counts['is_child']++;
+        while ($parent->get_id() != $child->get_parentid() and $child->get_parentid() > 0) {
+            $child = $this->get_page($child->get_parentid());
+        }
+        if ($parent->get_id() == $child->get_parentid()) {
+            return true;
+        }
+        return false;
     }
 }
