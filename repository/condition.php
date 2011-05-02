@@ -1,6 +1,8 @@
 <?php
 
-class course_format_flexpage_respository_condition {
+require_once($CFG->libdir.'/conditionlib.php');
+
+class course_format_flexpage_repository_condition {
 /*
     public function get_conditions($courseid) {
         global $DB;
@@ -75,7 +77,7 @@ class course_format_flexpage_respository_condition {
     }
 
     protected function get_conditions($courseid, $pageid = null) {
-        $conditions = $this->get_gradeitem_conditions($courseid, $pageid);
+        $conditions = $this->get_grade_conditions($courseid, $pageid);
 
         foreach ($this->get_completion_conditions($courseid, $pageid) as $pageid => $otherconditions) {
             if (array_key_exists($pageid, $conditions)) {
@@ -87,7 +89,7 @@ class course_format_flexpage_respository_condition {
         return $conditions;
     }
 
-    protected function get_gradeitem_conditions($courseid, $pageid = null) {
+    protected function get_grade_conditions($courseid, $pageid = null) {
         global $DB;
 
         if (!is_null($pageid)) {
@@ -99,9 +101,9 @@ class course_format_flexpage_respository_condition {
         }
         $rs = $DB->get_recordset_sql(
             "SELECT c.id AS conditionid, g.*, c.pageid, c.grademin AS conditiongrademin, c.grademax AS conditiongrademax
-               FROM {format_page} p
-         INNER JOIN {format_page_gradeitem} c ON p.id = c.pageid
-         INNER JOIN {grade_items} g ON g.ic = c.gradeitemid
+               FROM {format_flexpage_page} p
+         INNER JOIN {format_flexpage_grade} c ON p.id = c.pageid
+         INNER JOIN {grade_items} g ON g.id = c.gradeitemid
               WHERE $sqlwhere
            ORDER BY conditionid", $params
         );
@@ -127,9 +129,9 @@ class course_format_flexpage_respository_condition {
         }
         $rs = $DB->get_recordset_sql(
             "SELECT c.*
-               FROM {format_page} p
-         INNER JOIN {format_page_completion} c ON p.id = c.pageid
-         INNER JOIN {course_modules} cm ON cm.id = c.sourcecmid
+               FROM {format_flexpage_page} p
+         INNER JOIN {format_flexpage_completion} c ON p.id = c.pageid
+         INNER JOIN {course_modules} cm ON cm.id = c.cmid
               WHERE $sqlwhere
            ORDER BY c.id", $params
         );
@@ -153,8 +155,8 @@ class course_format_flexpage_respository_condition {
         } else {
             throw new coding_exception('Invalid parameter passed, expecting a page ID or page instance');
         }
-        $DB->delete_records('format_page_gradeitem', array('pageid' => $pageid));
-        $DB->delete_records('format_page_completion', array('pageid' => $pageid));
+        $DB->delete_records('format_flexpage_grade', array('pageid' => $pageid));
+        $DB->delete_records('format_flexpage_completion', array('pageid' => $pageid));
 
         if ($param instanceof course_format_flexpage_model_page) {
             $param->set_conditions(array());
@@ -166,14 +168,14 @@ class course_format_flexpage_respository_condition {
         global $DB;
 
         if ($condition instanceof condition_grade) {
-            $DB->insert_record('format_page_gradeitem', (object) array(
+            $DB->insert_record('format_flexpage_grade', (object) array(
                 'pageid' => $pageid,
                 'gradeitemid' => $condition->get_gradeitemid(),
                 'grademin' => $condition->get_min(),
                 'grademax'=> $condition->get_max()
             ), false);
         } else if ($condition instanceof condition_completion) {
-            $DB->insert_record('format_page_completion', (object) array(
+            $DB->insert_record('format_flexpage_completion', (object) array(
                 'coursesectionid' => $pageid,
                 'sourcecmid' => $condition->get_cmid(),
                 'requiredcompletion' => $condition->get_requiredcompletion()

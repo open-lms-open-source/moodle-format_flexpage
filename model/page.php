@@ -1,6 +1,7 @@
 <?php
 
-// @todo implement condition_availability or w/e
+require_once($CFG->libdir.'/conditionlib.php');
+
 class course_format_flexpage_model_page {
     /**
      * Publish the page
@@ -37,27 +38,35 @@ class course_format_flexpage_model_page {
     protected $id;
     protected $courseid;
     protected $name;
-    protected $altname;
-    protected $display;
-    protected $parentid;
-    protected $weight;
-    protected $template;
-    protected $showbuttons;
-    protected $releasecode;
-    protected $availablefrom;
-    protected $availableuntil;
+    protected $altname = null;
+    protected $display = 0;
+    protected $parentid = 0;
+    protected $weight = 0;
+    protected $template = 0;
+    protected $showbuttons = 0;
+    protected $releasecode = null;
+    protected $availablefrom = 0;
+    protected $availableuntil = 0;
 
     /**
      * @var condition_info_controller
      */
     protected $conditions;
 
-    public function __construct(array $options = array()) {
+    public function __construct($options = array()) {
         $this->set_options($options);
     }
 
     public function get_id() {
         return $this->id;
+    }
+
+    public function set_id($id) {
+        if (!empty($this->id)) {
+            throw new coding_exception('Cannot re-assign page ID');
+        }
+        $this->id = $id;
+        return $this;
     }
 
     public function get_courseid() {
@@ -82,6 +91,14 @@ class course_format_flexpage_model_page {
 
     public function get_weight() {
         return $this->weight;
+    }
+
+    public function set_weight($weight) {
+        if ($weight < 0) {
+            throw new coding_exception("Page weight must be zero or more: $weight");
+        }
+        $this->weight = $weight;
+        return $this;
     }
 
     public function get_template() {
@@ -113,7 +130,7 @@ class course_format_flexpage_model_page {
         return $this->conditions;
     }
 
-    public function set_options(array $options) {
+    public function set_options($options) {
         foreach ($options as $name => $value) {
             $method = "set_$name";
             if (method_exists($this, $method)) {
@@ -138,6 +155,7 @@ class course_format_flexpage_model_page {
                 $this->availableuntil
             );
         }
+        // @todo Don't make an instance if conditions are empty? Would reduce cache size...
         $this->conditions = new condition_info_controller($conditions);
     }
 
