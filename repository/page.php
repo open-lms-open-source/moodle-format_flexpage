@@ -4,24 +4,7 @@
  */
 require_once($CFG->dirroot.'/course/format/flexpage/model/page.php');
 
-/**
- * @see course_format_flexpage_repository_cache
- */
-require_once($CFG->dirroot.'/course/format/flexpage/repository/cache.php');
-
 class course_format_flexpage_repository_page {
-    /**
-     * @var course_format_flexpage_repository_cache
-     */
-    protected $cacherepo;
-
-    public function __construct() {
-        $this->set_cache_repository(new course_format_flexpage_repository_cache());
-    }
-
-    public function set_cache_repository($repo) {
-        $this->cacherepo = $repo;
-    }
 
     public function get_page($id) {
         global $DB;
@@ -165,8 +148,6 @@ class course_format_flexpage_repository_page {
 
                 break;
         }
-        // @todo Remove from here?
-        $this->cacherepo->clear_cache($page->get_courseid());
         return $this;
     }
 

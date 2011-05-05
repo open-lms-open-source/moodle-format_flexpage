@@ -9,15 +9,33 @@ require_once($CFG->dirroot.'/course/format/flexpage/repository/page.php');
  */
 require_once($CFG->dirroot.'/course/format/flexpage/repository/condition.php');
 
-class course_format_flexpage_lib_cache implements Serializable {
-    protected $courseid;
+class course_format_flexpage_model_cache {
+    /**
+     * @var int
+     */
+    protected $id;
 
-    protected $built = false;
+    /**
+     * @var int
+     */
+    protected $courseid = null;
 
     /**
      * @var course_format_flexpage_model_page[]
      */
-    protected $pages = array();
+    protected $pages;
+
+    /**
+     * @var int
+     */
+    protected $timemodified;
+
+    /**
+     * Flag for if the cache has been built or not
+     *
+     * @var bool
+     */
+    protected $built = false;
 
     /**
      * @var course_format_flexpage_repository_page
@@ -30,65 +48,45 @@ class course_format_flexpage_lib_cache implements Serializable {
     protected $condrepo;
 
     /**
-     * @var course_format_flexpage_lib_cache
-     */
-    protected static $instance;
-
-    /**
      * It is most efficient to access the course cache via
      * course_format_flexpage_repository_cache class.
      *
      * @param  $courseid
      */
-    public function __construct($courseid) {
-        $this->courseid = $courseid;
-        $this->init();
-    }
-
-    protected function init() {
+    public function __construct() {
         $this->pagerepo = new course_format_flexpage_repository_page();
         $this->condrepo = new course_format_flexpage_repository_condition();
+        $this->set_timemodified();
     }
 
-    /**
-     * String representation of object
-     *
-     * @link http://php.net/manual/en/serializable.serialize.php
-     * @return string
-     */
-    public function serialize() {
-        return serialize(array(
-            $this->get_courseid(),
-            $this->get_pages(),
-        ));
+    public function get_id() {
+        return $this->id;
     }
 
-    /**
-     * Constructs the object
-     *
-     * @link http://php.net/manual/en/serializable.unserialize.php
-     * @param string $serialized The string representation of the object.
-     * @return mixed
-     */
-    public function unserialize($serialized) {
-        list($this->courseid, $this->pages) = unserialize($serialized);
-        $this->init();
-        $this->built = true;
+    public function set_id($id) {
+        $this->id = $id;
     }
 
     public function get_courseid() {
         return $this->courseid;
     }
 
-    public function get_page_parents($pageid) {
-        $this->require_built();
-        // return array of parents of a page
+    public function set_courseid($id) {
+        $this->courseid = $id;
     }
 
-    public function get_pages() {
-        $this->require_built();
-        return $this->pages;
+    public function get_timemodified() {
+        return $this->timemodified;
     }
+
+    public function set_timemodified($time = null) {
+        if (is_null($time)) {
+            $time = time();
+        }
+        $this->timemodified = $time;
+        return $this;
+    }
+
     public function get_page($pageid) {
         $this->require_built();
         if (!array_key_exists($pageid, $this->pages)) {
@@ -96,6 +94,22 @@ class course_format_flexpage_lib_cache implements Serializable {
             throw new moodle_exception('pagenotfound', 'format_flexpage', '', $pageid);
         }
         return $this->pages[$pageid];
+    }
+
+    public function get_pages() {
+        $this->require_built();
+        return $this->pages;
+    }
+
+    public function set_pages(array $pages) {
+        $this->pages = $pages;
+        $this->built = true;
+        return $this;
+    }
+
+    public function get_page_parents($pageid) {
+        $this->require_built();
+        // return array of parents of a page
     }
 
     public function set_repository_page(course_format_flexpage_repository_page $pagerepo) {
@@ -118,19 +132,23 @@ class course_format_flexpage_lib_cache implements Serializable {
         }
     }
 
-    public function rebuild() {
+    public function build() {
+        if (is_null($this->get_courseid())) {
+            throw new coding_exception('Must set course ID before building cache');
+        }
+
         // Ensure that we have at least one page
         $this->pagerepo->create_default_page($this->get_courseid());
 
         // Fetch our pages and conditions
-        $this->pages = $this->pagerepo->get_pages($this->get_courseid(), 'parentid, weight');
+        $pages       = $this->pagerepo->get_pages($this->get_courseid(), 'parentid, weight');
         $conditions  = $this->condrepo->get_course_conditions($this->get_courseid());
 
         // Make sure our weights are all in order
-        $this->repair_page_weights($this->pages);
+        $this->repair_page_weights($pages);
 
         // Associate conditions to pages
-        foreach ($this->pages as $page) {
+        foreach ($pages as $page) {
             if (array_key_exists($page->get_id(), $conditions)) {
                 $pageconditions = $conditions[$page->get_id()];
             } else {
@@ -140,10 +158,19 @@ class course_format_flexpage_lib_cache implements Serializable {
         }
 
         // Sort all of the pages
-        $this->pages = $this->sort_pages($this->pages);
+        $pages = $this->sort_pages($pages);
 
-        // Flag cache a built
-        $this->built = true;
+        // Store in house
+        $this->set_pages($pages);
+        $this->set_timemodified();
+        unset($pages);
+    }
+
+    public function clear() {
+        unset($this->pages);
+        $this->pages = null;
+        $this->built = false;
+        $this->set_timemodified();
     }
 
     /**

@@ -1,5 +1,7 @@
 <?php
 
+require_once($CFG->dirroot.'/course/format/flexpage/locallib.php');
+
 class course_format_flexpage_lib_menu_action {
     protected $action;
     protected $name;
@@ -44,15 +46,10 @@ class course_format_flexpage_lib_menu_action {
     }
 
     public function set_url($url = array()) {
-        global $CFG;
-
-        require_once($CFG->dirroot.'/course/format/flexpage/repository/cache.php');
-
         if ($url instanceof moodle_url) {
             $this->url = $url;
         } else {
-            $repo = new course_format_flexpage_repository_cache();
-            $page = $repo->get_cache()->get_current_page();
+            $page = format_flexpage_cache()->get_current_page();
 
             $params = array(
                 'controller' => 'ajax',

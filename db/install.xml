@@ -70,9 +70,9 @@
     <TABLE NAME="format_flexpage_cache" COMMENT="Flexpage course cache" PREVIOUS="format_flexpage_grade">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="courseid"/>
-        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" PREVIOUS="id" NEXT="cache"/>
-        <FIELD NAME="cache" TYPE="text" LENGTH="big" NOTNULL="false" SEQUENCE="false" COMMENT="The cache" PREVIOUS="courseid" NEXT="timemodified"/>
-        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="The last time the cache was rebuilt" PREVIOUS="cache"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" PREVIOUS="id" NEXT="pages"/>
+        <FIELD NAME="pages" TYPE="text" LENGTH="big" NOTNULL="false" SEQUENCE="false" COMMENT="Page cache" PREVIOUS="courseid" NEXT="timemodified"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="The last time the cache was rebuilt" PREVIOUS="pages"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="courseid"/>

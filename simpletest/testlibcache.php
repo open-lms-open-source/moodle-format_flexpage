@@ -1,21 +1,21 @@
 <?php
 /**
- * @see course_format_flexpage_lib_cache
+ * @see course_format_flexpage_model_cache
  */
-require_once($CFG->dirroot.'/course/format/flexpage/lib/cache.php');
+require_once($CFG->dirroot.'/course/format/flexpage/model/cache.php');
 
 Mock::generate('course_format_flexpage_repository_page', 'mock_course_format_flexpage_repository_page');
 Mock::generate('course_format_flexpage_repository_condition', 'mock_course_format_flexpage_repository_condition');
 
 /**
- * Test course_format_flexpage_lib_cache
+ * Test course_format_flexpage_model_cache
  *
  * @package format_flexpage
  * @author Mark Nielsen
  */
 class course_format_flexpage_lib_cache_test extends UnitTestCase {
 
-    public static $includecoverage = array('course/format/flexpage/lib/cache.php');
+    public static $includecoverage = array('course/format/flexpage/model/cache.php');
 
     /**
      * @var course_format_flexpage_model_page[]
@@ -84,7 +84,7 @@ class course_format_flexpage_lib_cache_test extends UnitTestCase {
         $condrepo = new mock_course_format_flexpage_repository_condition();
         $condrepo->setReturnValue('get_course_conditions', array());
 
-        $cache = new course_format_flexpage_lib_cache(0);
+        $cache = new course_format_flexpage_model_cache();
         $cache->set_repository_page($pagerepo);
         $cache->set_repository_condition($condrepo);
         $cache->rebuild();
@@ -100,7 +100,7 @@ class course_format_flexpage_lib_cache_test extends UnitTestCase {
         $condrepo = new mock_course_format_flexpage_repository_condition();
         $condrepo->setReturnValue('get_course_conditions', array());
 
-        $cache = new course_format_flexpage_lib_cache(0);
+        $cache = new course_format_flexpage_model_cache();
         $cache->set_repository_page($pagerepo);
         $cache->set_repository_condition($condrepo);
         $cache->rebuild();
@@ -114,7 +114,7 @@ class course_format_flexpage_lib_cache_test extends UnitTestCase {
         $condrepo = new mock_course_format_flexpage_repository_condition();
         $condrepo->setReturnValue('get_course_conditions', array());
 
-        $cache = new course_format_flexpage_lib_cache(0);
+        $cache = new course_format_flexpage_model_cache();
         $cache->set_repository_page($pagerepo);
         $cache->set_repository_condition($condrepo);
         $cache->rebuild();

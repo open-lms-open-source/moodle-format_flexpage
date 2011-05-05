@@ -1,10 +1,5 @@
 <?php
 /**
- * @see course_format_flexpage_repository_cache
- */
-require_once($CFG->dirroot.'/course/format/flexpage/repository/cache.php');
-
-/**
  * @see course_format_flexpage_repository_page
  */
 require_once($CFG->dirroot.'/course/format/flexpage/repository/page.php');
@@ -30,6 +25,10 @@ class course_format_flexpage_controller_ajax extends mr_controller {
      */
     public function exception_handler($e) {
         $this->notify->bad('ajaxexception', $e->getMessage());
+
+        if (debugging('', DEBUG_DEVELOPER)) {
+            $this->notify->add_string(format_backtrace(get_exception_info($e)->backtrace));
+        }
     }
 
     /**
@@ -66,13 +65,14 @@ class course_format_flexpage_controller_ajax extends mr_controller {
                 $repo->move_page($page, $moves[$key], $referencepageids[$key])
                      ->save_page($page);
             }
+            format_flexpage_clear_cache();
+
             if (!empty($addedpages)) {
                 $this->notify->good('addedpages', implode(', ', array_reverse($addedpages)));
             }
         } else {
-            $repo = new course_format_flexpage_repository_cache();
             $pageoptions = array();
-            foreach ($repo->get_cache()->get_pages() as $page) {
+            foreach (format_flexpage_cache()->get_pages() as $page) {
                 $pageoptions[$page->get_id()] = $this->output->pad_page_name($page);
             }
             $moveoptions = course_format_flexpage_model_page::get_move_options();

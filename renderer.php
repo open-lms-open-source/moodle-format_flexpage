@@ -1,4 +1,7 @@
 <?php
+
+require_once($CFG->dirroot.'/course/format/flexpage/locallib.php');
+
 /**
  * @see course_format_flexpage_lib_box
  */
@@ -138,22 +141,10 @@ class format_flexpage_renderer extends plugin_renderer_base {
     }
 
     public function pad_page_name(course_format_flexpage_model_page $page, $amount = null) {
-        global $CFG;
-
-        /**
-         * @var course_format_flexpage_repository_cache $repo
-         */
-        static $repo = null;
-
         $name = format_string($page->get_display_name(), true, $page->get_courseid());
 
         if (is_null($amount)) {
-            if (is_null($repo)) {
-                require_once($CFG->dirroot.'/course/format/flexpage/repository/cache.php');
-                $repo = new course_format_flexpage_repository_cache();
-            }
-            $cache  = $repo->get_cache($page->get_courseid());
-            $amount = $cache->get_page_depth($page);
+            $amount = format_flexpage_cache()->get_page_depth($page);
         }
         if ($amount == 0) {
             return $name;
