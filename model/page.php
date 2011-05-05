@@ -35,6 +35,10 @@ class course_format_flexpage_model_page {
      */
     const BUTTON_BOTH = 3;
 
+    const MOVE_BEFORE = 'before';
+    const MOVE_AFTER = 'after';
+    const MOVE_CHILD = 'child';
+
     protected $id;
     protected $courseid;
     protected $name;
@@ -73,12 +77,35 @@ class course_format_flexpage_model_page {
         return $this->courseid;
     }
 
+    public function set_courseid($id) {
+        $this->courseid = $id;
+        return $this;
+    }
+
     public function get_name() {
         return $this->name;
     }
 
+    public function set_name($name) {
+        $this->name = $name;
+        return $this;
+    }
+
     public function get_altname() {
         return $this->altname;
+    }
+
+    /**
+     * Gets the name to be displayed to the end user
+     *
+     * @return string
+     */
+    public function get_display_name() {
+        $name = $this->get_altname();
+        if (empty($name)) {
+            $name = $this->get_name();
+        }
+        return $name;
     }
 
     public function get_display() {
@@ -87,6 +114,11 @@ class course_format_flexpage_model_page {
 
     public function get_parentid() {
         return $this->parentid;
+    }
+
+    public function set_parentid($id) {
+        $this->parentid = $id;
+        return $this;
     }
 
     public function get_weight() {
@@ -128,6 +160,14 @@ class course_format_flexpage_model_page {
      */
     public function get_conditions() {
         return $this->conditions;
+    }
+
+    public static function get_move_options() {
+        return array(
+            self::MOVE_CHILD  => get_string('movechild', 'format_flexpage'),
+            self::MOVE_BEFORE => get_string('movebefore', 'format_flexpage'),
+            self::MOVE_AFTER  => get_string('moveafter', 'format_flexpage'),
+        );
     }
 
     public function set_options($options) {

@@ -86,12 +86,12 @@ function callback_flexpage_ajax_support() {
  * @return void
  */
 function callback_flexpage_set_pagelayout() {
-    global $CFG, $PAGE, $COURSE;
+    global $CFG, $PAGE;
 
     require_once($CFG->dirroot.'/course/format/flexpage/repository/cache.php');
 
     $repo  = new course_format_flexpage_repository_cache();
-    $cache = $repo->get_cache($COURSE->id);
+    $cache = $repo->get_cache();
     $page  = $cache->get_current_page();
 
     $PAGE->set_pagelayout('format_flexpage');

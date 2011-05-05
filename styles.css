@@ -1,0 +1,36 @@
+
+/* Hide template, for JS only */
+#page-course-view-flexpage #addpagetemplate {
+    display: none;
+}
+
+#page-course-view-flexpage .format_flexpage_addpages_wrapper {
+    margin-bottom: 20px;
+}
+
+#page-course-view-flexpage .format_flexpage_addpages_addbutton {
+    vertical-align: bottom;
+    padding-left: 25px;
+}
+
+#page-course-view-flexpage .format_flexpage_addpages_addbutton button {
+    font-weight: bold;
+}
+
+#page-course-view-flexpage .format_flexpage_addpages_elements {
+    white-space: nowrap;
+    padding-top: 3px;
+    padding-bottom: 2px;
+}
+
+.format_flexpage_box {
+    display: table;
+}
+
+.format_flexpage_row {
+    display: table-row;
+}
+
+.format_flexpage_cell {
+    display: table-cell;
+}
