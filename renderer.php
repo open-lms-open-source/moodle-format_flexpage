@@ -76,9 +76,43 @@ class format_flexpage_renderer extends plugin_renderer_base {
         $arguments = array($menus);
 
         $PAGE->requires->js_init_call('M.format_flexpage.init_actionbar', $arguments, false, $this->get_js_module());
-        $otherdiv = html_writer::tag('div', 'hi', array('style' => 'float:right;'));
-        $menudiv = html_writer::tag('div', $otherdiv, array('id' => 'format_flexpage_actionbar_menu'));
+        $menudiv = html_writer::tag('div', $this->render_actionbar_navigation(), array('id' => 'format_flexpage_actionbar_menu'));
         return html_writer::tag('div', $menudiv, array('id' => 'format_flexpage_actionbar'));
+    }
+
+    /**
+     * Renders action bar's navigation
+     *
+     * @return string
+     */
+    public function render_actionbar_navigation() {
+        $currentpage = format_flexpage_cache()->get_current_page();
+        $options = array();
+        foreach (format_flexpage_cache()->get_pages() as $page) {
+            $options[$page->get_id()] = $this->pad_page_name($page);
+        }
+
+        if ($prevpage = format_flexpage_cache()->get_previous_page($currentpage)) {
+            $previcon = new pix_icon('t/left', get_string('gotoa', 'format_flexpage', format_string($prevpage->get_display_name())));
+            $prevpage = $this->output->action_icon(new moodle_url('/course/view.php', array('id' => $prevpage->get_courseid(), 'pageid' => $prevpage->get_id())), $previcon);
+            $prevpage = html_writer::tag('span', $prevpage, array('id' => 'format_flexpage_prevpage'));
+        } else {
+            $prevpage = '';
+        }
+        if ($nextpage = format_flexpage_cache()->get_next_page($currentpage)) {
+            $nexticon = new pix_icon('t/right', get_string('gotoa', 'format_flexpage', format_string($nextpage->get_display_name())));
+            $nextpage = $this->output->action_icon(new moodle_url('/course/view.php', array('id' => $nextpage->get_courseid(), 'pageid' => $nextpage->get_id())), $nexticon);
+            $nextpage = html_writer::tag('span', $nextpage, array('id' => 'format_flexpage_nextpage'));
+        } else {
+            $nextpage = '';
+        }
+        $jumptopage = $this->output->single_select(
+            new moodle_url('/course/view.php', array('id' => $currentpage->get_courseid())),
+            'pageid', $options, $currentpage->get_id(), array(), 'jumptopageid'
+        );
+        $jumptopage = html_writer::tag('span', $jumptopage, array('id' => 'format_flexpage_jumptopage'));
+
+        return html_writer::tag('div', $prevpage.$jumptopage.$nextpage, array('id' => 'format_flexpage_actionbar_nav'));
     }
 
     /**

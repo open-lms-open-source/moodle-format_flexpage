@@ -18,3 +18,4 @@ $string['addpages'] = 'Add pages';
 $string['error'] = 'Error';
 $string['genericasyncfail'] = 'The request failed for an unknown reason, please try the action again.';
 $string['close'] = 'Close';
+$string['gotoa'] = 'Go to "{$a}"';

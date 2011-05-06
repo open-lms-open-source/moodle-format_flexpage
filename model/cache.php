@@ -279,4 +279,29 @@ class course_format_flexpage_model_cache {
         }
         return false;
     }
+
+    // @todo add visibility checks?
+    public function get_next_page(course_format_flexpage_model_page $page) {
+        $found = false;
+        foreach ($this->get_pages() as $nextpage) {
+            if ($nextpage->get_id() == $page->get_id()) {
+                $found = true;
+            } else if ($found) {
+                return $nextpage;
+            }
+        }
+        return false;
+    }
+
+    // @todo add visibility checks?
+    public function get_previous_page(course_format_flexpage_model_page $page) {
+        $previouspage = false;
+        foreach ($this->get_pages() as $apage) {
+            if ($apage->get_id() == $page->get_id()) {
+                return $previouspage;
+            }
+            $previouspage = $apage;
+        }
+        return false;
+    }
 }

@@ -34,3 +34,20 @@
 .format_flexpage_cell {
     display: table-cell;
 }
+
+#format_flexpage_actionbar_nav {
+    float: right;
+    padding-right: 10px;
+}
+
+#format_flexpage_actionbar_nav #format_flexpage_jumptopage .singleselect {
+    display: inline-block;
+}
+
+#format_flexpage_actionbar_nav #format_flexpage_prevpage {
+    padding-right: 5px;
+}
+
+#format_flexpage_actionbar_nav #format_flexpage_nextpage {
+    padding-left: 5px;
+}
