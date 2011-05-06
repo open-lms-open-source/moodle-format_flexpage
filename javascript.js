@@ -47,6 +47,17 @@ M.format_flexpage.init_addpages = function(Y, url) {
     });
 }
 
+M.format_flexpage.init_movepage = function(Y, url) {
+    var dialog = M.format_flexpage.init_default_dialog(Y, "movepagepanel");
+
+    // Customize buttons
+    dialog.cfg.queueProperty("buttons", [
+        { text: M.str.format_flexpage.movepage, handler: dialog.submit, isDefault: true }
+    ]);
+
+    M.format_flexpage.populate_panel(Y, dialog, url);
+}
+
 M.format_flexpage.populate_panel = function(Y, panel, url, onsuccess) {
     Y.io(url, {
         on: {

@@ -80,8 +80,54 @@ class course_format_flexpage_controller_ajax extends mr_controller {
             $submiturl = $this->new_url(array('sesskey' => sesskey(), 'action' => 'addpages', 'add' => 1));
 
             echo json_encode((object) array(
-                'header' => get_string('addpagesaction', 'format_flexpage'),
+                'header' => get_string('addpages', 'format_flexpage'),
                 'body' => $this->output->render_addpages($submiturl, $pageoptions, $moveoptions),
+            ));
+        }
+    }
+
+    /**
+     * Move Page Modal
+     */
+    public function movepage_action() {
+
+        $pageid      = required_param('pageid', PARAM_INT);
+        $repo        = new course_format_flexpage_repository_page();
+        $movepage    = $repo->get_page($pageid);
+        $moveoptions = course_format_flexpage_model_page::get_move_options();
+
+        if (optional_param('move', 0, PARAM_BOOL)) {
+            require_sesskey();
+
+            $move = required_param('move', PARAM_ACTION);
+            $referencepageid = required_param('referencepageid', PARAM_INT);
+
+            $repo->move_page($movepage, $move, $referencepageid)
+                 ->save_page($movepage);
+
+            format_flexpage_clear_cache();
+
+            $refpage = $repo->get_page($referencepageid);
+
+            $this->notify->good('movedpage', (object) array(
+                'movepage' => format_string($movepage->get_display_name()),
+                'move' => $moveoptions[$move],
+                'refpage' => format_string($refpage->get_display_name()),
+            ));
+        } else {
+            $pageoptions = array();
+            foreach (format_flexpage_cache()->get_pages() as $page) {
+                // Skip the page that we are moving and any of its children
+                if ($page->get_id() == $movepage->get_id() or format_flexpage_cache()->is_child_page($movepage, $page)) {
+                    continue;
+                }
+                $pageoptions[$page->get_id()] = $this->output->pad_page_name($page);
+            }
+            $submiturl = $this->new_url(array('sesskey' => sesskey(), 'action' => 'movepage', 'pageid' => $pageid, 'move' => 1));
+
+            echo json_encode((object) array(
+                'header' => get_string('movepage', 'format_flexpage'),
+                'body' => $this->output->render_movepage($movepage, $submiturl, $pageoptions, $moveoptions),
             ));
         }
     }

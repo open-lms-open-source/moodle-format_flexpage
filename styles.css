@@ -51,3 +51,12 @@
 #format_flexpage_actionbar_nav #format_flexpage_nextpage {
     padding-left: 5px;
 }
+
+#format_flexpage_movingtext {
+    padding-right: 5px;
+}
+
+.format_flexpage_movepage_wrapper #menumove {
+    margin-right: 5px;
+}
+

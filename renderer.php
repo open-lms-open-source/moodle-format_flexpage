@@ -40,8 +40,21 @@ class format_flexpage_renderer extends plugin_renderer_base {
                 array('addpages', 'format_flexpage'),
                 array('genericasyncfail', 'format_flexpage'),
                 array('error', 'format_flexpage'),
+                array('movepage', 'format_flexpage'),
             )
         );
+    }
+
+    public function pad_page_name(course_format_flexpage_model_page $page, $amount = null) {
+        $name = format_string($page->get_display_name(), true, $page->get_courseid());
+
+        if (is_null($amount)) {
+            $amount = format_flexpage_cache()->get_page_depth($page);
+        }
+        if ($amount == 0) {
+            return $name;
+        }
+        return str_repeat('&nbsp;&nbsp;', $amount).'-&nbsp;'.$name;
     }
 
     /**
@@ -93,14 +106,14 @@ class format_flexpage_renderer extends plugin_renderer_base {
         }
 
         if ($prevpage = format_flexpage_cache()->get_previous_page($currentpage)) {
-            $previcon = new pix_icon('t/left', get_string('gotoa', 'format_flexpage', format_string($prevpage->get_display_name())));
+            $previcon = new pix_icon('t/moveleft', get_string('gotoa', 'format_flexpage', format_string($prevpage->get_display_name())));
             $prevpage = $this->output->action_icon(new moodle_url('/course/view.php', array('id' => $prevpage->get_courseid(), 'pageid' => $prevpage->get_id())), $previcon);
             $prevpage = html_writer::tag('span', $prevpage, array('id' => 'format_flexpage_prevpage'));
         } else {
             $prevpage = '';
         }
         if ($nextpage = format_flexpage_cache()->get_next_page($currentpage)) {
-            $nexticon = new pix_icon('t/right', get_string('gotoa', 'format_flexpage', format_string($nextpage->get_display_name())));
+            $nexticon = new pix_icon('t/removeright', get_string('gotoa', 'format_flexpage', format_string($nextpage->get_display_name())));
             $nextpage = $this->output->action_icon(new moodle_url('/course/view.php', array('id' => $nextpage->get_courseid(), 'pageid' => $nextpage->get_id())), $nexticon);
             $nextpage = html_writer::tag('span', $nextpage, array('id' => 'format_flexpage_nextpage'));
         } else {
@@ -174,15 +187,14 @@ class format_flexpage_renderer extends plugin_renderer_base {
                $copyelements;
     }
 
-    public function pad_page_name(course_format_flexpage_model_page $page, $amount = null) {
-        $name = format_string($page->get_display_name(), true, $page->get_courseid());
+    public function render_movepage(course_format_flexpage_model_page $page, moodle_url $url, array $pageoptions, array $moveoptions) {
+        $output  = html_writer::tag('span', get_string('movepagea', 'format_flexpage', format_string($page->get_display_name())), array('id' => 'format_flexpage_movingtext'));
+        $output .= html_writer::select($moveoptions, 'move', 'child', false);
+        $output .= html_writer::select($pageoptions, 'referencepageid', '', false);
 
-        if (is_null($amount)) {
-            $amount = format_flexpage_cache()->get_page_depth($page);
-        }
-        if ($amount == 0) {
-            return $name;
-        }
-        return str_repeat('&nbsp;&nbsp;', $amount).'-&nbsp;'.$name;
+        return html_writer::start_tag('form', array('method' => 'post', 'action' => $url->out_omit_querystring())).
+               html_writer::input_hidden_params($url).
+               html_writer::tag('div', $output, array('class' => 'format_flexpage_movepage_wrapper')).
+               html_writer::end_tag('form');
     }
 }

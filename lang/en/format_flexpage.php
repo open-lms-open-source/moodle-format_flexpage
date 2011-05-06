@@ -19,3 +19,7 @@ $string['error'] = 'Error';
 $string['genericasyncfail'] = 'The request failed for an unknown reason, please try the action again.';
 $string['close'] = 'Close';
 $string['gotoa'] = 'Go to "{$a}"';
+$string['movepageaction'] = 'Move page';
+$string['movepage'] = 'Move page';
+$string['movepagea'] = 'Move page <strong>{$a}</strong>';
+$string['movedpage'] = 'Moved page "{$a->movepage}" {$a->move} page "{$a->refpage}"';
