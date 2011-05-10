@@ -63,6 +63,8 @@ function callback_flexpage_request_key() {
 function callback_flexpage_get_section_name($course, $section) {
     // @todo Probably delete this function
     debugging('here');
+    global $CFG;
+    require_once($CFG->dirroot.'/course/format/topics/lib.php');
     return callback_topics_get_section_name($course, $section);
 }
 
