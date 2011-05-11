@@ -88,6 +88,29 @@ M.format_flexpage.init_addexistingactivity = function(Y, url) {
     });
 }
 
+M.format_flexpage.init_addblock = function(Y, url) {
+    var dialog = M.format_flexpage.init_default_dialog(Y, "addblockpanel");
+
+    // Customize buttons
+    dialog.cfg.queueProperty("buttons", []);
+
+    M.format_flexpage.populate_panel(Y, dialog, url, function(buttons) {
+        var buttonGroup = M.format_flexpage.init_region_buttons(Y, buttons);
+
+        Y.all('#format_flexpage_addblock_links a').on('click', function(e) {
+            e.preventDefault();
+
+            // Update our form so we know what the user selected
+            Y.one('input[name="blockname"]').set('value', e.target.get('name'));
+
+            // Update our form so we know what region was selected
+            M.format_flexpage.set_region_input(Y, buttonGroup, 'region');
+
+            dialog.submit();
+        });
+    });
+}
+
 M.format_flexpage.init_movepage = function(Y, url) {
     var dialog = M.format_flexpage.init_default_dialog(Y, "movepagepanel");
 

@@ -32,6 +32,22 @@ class course_format_flexpage_lib_moodlepage {
     }
 
     /**
+     * @return array
+     */
+    public static function get_region_json_options() {
+        $default = self::get_default_region();
+        $options = array();
+        foreach (self::get_regions() as $region => $name) {
+            $options[] = (object) array(
+                'value' => $region,
+                'label' => $name,
+                'checked' => ($region == $default),
+            );
+        }
+        return $options;
+    }
+
+    /**
      * Get theme's default region
      *
      * @static
@@ -42,6 +58,35 @@ class course_format_flexpage_lib_moodlepage {
 
         // @todo better validation
         return $PAGE->theme->layouts[self::LAYOUT]['defaultregion'];
+    }
+
+    /**
+     * Get the add block options
+     *
+     * @static
+     * @param int $courseid
+     * @return array
+     */
+    public static function get_add_block_options($courseid) {
+        $page = self::new_moodle_page($courseid);
+        $page->blocks->load_blocks(true);
+
+        $options = array();
+        $blocks  = $page->blocks->get_addable_blocks();
+
+        if (!empty($blocks)) {
+            foreach ($blocks as $block) {
+                if ($block->name == 'flexpagemod') {
+                    continue;
+                }
+                $blockobject = block_instance($block->name);
+                if ($blockobject !== false and $blockobject->user_can_addto($page)) {
+                    $options[$block->name] = $blockobject->get_title();
+                }
+            }
+            textlib_get_instance()->asort($options);
+        }
+        return $options;
     }
 
     /**
@@ -73,21 +118,18 @@ class course_format_flexpage_lib_moodlepage {
      * @return bool|mixed
      */
     public static function add_block($blockname, $courseid, $region = false) {
-        global $DB, $CFG;
+        global $DB;
 
-        require_once($CFG->dirroot.'/course/format/flexpage/lib.php');
-
-        $course = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
-
-        $page = new moodle_page();
-        $page->set_course($course);
-        $page->set_context(get_context_instance(CONTEXT_COURSE, $course->id));
-        $page->set_url('/course/view.php', array('id' => $course->id));
-        callback_flexpage_set_pagelayout($page);
-        $page->set_pagetype('course-view-flexpage');
+        $page = self::new_moodle_page($courseid);
         $page->blocks->load_blocks(true);
 
-        if ($region and $region != $page->blocks->get_default_region() and $page->blocks->is_known_region($region)) {
+        if (!$page->user_can_edit_blocks()) {
+            throw new moodle_exception('nopermissions', '', $page->url->out(), get_string('addblock'));
+        }
+        if (!array_key_exists($blockname, $page->blocks->get_addable_blocks())) {
+            throw new moodle_exception('cannotaddthisblocktype', '', $page->url->out(), $blockname);
+        }
+        if (!empty($region) and $region != $page->blocks->get_default_region() and $page->blocks->is_known_region($region)) {
             // Determine weight...
             $blocks = $page->blocks->get_blocks_for_region($region);
             if (empty($blocks)) {
@@ -113,5 +155,31 @@ class course_format_flexpage_lib_moodlepage {
             return current($instances);
         }
         return false;
+    }
+
+    /**
+     * Generate a new moodle_page that looks like the
+     * page made on course/view.php
+     *
+     * @static
+     * @param int $courseid
+     * @return moodle_page
+     */
+    public static function new_moodle_page($courseid) {
+        global $CFG, $DB;
+
+        require_once($CFG->dirroot.'/course/format/flexpage/lib.php');
+
+        $course = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
+
+        $page = new moodle_page();
+        $page->set_course($course);
+        $page->set_context(get_context_instance(CONTEXT_COURSE, $course->id));
+        $page->set_url('/course/view.php', array('id' => $course->id));
+        callback_flexpage_set_pagelayout($page);
+        $page->set_pagetype('course-view-flexpage');
+        $page->set_other_editing_capability('moodle/course:manageactivities');
+
+        return $page;
     }
 }

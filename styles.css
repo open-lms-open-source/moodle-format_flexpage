@@ -77,3 +77,17 @@
     max-height: 600px;
     overflow: auto;
 }
+
+.format_flexpage_existing_activity_list li {
+    padding-bottom: 5px;
+}
+
+#format_flexpage_addblock_links ul li {
+    list-style: none;
+    white-space: nowrap;
+    padding-bottom: 5px;
+}
+
+.block_adminblock {
+    display: none;
+}

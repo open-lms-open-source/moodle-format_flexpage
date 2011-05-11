@@ -28,3 +28,6 @@ $string['addto'] = 'Add to:';
 $string['addexistingactivity'] = 'Add existing activity';
 $string['addexistingactivityaction'] = 'Add existing activity';
 $string['addactivities'] = 'Add activities';
+$string['addblock'] = 'Add block';
+$string['addblockaction'] = 'Add block';
+$string['block'] = 'Block';

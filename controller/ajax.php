@@ -145,31 +145,19 @@ class course_format_flexpage_controller_ajax extends mr_controller {
         require_once($CFG->dirroot.'/course/format/flexpage/lib/mod.php');
         require_once($CFG->dirroot.'/course/format/flexpage/lib/moodlepage.php');
 
-        $regions       = course_format_flexpage_lib_moodlepage::get_regions();
-        $defaultregion = course_format_flexpage_lib_moodlepage::get_default_region();
-
         if (optional_param('add', 0, PARAM_BOOL)) {
             require_sesskey();
 
             $url    = required_param('addurl', PARAM_URL);
-            $region = optional_param('region', $defaultregion, PARAM_ACTION);
+            $region = optional_param('region', false, PARAM_ACTION);
 
             $SESSION->format_flexpage_mod_region = $region;
 
             redirect(new moodle_url($url));
         }
 
-        $args = array();
-        foreach ($regions as $region => $name) {
-            $args[] = (object) array(
-                'value' => $region,
-                'label' => $name,
-                'checked' => ($region == $defaultregion),
-            );
-        }
-
         echo json_encode((object) array(
-            'args' => $args,
+            'args' => course_format_flexpage_lib_moodlepage::get_region_json_options(),
             'header' => get_string('addactivity', 'format_flexpage'),
             'body' => $this->output->render_addactivity(
                 $this->new_url(array('sesskey' => sesskey(), 'action' => 'addactivity', 'add' => 1)),
@@ -187,14 +175,11 @@ class course_format_flexpage_controller_ajax extends mr_controller {
         require_once($CFG->dirroot.'/course/format/flexpage/lib/mod.php');
         require_once($CFG->dirroot.'/course/format/flexpage/lib/moodlepage.php');
 
-        $regions       = course_format_flexpage_lib_moodlepage::get_regions();
-        $defaultregion = course_format_flexpage_lib_moodlepage::get_default_region();
-
         if (optional_param('add', 0, PARAM_BOOL)) {
             require_sesskey();
 
             $cmids  = optional_param('cmids', array(), PARAM_INT);
-            $region = optional_param('region', $defaultregion, PARAM_ACTION);
+            $region = optional_param('region', false, PARAM_ACTION);
 
             if (!is_array($cmids)) {
                 $cmids = array($cmids);
@@ -203,21 +188,41 @@ class course_format_flexpage_controller_ajax extends mr_controller {
                 course_format_flexpage_lib_moodlepage::add_activity_block($cmid, $region);
             }
         } else {
-            $args = array();
-            foreach ($regions as $region => $name) {
-                $args[] = (object) array(
-                    'value' => $region,
-                    'label' => $name,
-                    'checked' => ($region == $defaultregion),
-                );
-            }
-
             echo json_encode((object) array(
-                'args' => $args,
+                'args' => course_format_flexpage_lib_moodlepage::get_region_json_options(),
                 'header' => get_string('addexistingactivity', 'format_flexpage'),
                 'body' => $this->output->render_addexistingactivity(
                     $this->new_url(array('sesskey' => sesskey(), 'action' => 'addexistingactivity', 'add' => 1)),
                     course_format_flexpage_lib_mod::get_existing_options()
+                ),
+            ));
+        }
+    }
+
+    /**
+     * Add Block Modal
+     */
+    public function addblock_action() {
+        global $CFG, $COURSE;
+
+        require_once($CFG->dirroot.'/course/format/flexpage/lib/moodlepage.php');
+
+        if (optional_param('add', 0, PARAM_BOOL)) {
+            require_sesskey();
+
+            $blockname = optional_param('blockname', '', PARAM_ACTION);
+            $region    = optional_param('region', false, PARAM_ACTION);
+
+            if (!empty($blockname)) {
+                course_format_flexpage_lib_moodlepage::add_block($blockname, $COURSE->id, $region);
+            }
+        } else {
+            echo json_encode((object) array(
+                'args' => course_format_flexpage_lib_moodlepage::get_region_json_options(),
+                'header' => get_string('addblock', 'format_flexpage'),
+                'body' => $this->output->render_addblock(
+                    $this->new_url(array('sesskey' => sesskey(), 'action' => 'addblock', 'add' => 1)),
+                    course_format_flexpage_lib_moodlepage::get_add_block_options($COURSE->id)
                 ),
             ));
         }

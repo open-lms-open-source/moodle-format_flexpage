@@ -34,7 +34,8 @@ class course_format_flexpage_lib_actionbar implements renderable {
         $addmenu = new course_format_flexpage_lib_menu(get_string('add', 'format_flexpage'));
         $addmenu->add_action(new course_format_flexpage_lib_menu_action('addpages'))
                 ->add_action(new course_format_flexpage_lib_menu_action('addactivity'))
-                ->add_action(new course_format_flexpage_lib_menu_action('addexistingactivity'));
+                ->add_action(new course_format_flexpage_lib_menu_action('addexistingactivity'))
+                ->add_action(new course_format_flexpage_lib_menu_action('addblock'));
 
         $managemenu = new course_format_flexpage_lib_menu(get_string('manage', 'format_flexpage'));
         $managemenu->add_action(new course_format_flexpage_lib_menu_action('movepage'))

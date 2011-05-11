@@ -221,7 +221,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
                     array('class' => 'format_flexpage_addactivity_link')
                 );
             }
-            $title = html_writer::tag('div', $groupname, array('class' => 'format_flexpage_addactivity_heading'));
+            $title = html_writer::tag('div', "$groupname:", array('class' => 'format_flexpage_addactivity_heading'));
             $list  = html_writer::alist($items);
             $contents = html_writer::tag('div', $title.$list, array('class' => 'format_flexpage_addactivity_group'));
 
@@ -250,7 +250,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
                 }
                 $items[] = html_writer::checkbox('cmids[]', $cmid, false, '&nbsp;'.$module['label']);
             }
-            $title = html_writer::tag('div', "$icon $groupname", array('class' => 'format_flexpage_addactivity_heading'));
+            $title = html_writer::tag('div', "$icon $groupname:", array('class' => 'format_flexpage_addactivity_heading'));
             $list  = html_writer::alist($items);
             $checkboxes .= html_writer::tag('div', $title.$list, array('class' => 'format_flexpage_addactivity_group'));
 
@@ -262,5 +262,35 @@ class format_flexpage_renderer extends plugin_renderer_base {
                html_writer::tag('div', '', array('id' => 'format_flexpage_region_radios')).
                html_writer::tag('div', $checkboxes, array('class' => 'format_flexpage_existing_activity_list')).
                html_writer::end_tag('form');
+    }
+
+    public function render_addblock(moodle_url $url, array $blocks) {
+        $form = html_writer::start_tag('form', array('id' => 'addactivity_form', 'method' => 'post', 'action' => $url->out_omit_querystring())).
+                html_writer::input_hidden_params($url).
+                html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'region', 'value' => '')).
+                html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'blockname', 'value' => '')).
+                html_writer::tag('div', get_string('addto', 'format_flexpage'), array('class' => 'format_flexpage_addactivity_heading')).
+                html_writer::tag('div', '', array('id' => 'format_flexpage_region_radios')).
+                html_writer::end_tag('form');
+
+        $title = html_writer::tag('div', get_string('block', 'format_flexpage').':', array('class' => 'format_flexpage_addactivity_heading'));
+
+        $box = new course_format_flexpage_lib_box();
+        $box->add_new_row()->add_new_cell($form);
+        $box->add_new_row()->add_new_cell($title);
+        $row = $box->add_new_row(array('id' => 'format_flexpage_addblock_links'));
+
+        $chunks = array_chunk($blocks, ceil(count($blocks) / 3), true);
+        foreach ($chunks as $chunk) {
+            $items = array();
+            foreach ($chunk as $blockname => $blocktitle) {
+                $link = clone($url);
+                $link->param('blockname', $blockname);
+
+                $items[] = html_writer::link($link, format_string($blocktitle), array('name' => $blockname));
+            }
+            $row->add_new_cell(html_writer::alist($items));
+        }
+        return $this->render($box);
     }
 }
