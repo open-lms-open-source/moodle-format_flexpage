@@ -87,13 +87,17 @@ function callback_flexpage_ajax_support() {
  *
  * @return void
  */
-function callback_flexpage_set_pagelayout() {
+function callback_flexpage_set_pagelayout($page = null) {
     global $CFG, $PAGE;
 
     require_once($CFG->dirroot.'/course/format/flexpage/locallib.php');
+    require_once($CFG->dirroot.'/course/format/flexpage/lib/moodlepage.php');
 
-    $page = format_flexpage_cache()->get_current_page();
+    if (is_null($page)) {
+        $page = $PAGE;
+    }
+    $currentpage = format_flexpage_cache()->get_current_page();
 
-    $PAGE->set_pagelayout('format_flexpage');
-    $PAGE->set_subpage($page->get_id());
+    $page->set_pagelayout(course_format_flexpage_lib_moodlepage::LAYOUT);
+    $page->set_subpage($currentpage->get_id());
 }

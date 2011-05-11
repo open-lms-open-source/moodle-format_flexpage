@@ -47,6 +47,47 @@ M.format_flexpage.init_addpages = function(Y, url) {
     });
 }
 
+M.format_flexpage.init_addactivity = function(Y, url) {
+    var dialog = M.format_flexpage.init_default_dialog(Y, "addactivitypanel");
+
+    // Customize buttons
+    dialog.cfg.queueProperty("buttons", []);
+
+    M.format_flexpage.populate_panel(Y, dialog, url, function(buttons) {
+        var buttonGroup = M.format_flexpage.init_region_buttons(Y, buttons);
+
+        Y.all('a.format_flexpage_addactivity_link').on('click', function(e) {
+            e.preventDefault();
+
+            // Update our form so we know what the user selected
+            Y.one('input[name="addurl"]').set('value', e.target.get('href'));
+
+            // Update our form so we know what region was selected
+            M.format_flexpage.set_region_input(Y, buttonGroup, 'region');
+
+            document.getElementById('addactivity_form').submit();
+        });
+    });
+}
+
+M.format_flexpage.init_addexistingactivity = function(Y, url) {
+    var dialog = M.format_flexpage.init_default_dialog(Y, "addexistingactivitypanel");
+
+    var buttonGroup;
+
+    // Customize buttons
+    dialog.cfg.queueProperty("buttons", [
+        { text: M.str.format_flexpage.addactivities, isDefault: true, handler: function() {
+            M.format_flexpage.set_region_input(Y, buttonGroup, 'region');
+            dialog.submit();
+        }}
+    ]);
+
+    M.format_flexpage.populate_panel(Y, dialog, url, function(buttons) {
+        buttonGroup = M.format_flexpage.init_region_buttons(Y, buttons);
+    });
+}
+
 M.format_flexpage.init_movepage = function(Y, url) {
     var dialog = M.format_flexpage.init_default_dialog(Y, "movepagepanel");
 
@@ -80,7 +121,11 @@ M.format_flexpage.populate_panel = function(Y, panel, url, onsuccess) {
                 panel.center();
 
                 if (typeof onsuccess == 'function') {
-                    onsuccess();
+                    if (response.args != undefined) {
+                        onsuccess(response.args);
+                    } else {
+                        onsuccess();
+                    }
                 }
             },
             failure: function(id, o) {
@@ -88,6 +133,28 @@ M.format_flexpage.populate_panel = function(Y, panel, url, onsuccess) {
             }
         }
     });
+}
+
+M.format_flexpage.init_region_buttons = function(Y, buttons) {
+    var buttonGroup = new YAHOO.widget.ButtonGroup({
+        id: "format_flexpage_region_radios_id",
+        name: "region",
+        container: "format_flexpage_region_radios"
+    });
+    buttonGroup.addButtons(buttons);
+
+    return buttonGroup;
+}
+
+M.format_flexpage.set_region_input = function(Y, buttonGroup, inputname) {
+    var buttons = buttonGroup.getButtons();
+    for (var i = 0; i < buttons.length; i++) {
+        var button = buttons[i];
+        if (button.get('checked')) {
+            Y.one('input[name="' + inputname + '"]').set('value', button.get('value'));
+            break;
+        }
+    }
 }
 
 M.format_flexpage.init_default_dialog = function(Y, id) {

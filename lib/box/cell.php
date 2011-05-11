@@ -46,4 +46,15 @@ class course_format_flexpage_lib_box_cell extends course_format_flexpage_lib_box
         $this->contents = $contents;
         return $this;
     }
+
+    /**
+     * Append more content to current contents
+     *
+     * @param string $morecontents
+     * @return course_format_flexpage_lib_box_cell
+     */
+    public function append_contents($morecontents) {
+        $this->contents .= $morecontents;
+        return $this;
+    }
 }

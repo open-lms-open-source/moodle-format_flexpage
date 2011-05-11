@@ -87,6 +87,11 @@ class course_format_flexpage_model_cache {
         return $this;
     }
 
+    /**
+     * @throws moodle_exception
+     * @param  $pageid
+     * @return course_format_flexpage_model_page
+     */
     public function get_page($pageid) {
         $this->require_built();
         if (!array_key_exists($pageid, $this->pages)) {
@@ -243,17 +248,42 @@ class course_format_flexpage_model_cache {
      * @return course_format_flexpage_model_page
      */
     public function get_current_page() {
+        global $COURSE, $USER;
+
         $this->require_built();
 
+        if (empty($USER->format_flexpage_display)) {
+            $USER->format_flexpage_display = array();
+        }
+
         $pageid = optional_param('pageid', 0, PARAM_INT);
+
+        // See if we are requesting a specific page
         if (!empty($pageid)) {
-            // Requesting a specific page
-            return $this->get_page($pageid);
-        } else {
-            // Return the first page
-            foreach ($this->get_pages() as $page) {
+            try {
+                $page = $this->get_page($pageid);
+                $USER->format_flexpage_display[$page->get_courseid()] = $page->get_id();
                 return $page;
+            } catch (Exception $e) {
+                // Continue looking for a page
             }
+        }
+
+        // See if we know the last page the user was on
+        if (!empty($USER->format_flexpage_display[$COURSE->id])) {
+            try {
+                return $this->get_page($USER->format_flexpage_display[$COURSE->id]);
+            } catch (Exception $e) {
+                // Continue looking for a page
+            }
+        }
+
+        // Set to zero, AKA default page
+        $USER->format_flexpage_display[$COURSE->id] = 0;
+
+        // Everything failed, so return first page
+        foreach ($this->get_pages() as $page) {
+            return $page;
         }
     }
 

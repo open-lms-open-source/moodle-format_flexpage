@@ -60,3 +60,20 @@
     margin-right: 5px;
 }
 
+.format_flexpage_addactivity_heading {
+    font-weight: bold;
+}
+
+.format_flexpage_addactivity_group li {
+    list-style: none;
+}
+
+#format_flexpage_region_radios {
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+.format_flexpage_existing_activity_list {
+    max-height: 600px;
+    overflow: auto;
+}

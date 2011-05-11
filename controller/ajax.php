@@ -17,6 +17,10 @@ class course_format_flexpage_controller_ajax extends mr_controller {
         set_exception_handler(array($this, 'exception_handler'));
     }
 
+    public function require_capability() {
+        // @todo
+    }
+
     /**
      * Set's errors through mr_notify
      *
@@ -128,6 +132,93 @@ class course_format_flexpage_controller_ajax extends mr_controller {
             echo json_encode((object) array(
                 'header' => get_string('movepage', 'format_flexpage'),
                 'body' => $this->output->render_movepage($movepage, $submiturl, $pageoptions, $moveoptions),
+            ));
+        }
+    }
+
+    /**
+     * Add New Activity Modal
+     */
+    public function addactivity_action() {
+        global $CFG, $SESSION;
+
+        require_once($CFG->dirroot.'/course/format/flexpage/lib/mod.php');
+        require_once($CFG->dirroot.'/course/format/flexpage/lib/moodlepage.php');
+
+        $regions       = course_format_flexpage_lib_moodlepage::get_regions();
+        $defaultregion = course_format_flexpage_lib_moodlepage::get_default_region();
+
+        if (optional_param('add', 0, PARAM_BOOL)) {
+            require_sesskey();
+
+            $url    = required_param('addurl', PARAM_URL);
+            $region = optional_param('region', $defaultregion, PARAM_ACTION);
+
+            $SESSION->format_flexpage_mod_region = $region;
+
+            redirect(new moodle_url($url));
+        }
+
+        $args = array();
+        foreach ($regions as $region => $name) {
+            $args[] = (object) array(
+                'value' => $region,
+                'label' => $name,
+                'checked' => ($region == $defaultregion),
+            );
+        }
+
+        echo json_encode((object) array(
+            'args' => $args,
+            'header' => get_string('addactivity', 'format_flexpage'),
+            'body' => $this->output->render_addactivity(
+                $this->new_url(array('sesskey' => sesskey(), 'action' => 'addactivity', 'add' => 1)),
+                course_format_flexpage_lib_mod::get_add_options()
+            ),
+        ));
+    }
+
+    /**
+     * Add Existing Activity Modal
+     */
+    public function addexistingactivity_action() {
+        global $CFG;
+
+        require_once($CFG->dirroot.'/course/format/flexpage/lib/mod.php');
+        require_once($CFG->dirroot.'/course/format/flexpage/lib/moodlepage.php');
+
+        $regions       = course_format_flexpage_lib_moodlepage::get_regions();
+        $defaultregion = course_format_flexpage_lib_moodlepage::get_default_region();
+
+        if (optional_param('add', 0, PARAM_BOOL)) {
+            require_sesskey();
+
+            $cmids  = optional_param('cmids', array(), PARAM_INT);
+            $region = optional_param('region', $defaultregion, PARAM_ACTION);
+
+            if (!is_array($cmids)) {
+                $cmids = array($cmids);
+            }
+            foreach ($cmids as $cmid) {
+                course_format_flexpage_lib_moodlepage::add_activity_block($cmid, $region);
+            }
+        } else {
+            $args = array();
+            foreach ($regions as $region => $name) {
+                $args[] = (object) array(
+                    'value' => $region,
+                    'label' => $name,
+                    'checked' => ($region == $defaultregion),
+                );
+            }
+
+            echo json_encode((object) array(
+                'args' => $args,
+                'header' => get_string('addexistingactivity', 'format_flexpage'),
+                'body' => $this->output->render_addexistingactivity(
+                    $this->new_url(array('sesskey' => sesskey(), 'action' => 'addexistingactivity', 'add' => 1)),
+                    course_format_flexpage_lib_mod::get_existing_options()
+                ),
             ));
         }
     }

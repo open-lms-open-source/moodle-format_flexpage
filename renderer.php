@@ -41,6 +41,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
                 array('genericasyncfail', 'format_flexpage'),
                 array('error', 'format_flexpage'),
                 array('movepage', 'format_flexpage'),
+                array('addactivities', 'format_flexpage'),
             )
         );
     }
@@ -195,6 +196,71 @@ class format_flexpage_renderer extends plugin_renderer_base {
         return html_writer::start_tag('form', array('method' => 'post', 'action' => $url->out_omit_querystring())).
                html_writer::input_hidden_params($url).
                html_writer::tag('div', $output, array('class' => 'format_flexpage_movepage_wrapper')).
+               html_writer::end_tag('form');
+    }
+
+    public function render_addactivity(moodle_url $url, array $activities) {
+        $form = html_writer::start_tag('form', array('id' => 'addactivity_form', 'method' => 'post', 'action' => $url->out_omit_querystring())).
+                html_writer::input_hidden_params($url).
+                html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'region', 'value' => '')).
+                html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'addurl', 'value' => '')).
+                html_writer::tag('div', get_string('addto', 'format_flexpage'), array('class' => 'format_flexpage_addactivity_heading')).
+                html_writer::tag('div', '', array('id' => 'format_flexpage_region_radios')).
+                html_writer::end_tag('form');
+
+        $box   = new course_format_flexpage_lib_box();
+        $cell1 = new course_format_flexpage_lib_box_cell();
+        $cell2 = new course_format_flexpage_lib_box_cell();
+        foreach ($activities as $groupname => $modules) {
+            $items = array();
+            foreach ($modules as $addurl => $module) {
+                $icon    = $this->output->pix_icon('icon', $module['label'], $module['module']);
+                $items[] = html_writer::link(
+                    new moodle_url($addurl),
+                    $icon.' '.$module['label'],
+                    array('class' => 'format_flexpage_addactivity_link')
+                );
+            }
+            $title = html_writer::tag('div', $groupname, array('class' => 'format_flexpage_addactivity_heading'));
+            $list  = html_writer::alist($items);
+            $contents = html_writer::tag('div', $title.$list, array('class' => 'format_flexpage_addactivity_group'));
+
+            // First group goes into cell1, rest into cell2
+            if ($cell1->get_contents() === '') {
+                $cell1->set_contents($contents);
+            } else {
+                $cell2->append_contents($contents);
+            }
+        }
+        $box->add_new_row()->add_new_cell($form);
+        $box->add_new_row()->add_cell($cell1)
+                           ->add_cell($cell2);
+
+        return $this->render($box);
+    }
+
+    public function render_addexistingactivity(moodle_url $url, array $activities) {
+        $checkboxes = '';
+        foreach ($activities as $groupname => $modules) {
+            $items = array();
+            $icon  = false;
+            foreach ($modules as $cmid => $module) {
+                if (!$icon) {
+                    $icon = $this->output->pix_icon('icon', $groupname, $module['module']);
+                }
+                $items[] = html_writer::checkbox('cmids[]', $cmid, false, '&nbsp;'.$module['label']);
+            }
+            $title = html_writer::tag('div', "$icon $groupname", array('class' => 'format_flexpage_addactivity_heading'));
+            $list  = html_writer::alist($items);
+            $checkboxes .= html_writer::tag('div', $title.$list, array('class' => 'format_flexpage_addactivity_group'));
+
+        }
+        return html_writer::start_tag('form', array('id' => 'addactivity_form', 'method' => 'post', 'action' => $url->out_omit_querystring())).
+               html_writer::input_hidden_params($url).
+               html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'region', 'value' => '')).
+               html_writer::tag('div', get_string('addto', 'format_flexpage'), array('class' => 'format_flexpage_addactivity_heading')).
+               html_writer::tag('div', '', array('id' => 'format_flexpage_region_radios')).
+               html_writer::tag('div', $checkboxes, array('class' => 'format_flexpage_existing_activity_list')).
                html_writer::end_tag('form');
     }
 }
