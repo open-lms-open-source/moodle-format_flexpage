@@ -66,7 +66,7 @@ class course_format_flexpage_repository_page {
      * @param course_format_flexpage_model_page $page
      * @return course_format_flexpage_repository_page
      */
-    public function save_page(course_format_flexpage_model_page &$page) {
+    public function save_page(course_format_flexpage_model_page $page) {
         global $DB;
 
         $id = $page->get_id();
@@ -77,8 +77,11 @@ class course_format_flexpage_repository_page {
             'name' => $page->get_name(),
             'altname' => $page->get_altname(),
             'display' => $page->get_display(),
-            'showbuttons' => $page->get_showbuttons(),
-            'template' => $page->get_template(),
+            'navigation' => $page->get_navigation(),
+            'availablefrom' => $page->get_availablefrom(),
+            'availableuntil' => $page->get_availableuntil(),
+            'releasecode' => $page->get_releasecode(),
+            'showavailability' => $page->get_showavailability(),
             'parentid' => $page->get_parentid(),
             'weight' => $page->get_weight(),
         );
@@ -94,7 +97,49 @@ class course_format_flexpage_repository_page {
         return $this;
     }
 
-    public function move_page(course_format_flexpage_model_page &$page, $move, $referencepageid) {
+    public function get_page_region_widths($pageid) {
+        global $DB;
+
+        $regionwidths = array();
+        if ($regions = $DB->get_records('format_flexpage_region', array('pageid' => $pageid))) {
+            foreach ($regions as $region) {
+                $regionwidths[$region->region] = $region->width;
+            }
+        }
+        return $regionwidths;
+    }
+
+    public function set_page_region_widths(course_format_flexpage_model_page $page) {
+        $page->set_region_widths($this->get_page_region_widths($page->get_id()));
+    }
+
+    public function save_page_region_widths(course_format_flexpage_model_page $page, $regionwidths) {
+        global $DB;
+
+        foreach ($regionwidths as $region => $width) {
+            if (empty($width)) {
+                unset($regionwidths[$region]);
+                continue;
+            }
+            $conditions = array('pageid' => $page->get_id(), 'region' => $region);
+            if ($DB->record_exists('format_flexpage_region', $conditions)) {
+                $DB->set_field('format_flexpage_region', 'width', $width, $conditions);
+            } else {
+                $conditions['width'] = $width;
+                $DB->insert_record('format_flexpage_region', (object) $conditions);
+            }
+        }
+        if (!empty($regionwidths)) {
+            list($select, $params) = $DB->get_in_or_equal(array_keys($regionwidths), SQL_PARAMS_QM, '', false);
+            $params[] = $page->get_id();
+
+            $DB->delete_records_select('format_flexpage_region', "region $select AND pageid = ?", $params);
+        } else {
+            $DB->delete_records('format_flexpage_region', array('pageid' => $page->get_id()));
+        }
+    }
+
+    public function move_page(course_format_flexpage_model_page $page, $move, $referencepageid) {
         global $DB;
 
         $refpage = $this->get_page($referencepageid);
@@ -151,7 +196,7 @@ class course_format_flexpage_repository_page {
         return $this;
     }
 
-    protected function remove_page_position(course_format_flexpage_model_page &$page) {
+    protected function remove_page_position(course_format_flexpage_model_page $page) {
         global $DB;
 
         $DB->execute("

@@ -1,79 +1,25 @@
 <?php
 
+require_once($CFG->libdir.'/completionlib.php');
 require_once($CFG->libdir.'/conditionlib.php');
 
 class course_format_flexpage_repository_condition {
-/*
-    public function get_conditions($courseid) {
-        global $DB;
-
-        $rs = $DB->get_recordset_sql(
-            "SELECT c.*, a.pageid, a.type
-               FROM {format_page} p
-         INNER JOIN {format_page_availability} a ON p.id = a.pageid
-         INNER JOIN {format_page_condition} c ON a.id = c.availabilityid
-              WHERE p.courseid = ?", array($courseid)
-        );
-
-        $conditions = array();
-        $grouped = array();
-        if ($rs) {
-            foreach ($rs as $record) {
-                $id = $record->availabilityid;
-                if (empty($grouped[$id])) {
-                    $grouped[$id] = array();
-                }
-                $grouped[$id]['type'] = $record->type;
-                $grouped[$id][$record->name] = $record->value;
-            }
-            $rs->close();
-        }
-        foreach ($grouped as $group) {
-            switch ($group['type']) {
-                case 'condition_daterange':
-                    $conditions[] = new condition_daterange($group['availablefrom'], $group['availableuntil']);
-                    break;
-                case 'condition_grade':
-                    $conditions[] = new condition_grade($group['availablefrom'], $group['availableuntil']);
-//                    condition_releasecode
-//                    condition_completion
-            }
-        }
-    }
-
-    public function get_grade_conditions($courseid) {
-        $rs = $DB->get_recordset_sql(
-            "SELECT gi.*, a.id, a.pageid,
-               FROM {format_page} p
-         INNER JOIN {format_page_availability} a ON p.id = a.pageid
-         INNER JOIN {format_page_condition} c1 ON a.id = c.availabilityid AND c.name = 'gradeitemid'
-         INNER JOIN {grade_items} i ON
-              WHERE p.courseid = ?", array($courseid)
-        );
-    }
-*/
 
     public function get_course_conditions($courseid) {
         return $this->get_conditions($courseid);
     }
 
-    // @todo only allow param of type course_format_flexpage_model_page ?
-    public function get_page_condtions($param) {
-        if ($param instanceof course_format_flexpage_model_page) {
-            $pageid = $param->get_id();
-        } else if (is_number($param)) {
-            $pageid = $param;
-        } else {
-            throw new coding_exception('Invalid parameter passed, expecting a page ID or page instance');
-        }
-        // Pass through current() because conditions are keyed by pageid
-        $conditions = current($this->get_conditions(null, $pageid));
+    public function get_page_condtions($pageid) {
+        $conditions = $this->get_conditions(null, $pageid);
 
-        if ($param instanceof course_format_flexpage_model_page) {
-            $param->set_conditions($conditions);
-        } else {
-            return $conditions;
+        if (array_key_exists($pageid, $conditions)) {
+            return $conditions[$pageid];
         }
+        return array();
+    }
+
+    public function set_page_conditions(course_format_flexpage_model_page $page) {
+        $page->set_conditions($this->get_page_condtions($page->get_id()));
     }
 
     protected function get_conditions($courseid, $pageid = null) {
@@ -117,6 +63,7 @@ class course_format_flexpage_repository_condition {
         return $conditions;
     }
 
+    // @todo Shouldn't get if the course doesn't have completion enabled
     protected function get_completion_conditions($courseid, $pageid = null) {
         global $DB;
 
@@ -139,7 +86,7 @@ class course_format_flexpage_repository_condition {
         $conditions = array();
         foreach ($rs as $record) {
             $conditions[$record->pageid][] = new condition_completion(
-                $record->sourcecmid, $record->requiredcompletion
+                $record->cmid, $record->requiredcompletion
             );
         }
         return $conditions;
@@ -163,25 +110,82 @@ class course_format_flexpage_repository_condition {
         }
     }
 
-    // @todo delete
-    public function save_page_conditions($pageid, condition_base $condition) {
+    /**
+     * @param course_format_flexpage_model_page $page
+     * @param condition_grade[] $conditions
+     * @return void
+     */
+    public function save_page_grade_conditions(course_format_flexpage_model_page $page, array $conditions) {
         global $DB;
 
-        if ($condition instanceof condition_grade) {
-            $DB->insert_record('format_flexpage_grade', (object) array(
-                'pageid' => $pageid,
+        $saveids = array();
+
+        foreach ($conditions as $condition) {
+            $record = (object) array(
+                'pageid' => $page->get_id(),
                 'gradeitemid' => $condition->get_gradeitemid(),
                 'grademin' => $condition->get_min(),
                 'grademax'=> $condition->get_max()
-            ), false);
-        } else if ($condition instanceof condition_completion) {
-            $DB->insert_record('format_flexpage_completion', (object) array(
-                'coursesectionid' => $pageid,
-                'sourcecmid' => $condition->get_cmid(),
-                'requiredcompletion' => $condition->get_requiredcompletion()
-            ), false);
+            );
+            $params = array(
+                'pageid' => $page->get_id(),
+                'gradeitemid' => $condition->get_gradeitemid()
+            );
+            if ($id = $DB->get_field('format_flexpage_grade', 'id', $params)) {
+                $saveids[] = $id;
+                $record->id = $id;
+                $DB->update_record('format_flexpage_grade', $record);
+            } else {
+                $saveids[] = $DB->insert_record('format_flexpage_grade', $record);
+            }
+        }
+        if (!empty($saveids)) {
+            list($select, $params) = $DB->get_in_or_equal($saveids, SQL_PARAMS_QM, '', false);
+            $params[] = $page->get_id();
+
+            $DB->delete_records_select('format_flexpage_grade', "id $select AND pageid = ?", $params);
         } else {
-            throw new coding_exception('Unsupported condition: '.get_class($condition));
+            $DB->delete_records('format_flexpage_grade', array('pageid' => $page->get_id()));
+        }
+    }
+
+    /**
+     * @param course_format_flexpage_model_page $page
+     * @param condition_completion[] $conditions
+     * @return void
+     */
+    public function save_page_completion_conditions(course_format_flexpage_model_page $page, array $conditions) {
+        global $DB;
+
+        // @todo Check if course completion is enabled?
+
+        $saveids = array();
+
+        foreach ($conditions as $condition) {
+            $record = (object) array(
+                'pageid' => $page->get_id(),
+                'cmid' => $condition->get_cmid(),
+                'requiredcompletion' => $condition->get_requiredcompletion()
+            );
+            $params = array(
+                'pageid' => $page->get_id(),
+                'cmid' => $condition->get_cmid(),
+            );
+            if ($id = $DB->get_field('format_flexpage_completion', 'id', $params)) {
+                $saveids[] = $id;
+                $record->id = $id;
+                $DB->update_record('format_flexpage_completion', $record);
+            } else {
+                $saveids[] = $DB->insert_record('format_flexpage_completion', $record);
+            }
+        }
+        if (!empty($saveids)) {
+            list($select, $params) = $DB->get_in_or_equal($saveids, SQL_PARAMS_QM, '', false);
+            $params[] = $page->get_id();
+
+            $DB->delete_records_select('format_flexpage_completion', "id $select AND pageid = ?", $params);
+        } else {
+            $DB->delete_records('format_flexpage_completion', array('pageid' => $page->get_id()));
         }
     }
 }

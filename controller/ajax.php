@@ -5,6 +5,16 @@
 require_once($CFG->dirroot.'/course/format/flexpage/repository/page.php');
 
 /**
+ * @see course_format_flexpage_lib_mod
+ */
+require_once($CFG->dirroot.'/course/format/flexpage/lib/mod.php');
+
+/**
+ * @see course_format_flexpage_lib_moodlepage
+ */
+require_once($CFG->dirroot.'/course/format/flexpage/lib/moodlepage.php');
+
+/**
  * AJAX Controller
  */
 class course_format_flexpage_controller_ajax extends mr_controller {
@@ -140,10 +150,7 @@ class course_format_flexpage_controller_ajax extends mr_controller {
      * Add New Activity Modal
      */
     public function addactivity_action() {
-        global $CFG, $SESSION;
-
-        require_once($CFG->dirroot.'/course/format/flexpage/lib/mod.php');
-        require_once($CFG->dirroot.'/course/format/flexpage/lib/moodlepage.php');
+        global $SESSION;
 
         if (optional_param('add', 0, PARAM_BOOL)) {
             require_sesskey();
@@ -170,10 +177,6 @@ class course_format_flexpage_controller_ajax extends mr_controller {
      * Add Existing Activity Modal
      */
     public function addexistingactivity_action() {
-        global $CFG;
-
-        require_once($CFG->dirroot.'/course/format/flexpage/lib/mod.php');
-        require_once($CFG->dirroot.'/course/format/flexpage/lib/moodlepage.php');
 
         if (optional_param('add', 0, PARAM_BOOL)) {
             require_sesskey();
@@ -203,9 +206,7 @@ class course_format_flexpage_controller_ajax extends mr_controller {
      * Add Block Modal
      */
     public function addblock_action() {
-        global $CFG, $COURSE;
-
-        require_once($CFG->dirroot.'/course/format/flexpage/lib/moodlepage.php');
+        global $COURSE;
 
         if (optional_param('add', 0, PARAM_BOOL)) {
             require_sesskey();
@@ -223,6 +224,112 @@ class course_format_flexpage_controller_ajax extends mr_controller {
                 'body' => $this->output->render_addblock(
                     $this->new_url(array('sesskey' => sesskey(), 'action' => 'addblock', 'add' => 1)),
                     course_format_flexpage_lib_moodlepage::get_add_block_options($COURSE->id)
+                ),
+            ));
+        }
+    }
+
+    /**
+     * Edit Page Modal
+     */
+    public function editpage_action() {
+        global $CFG, $COURSE;
+
+        $pageid   = required_param('pageid', PARAM_INT);
+        $pagerepo = new course_format_flexpage_repository_page();
+        $condrepo = new course_format_flexpage_repository_condition();
+        $page     = $pagerepo->get_page($pageid);
+        $pagerepo->set_page_region_widths($page);
+        $condrepo->set_page_conditions($page);
+
+        if (optional_param('edit', 0, PARAM_BOOL)) {
+            require_sesskey();
+
+            $page->set_options(array(
+                'name' => required_param('name', PARAM_MULTILANG),
+                'altname' => required_param('altname', PARAM_MULTILANG),
+                'display' => required_param('display', PARAM_INT),
+                'navigation' => required_param('navigation', PARAM_INT),
+            ));
+
+            $regions = optional_param('regions', array(), PARAM_INT);
+            $pagerepo->save_page_region_widths($page, $regions);
+
+            if (!empty($CFG->enableavailability)) {
+
+                $page->set_options(array(
+                    'releasecode' => required_param('releasecode', PARAM_ALPHANUM),
+                    'showavailability' => required_param('showavailability', PARAM_INT),
+                ));
+
+                if (optional_param('enableavailablefrom', 0, PARAM_BOOL)) {
+                    $availablefrom = required_param('availablefrom', PARAM_SAFEPATH);
+                    $parts = explode('/', $availablefrom);
+                    $parts = clean_param($parts, PARAM_INT);
+                    $page->set_availablefrom(
+                        make_timestamp($parts[2], $parts[0], $parts[1])
+                    );
+                } else {
+                    $page->set_availablefrom(0);
+                }
+                if (optional_param('enableavailableuntil', 0, PARAM_BOOL)) {
+                    $availableuntil = required_param('availableuntil', PARAM_SAFEPATH);
+                    $parts = explode('/', $availableuntil);
+                    $parts = clean_param($parts, PARAM_INT);
+                    $page->set_availableuntil(
+                        make_timestamp($parts[2], $parts[0], $parts[1], 23, 59, 59)
+                    );
+                } else {
+                    $page->set_availableuntil(0);
+                }
+
+                $conditions   = array();
+                $gradeitemids = optional_param('gradeitemids', array(), PARAM_INT);
+                $mins         = optional_param('mins', array(), PARAM_FLOAT);
+                $maxes        = optional_param('maxes', array(), PARAM_FLOAT);
+
+                foreach ($gradeitemids as $key => $gradeitemid) {
+                    if (empty($gradeitemid)) {
+                        continue;
+                    }
+                    $min = $max = null;
+                    if (array_key_exists($key, $mins)) {
+                        $min = $mins[$key];
+                    }
+                    if (array_key_exists($key, $maxes)) {
+                        $max = $maxes[$key];
+                    }
+                    $conditions[] = new condition_grade($gradeitemid, $min, $max);
+                }
+                $condrepo->save_page_grade_conditions($page, $conditions);
+
+                $completion = new completion_info($COURSE);
+                if ($completion->is_enabled()) {
+                    $conditions = array();
+                    $cmids = optional_param('cmids', array(), PARAM_INT);
+                    $requiredcompletions = optional_param('requiredcompletions', array(), PARAM_INT);
+
+                    foreach ($cmids as $key => $cmid) {
+                        if (empty($cmid)) {
+                            continue;
+                        }
+                        if (!array_key_exists($key, $requiredcompletions)) {
+                            continue;
+                        }
+                        $conditions[] = new condition_completion($cmid, $requiredcompletions[$key]);
+                    }
+                    $condrepo->save_page_completion_conditions($page, $conditions);
+                }
+            }
+            $pagerepo->save_page($page);
+            format_flexpage_clear_cache();
+        } else {
+            echo json_encode((object) array(
+                'header' => get_string('editpage', 'format_flexpage'),
+                'body'   => $this->output->render_editpage(
+                    $this->new_url(array('sesskey' => sesskey(), 'action' => 'editpage', 'pageid' => $page->get_id(), 'edit' => 1)),
+                    $page,
+                    course_format_flexpage_lib_moodlepage::get_regions()
                 ),
             ));
         }

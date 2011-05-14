@@ -32,6 +32,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
                 'yui2-button',
                 'yui2-container',
                 'yui2-menu',
+                'yui2-calendar',
             ),
             'strings' => array(
                 array('savechanges'),
@@ -42,6 +43,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
                 array('error', 'format_flexpage'),
                 array('movepage', 'format_flexpage'),
                 array('addactivities', 'format_flexpage'),
+                array('formnamerequired', 'format_flexpage'),
             )
         );
     }
@@ -179,7 +181,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
 
         $box = new course_format_flexpage_lib_box();
         $box->add_new_row()->add_new_cell($elements, array('class' => 'format_flexpage_addpages_elements_row'))
-                           ->add_new_cell($addbutton, array('class' => 'format_flexpage_addpages_addbutton'));
+                           ->add_new_cell($addbutton, array('class' => 'format_flexpage_add_button'));
 
         return html_writer::start_tag('form', array('method' => 'post', 'action' => $url->out_omit_querystring())).
                html_writer::input_hidden_params($url).
@@ -292,5 +294,196 @@ class format_flexpage_renderer extends plugin_renderer_base {
             $row->add_new_cell(html_writer::alist($items));
         }
         return $this->render($box);
+    }
+
+    public function render_editpage(moodle_url $url, course_format_flexpage_model_page $page, array $regions) {
+        global $CFG, $COURSE;
+
+        $navigationopts = course_format_flexpage_model_page::get_navigation_options();
+        $displayopts    = course_format_flexpage_model_page::get_display_options();
+        $templates      = '';
+        $labelattr      = array('class' => 'format_flexpage_cell_label');
+
+        $box = new course_format_flexpage_lib_box(array('class' => 'format_flexpage_editpage'));
+        $box->add_new_row()->add_new_cell(html_writer::label(get_string('name', 'format_flexpage'), 'id_name'), $labelattr)
+                           ->add_new_cell(html_writer::empty_tag('input', array('id' => 'id_name', 'name' => 'name', 'type' => 'text', 'size' => 50, 'value' => $page->get_name())));
+
+        $box->add_new_row()->add_new_cell(html_writer::label(get_string('altname', 'format_flexpage'), 'id_altname'), $labelattr)
+                           ->add_new_cell(html_writer::empty_tag('input', array('id' => 'id_altname', 'name' => 'altname', 'type' => 'text', 'size' => 50, 'value' => $page->get_altname())));
+
+        $regioncell = new course_format_flexpage_lib_box_cell();
+        $pagewidths = $page->get_region_widths();
+        foreach ($regions as $region => $name) {
+            $value = '';
+            if (array_key_exists($region, $pagewidths)) {
+                $value = $pagewidths[$region];
+            }
+            $regioncell->append_contents(
+                html_writer::tag('span',
+                    html_writer::empty_tag('input', array('id' => "id_region_$region", 'name' => "regions[$region]", 'type' => 'text', 'size' => 4, 'value' => $value)).
+                    html_writer::label("&nbsp;$name&nbsp;", "id_region_$region")
+                )
+            );
+        }
+        $box->add_new_row()->add_new_cell(get_string('regrionwidths', 'format_flexpage'), $labelattr)
+                           ->add_cell($regioncell);
+
+        $box->add_new_row()->add_new_cell(html_writer::label(get_string('display', 'format_flexpage'), 'id_display'), $labelattr)
+                           ->add_new_cell(html_writer::select($displayopts, 'display', $page->get_display(), false, array('id' => 'id_display')));
+
+        $box->add_new_row()->add_new_cell(html_writer::label(get_string('navigation', 'format_flexpage'), 'id_navigation'), $labelattr)
+                           ->add_new_cell(html_writer::select($navigationopts, 'navigation', $page->get_navigation(), false, array('id' => 'id_navigation')));
+
+        if (!empty($CFG->enableavailability)) {
+            $box->add_new_row()->add_new_cell(get_string('availablefrom', 'condition'), $labelattr)
+                               ->add_new_cell($this->render_calendar('availablefrom', $page->get_availablefrom()));
+
+            $box->add_new_row()->add_new_cell(get_string('availableuntil', 'condition'), $labelattr)
+                               ->add_new_cell($this->render_calendar('availableuntil', $page->get_availableuntil()));
+
+            $box->add_new_row()->add_new_cell(html_writer::label(get_string('releasecode', 'local_mrooms'), 'id_releasecode'), $labelattr)
+                               ->add_new_cell(html_writer::empty_tag('input', array('id' => 'id_releasecode', 'type' => 'text', 'name' => 'releasecode', 'maxlength' => 50, 'size' => 50, 'value' => $page->get_releasecode())));
+
+            $box->add_new_row()->add_new_cell(get_string('gradecondition', 'condition'), $labelattr)
+                               ->add_new_cell($this->render_conditions($page, 'condition_grade'));
+
+            $templates = $this->render_condition_grade();
+
+            $completion = new completion_info($COURSE);
+            if ($completion->is_enabled()) {
+                $box->add_new_row()->add_new_cell(get_string('completioncondition', 'condition'), $labelattr)
+                                   ->add_new_cell($this->render_conditions($page, 'condition_completion'));
+
+                $templates .= $this->render_condition_completion();
+            }
+            $showopts = array(
+                CONDITION_STUDENTVIEW_SHOW => get_string('showavailability_show', 'condition'),
+                CONDITION_STUDENTVIEW_HIDE => get_string('showavailability_hide', 'condition')
+            );
+            $box->add_new_row()->add_new_cell(html_writer::label(get_string('showavailability', 'condition'), 'id_showavailability'), $labelattr)
+                               ->add_new_cell(html_writer::select($showopts, 'showavailability', $page->get_showavailability(), false, array('id' => 'id_showavailability')));
+        }
+
+        return html_writer::start_tag('form', array('id' => 'addactivity_form', 'method' => 'post', 'action' => $url->out_omit_querystring())).
+               html_writer::input_hidden_params($url).
+               $this->render($box).
+               html_writer::end_tag('form').
+               html_writer::tag('div', $templates, array('id' => 'condition_templates'));
+    }
+
+    public function render_conditions(course_format_flexpage_model_page $page, $conditionclass) {
+        $renderfunc = 'render_'.$conditionclass;
+        $conditions = $page->get_conditions()->get_conditions($conditionclass);
+
+        // Render a blank one if none exist
+        if (empty($conditions)) {
+            $conditions = array(null);
+        }
+        $condbox  = new course_format_flexpage_lib_box(array('class' => 'format_flexpage_conditions'));
+        $condcell = new course_format_flexpage_lib_box_cell();
+        $condcell->set_attributes(array('id' => $conditionclass.'s'));
+        $condadd = html_writer::tag('button', '+', array('type' => 'button', 'value' => '+', 'id' => $conditionclass.'_add_button'));
+
+        foreach ($conditions as $condition) {
+            $condcell->append_contents(
+                $this->$renderfunc($condition)
+            );
+        }
+        $condbox->add_new_row()->add_cell($condcell)
+                               ->add_new_cell($condadd, array('class' => 'format_flexpage_add_button'));
+
+        return $this->render($condbox);
+    }
+
+    public function render_condition_grade(condition_grade $condition = null) {
+        global $CFG, $COURSE;
+
+        require_once($CFG->libdir.'/gradelib.php');
+
+        // Static so we only build it once...
+        static $gradeoptions = null;
+
+        if (is_null($condition)) {
+            $gradeitemid = 0;
+            $min = '';
+            $max = '';
+        } else {
+            $gradeitemid = $condition->get_gradeitemid();
+            $min = rtrim(rtrim($condition->get_min(),'0'),'.');
+            $max = rtrim(rtrim($condition->get_max(),'0'),'.');
+        }
+        if (is_null($gradeoptions)) {
+            $gradeoptions = array();
+            if ($items = grade_item::fetch_all(array('courseid'=> $COURSE->id))) {
+                foreach($items as $id => $item) {
+                    $gradeoptions[$id] = $item->get_name();
+                }
+            }
+            asort($gradeoptions);
+            $gradeoptions = array(0 => get_string('none', 'condition')) + $gradeoptions;
+        }
+        $elements = html_writer::select($gradeoptions, 'gradeitemids[]', $gradeitemid, false).
+                    ' '.get_string('grade_atleast','condition').' '.
+                    html_writer::empty_tag('input', array('name' => 'mins[]', 'size' => 3, 'type' => 'text', 'value' => $min)).
+                    '% '.get_string('grade_upto','condition').' '.
+                    html_writer::empty_tag('input', array('name' => 'maxes[]', 'size' => 3, 'type' => 'text', 'value' => $max)).
+                    '%';
+
+        return html_writer::tag('div', $elements, array('class' => 'format_flexpage_condition_grade'));
+    }
+
+    public function render_condition_completion(condition_completion $condition = null) {
+        global $COURSE;
+
+        static $completionoptions = null;
+
+        if (is_null($condition)) {
+            $cmid = 0;
+            $requiredcompletion = '';
+        } else {
+            $cmid = $condition->get_cmid();
+            $requiredcompletion = $condition->get_requiredcompletion();
+        }
+        if (is_null($completionoptions)) {
+            $completionoptions = array();
+            $modinfo = get_fast_modinfo($COURSE);
+            foreach($modinfo->get_cms() as $id => $cm) {
+                if ($cm->completion) {
+                    $completionoptions[$id] = $cm->name;
+                }
+            }
+            asort($completionoptions);
+            $completionoptions = array(0 => get_string('none', 'condition')) + $completionoptions;
+        }
+        $completionvalues=array(
+            COMPLETION_COMPLETE      => get_string('completion_complete','condition'),
+            COMPLETION_INCOMPLETE    => get_string('completion_incomplete','condition'),
+            COMPLETION_COMPLETE_PASS => get_string('completion_pass','condition'),
+            COMPLETION_COMPLETE_FAIL => get_string('completion_fail','condition'),
+        );
+        $elements = html_writer::select($completionoptions, 'cmids[]', $cmid, false).'&nbsp;'.
+                    html_writer::select($completionvalues, 'requiredcompletions[]', $requiredcompletion, false);
+
+        return html_writer::tag('div', $elements, array('class' => 'format_flexpage_condition_completion'));
+    }
+
+    public function render_calendar($name, $defaulttime = 0, $optional = true) {
+        if ($defaulttime > 0) {
+            $value = date('m/d/Y', $defaulttime);
+        } else {
+            $value = date('m/d/Y');
+        }
+
+        $output = '';
+        $attributes  = array('id' => "calendar$name");
+        if ($optional) {
+            $output = html_writer::checkbox("enable$name", 1, ($defaulttime > 0), '&nbsp;'.get_string('enable'));
+            $output = html_writer::tag('div', $output);
+            $attributes['class'] = 'hiddenifjs';
+        }
+        $output .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => $name, 'value' => $value)).
+                   html_writer::tag('div', '', $attributes);
+
+        return $output;
     }
 }

@@ -38,9 +38,9 @@ class course_format_flexpage_lib_actionbar implements renderable {
                 ->add_action(new course_format_flexpage_lib_menu_action('addblock'));
 
         $managemenu = new course_format_flexpage_lib_menu(get_string('manage', 'format_flexpage'));
-        $managemenu->add_action(new course_format_flexpage_lib_menu_action('movepage'))
-                   ->add_action(new course_format_flexpage_lib_menu_action('managepages'))
-                   ->add_action(new course_format_flexpage_lib_menu_action('managepage'));
+        $managemenu->add_action(new course_format_flexpage_lib_menu_action('editpage'))
+                   ->add_action(new course_format_flexpage_lib_menu_action('movepage'))
+                   ->add_action(new course_format_flexpage_lib_menu_action('managepages'));
 
         return $actionbar->add_menu($addmenu)->add_menu($managemenu);
     }

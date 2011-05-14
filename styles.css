@@ -1,5 +1,6 @@
 
-/* Hide template, for JS only */
+.block_adminblock,
+#condition_templates,
 #page-course-view-flexpage #addpagetemplate {
     display: none;
 }
@@ -8,12 +9,14 @@
     margin-bottom: 20px;
 }
 
-#page-course-view-flexpage .format_flexpage_addpages_addbutton {
+.format_flexpage_add_button {
     vertical-align: bottom;
     padding-left: 25px;
+    text-align: right;
+    font-weight: bold;
 }
 
-#page-course-view-flexpage .format_flexpage_addpages_addbutton button {
+.format_flexpage_add_button button {
     font-weight: bold;
 }
 
@@ -88,6 +91,31 @@
     padding-bottom: 5px;
 }
 
-.block_adminblock {
-    display: none;
+.format_flexpage_conditions {
+    width: 100%;
+    margin-bottom: -5px;
+}
+
+.format_flexpage_condition_completion,
+.format_flexpage_condition_grade,
+.format_flexpage_editpage .format_flexpage_cell {
+    padding-bottom: 5px;
+}
+
+.format_flexpage_conditions .format_flexpage_cell {
+    padding-bottom: 0;
+}
+
+.format_flexpage_cell_label {
+    text-align: right;
+    padding-right: 5px;
+}
+
+.format_flexpage_error_bg {
+    background-color: #F9A0A0;
+}
+
+/* Fixes bleeding of completion check boxes when modals are up */
+.path-course-view.masked li.activity span.autocompletion, .path-course-view li.activity form.togglecompletion {
+    z-index: 2;
 }

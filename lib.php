@@ -85,17 +85,15 @@ function callback_flexpage_ajax_support() {
 /**
  * Setup the page layout and other properties
  *
+ * @param moodle_page $page
  * @return void
  */
-function callback_flexpage_set_pagelayout($page = null) {
-    global $CFG, $PAGE;
+function callback_flexpage_set_pagelayout($page) {
+    global $CFG;
 
     require_once($CFG->dirroot.'/course/format/flexpage/locallib.php');
     require_once($CFG->dirroot.'/course/format/flexpage/lib/moodlepage.php');
 
-    if (is_null($page)) {
-        $page = $PAGE;
-    }
     $currentpage = format_flexpage_cache()->get_current_page();
 
     $page->set_pagelayout(course_format_flexpage_lib_moodlepage::LAYOUT);
