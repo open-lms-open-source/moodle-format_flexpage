@@ -321,7 +321,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
             $regioncell->append_contents(
                 html_writer::tag('span',
                     html_writer::empty_tag('input', array('id' => "id_region_$region", 'name' => "regions[$region]", 'type' => 'text', 'size' => 4, 'value' => $value)).
-                    html_writer::label("&nbsp;$name&nbsp;", "id_region_$region")
+                    html_writer::label("&nbsp;$name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "id_region_$region")
                 )
             );
         }

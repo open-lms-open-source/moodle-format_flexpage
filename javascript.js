@@ -166,7 +166,7 @@ M.format_flexpage.init_movepage = function(Y, url) {
 
 M.format_flexpage.init_default_dialog = function(Y, id) {
     var dialog = new YAHOO.widget.Dialog(id, {
-        postmethod: 'form', // Very handy for debugging
+        // postmethod: 'form', // Very handy for debugging
         constraintoviewport: true,
         modal: true,
         underlay: "none",
