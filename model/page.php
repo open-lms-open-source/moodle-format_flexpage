@@ -71,7 +71,7 @@ class course_format_flexpage_model_page {
     }
 
     public function set_id($id) {
-        if (!empty($this->id)) {
+        if (!empty($this->id) and !is_null($id)) {
             throw new coding_exception('Cannot re-assign page ID');
         }
         $this->id = $id;

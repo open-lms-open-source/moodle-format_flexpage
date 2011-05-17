@@ -158,6 +158,25 @@ class course_format_flexpage_lib_moodlepage {
     }
 
     /**
+     * @static
+     * @param int $contextid The context that the block's belong to
+     * @param null|mixed $subpagepattern The subpage pattern
+     * @return void
+     */
+    public static function delete_blocks($contextid, $subpagepattern = null) {
+        global $DB;
+
+        $instances = $DB->get_recordset('block_instances', array(
+            'parentcontextid' => $contextid,
+            'subpagepattern' => $subpagepattern
+        ));
+        foreach ($instances as $instance) {
+            blocks_delete_instance($instance, true);
+        }
+        $instances->close();
+    }
+
+    /**
      * Generate a new moodle_page that looks like the
      * page made on course/view.php
      *

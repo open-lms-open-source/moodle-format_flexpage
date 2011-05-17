@@ -59,6 +59,7 @@ class course_format_flexpage_lib_actionbar implements renderable {
         $managemenu = new course_format_flexpage_lib_menu('manage');
         $managemenu->add_action(new course_format_flexpage_lib_menu_action('editpage'))
                    ->add_action(new course_format_flexpage_lib_menu_action('movepage'))
+                   ->add_action(new course_format_flexpage_lib_menu_action('deletepage'))
                    ->add_action(new course_format_flexpage_lib_menu_action('managepages'));
 
         return $actionbar->add_menu($addmenu)->add_menu($managemenu);

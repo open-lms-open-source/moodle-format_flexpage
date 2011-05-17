@@ -1,5 +1,10 @@
 <?php
 /**
+ * @see course_format_flexpage_lib_moodlepage
+ */
+require_once($CFG->dirroot.'/course/format/flexpage/lib/moodlepage.php');
+
+/**
  * @see course_format_flexpage_model_page
  */
 require_once($CFG->dirroot.'/course/format/flexpage/model/page.php');
@@ -15,15 +20,15 @@ class course_format_flexpage_repository_page {
     }
 
     /**
-     * @param  $courseid
+     * @param array $conditions
      * @param string $sort
      * @return array|course_format_flexpage_model_page[]
      */
-    public function get_pages($courseid, $sort = 'parentid, weight') {
+    public function get_pages(array $conditions, $sort = '') {
         global $DB;
 
         $pages = array();
-        $rs    = $DB->get_recordset('format_flexpage_page', array('courseid' => $courseid), $sort);
+        $rs    = $DB->get_recordset('format_flexpage_page', $conditions, $sort);
         foreach ($rs as $page) {
             $pages[$page->id] = new course_format_flexpage_model_page($page);
         }
@@ -210,5 +215,52 @@ class course_format_flexpage_repository_page {
              ->set_weight(0);
 
         return $this;
+    }
+
+    /**
+     * Delete a page
+     *
+     * @param course_format_flexpage_model_page $page  Will set it's id to null
+     * @return void
+     */
+    public function delete_page(course_format_flexpage_model_page $page) {
+        global $DB;
+
+        $parentid = $page->get_parentid();
+        $context  = get_context_instance(CONTEXT_COURSE, $page->get_courseid());
+
+        // Remove page blocks
+        course_format_flexpage_lib_moodlepage::delete_blocks($context->id, $page->get_id());
+
+        // Get the page out of the way
+        $this->remove_page_position($page);
+
+        // Now we need to move the page's children to children of the page's parent
+
+        // Default, if we don't find any other children of the parent, then we move
+        // the page's first child as the first child of parent
+        $referencepageid = $parentid;
+        $move = course_format_flexpage_model_page::MOVE_CHILD;
+
+        // Look for the last child of the parent, if found, we move after it
+        $parentchilren = $DB->get_records('format_flexpage_page', array('parentid' => $parentid), 'weight DESC', 'id', 0, 1);
+        foreach ($parentchilren as $lastchild) {
+            $referencepageid = $lastchild->id;
+            $move = course_format_flexpage_model_page::MOVE_AFTER;
+        }
+
+        // Move all of the child pages
+        $children = $this->get_pages(array('parentid' => $page->get_id()), 'weight');
+        foreach ($children as $child) {
+            $this->move_page($child, $move, $referencepageid)
+                 ->save_page($child);
+
+            // Move each subsequent child after the prior child
+            $referencepageid = $child->get_id();
+            $move = course_format_flexpage_model_page::MOVE_AFTER;
+        }
+
+        $DB->delete_records('format_flexpage_page', array('id' => $page->get_id()));
+        $page->set_id(null);
     }
 }

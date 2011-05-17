@@ -146,7 +146,7 @@ class course_format_flexpage_model_cache {
         $this->pagerepo->create_default_page($this->get_courseid());
 
         // Fetch our pages and conditions
-        $pages       = $this->pagerepo->get_pages($this->get_courseid(), 'parentid, weight');
+        $pages       = $this->pagerepo->get_pages(array('courseid' => $this->get_courseid()), 'parentid, weight');
         $conditions  = $this->condrepo->get_course_conditions($this->get_courseid());
 
         // Make sure our weights are all in order

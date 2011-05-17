@@ -100,6 +100,19 @@ M.format_flexpage.init_editpage = function(Y, url) {
     return dialog;
 }
 
+M.format_flexpage.init_deletepage = function(Y, url) {
+    var dialog = M.format_flexpage.init_default_dialog(Y, "deletepagepanel");
+
+    // Customize buttons
+    dialog.cfg.queueProperty("buttons", [
+        { text: M.str.format_flexpage.deletepage, handler: dialog.submit, isDefault: true }
+    ]);
+
+    M.format_flexpage.populate_panel(Y, dialog, url);
+
+    return dialog;
+}
+
 M.format_flexpage.init_managepages = function(Y, url) {
     // Ensure our flag starts with true
     M.format_flexpage.managepages_reload = true;
@@ -230,7 +243,7 @@ M.format_flexpage.init_addexistingactivity = function(Y, url) {
 }
 
 M.format_flexpage.init_addblock = function(Y, url) {
-    var dialog = M.format_flexpage.init_default_panel(Y, "addblockpanel");
+    var dialog = M.format_flexpage.init_default_dialog(Y, "addblockpanel");
 
     // Customize buttons
     dialog.cfg.queueProperty("buttons", []);

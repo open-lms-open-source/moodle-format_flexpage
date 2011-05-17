@@ -45,6 +45,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
                 array('movepage', 'format_flexpage'),
                 array('addactivities', 'format_flexpage'),
                 array('formnamerequired', 'format_flexpage'),
+                array('deletepage', 'format_flexpage'),
             )
         );
     }
@@ -368,8 +369,17 @@ class format_flexpage_renderer extends plugin_renderer_base {
                 ->add_new_cell($actionselect, array('id' => html_writer::random_id()))
                 ->add_new_cell($displayselect, array('id' => html_writer::random_id(), 'class' => 'format_flexpage_display_cell'));
         }
-        return  $PAGE->get_renderer('local_mr')->render(new mr_html_notify('format_flexpage')).
-                $this->render($box);
+        return $PAGE->get_renderer('local_mr')->render(new mr_html_notify('format_flexpage')).
+               $this->render($box);
+    }
+
+    public function render_deletepage(moodle_url $url, course_format_flexpage_model_page $page) {
+        $areyousure = get_string('areyousuredeletepage', 'format_flexpage', format_string($page->get_name()));
+
+        return html_writer::start_tag('form', array('method' => 'post', 'action' => $url->out_omit_querystring())).
+               html_writer::input_hidden_params($url).
+               html_writer::tag('div', $areyousure, array('class' => 'format_flexpage_deletepage')).
+               html_writer::end_tag('form');
     }
 
     public function render_editpage(moodle_url $url, course_format_flexpage_model_page $page, array $regions) {

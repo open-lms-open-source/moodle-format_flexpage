@@ -351,7 +351,7 @@ class course_format_flexpage_controller_ajax extends mr_controller {
         $actionbar = course_format_flexpage_lib_actionbar::factory();
         $menu = $actionbar->get_menu('manage');
         $actions = array();
-        foreach (array('editpage', 'movepage') as $actionname) {
+        foreach (array('editpage', 'movepage', 'deletepage') as $actionname) {
             $action = $menu->get_action($actionname);
             if ($action->get_visible()) {
                 $actions[$actionname] = $action;
@@ -378,6 +378,30 @@ class course_format_flexpage_controller_ajax extends mr_controller {
                 $actions
             ),
         ));
+    }
+
+    /**
+     * Delete Page Modal
+     */
+    public function deletepage_action() {
+        $pageid  = required_param('pageid', PARAM_INT);
+
+        $repo = new course_format_flexpage_repository_page();
+        $page = $repo->get_page($pageid);
+
+        if (optional_param('delete', 0, PARAM_BOOL)) {
+            $repo->delete_page($page);
+            $this->notify->good('deletedpagex', format_string($page->get_name()));
+            format_flexpage_clear_cache();
+        } else {
+            echo json_encode((object) array(
+                'header' => get_string('deletepage', 'format_flexpage'),
+                'body'   => $this->output->render_deletepage(
+                    $this->new_url(array('sesskey' => sesskey(), 'action' => 'deletepage', 'delete' => 1, 'pageid' => $page->get_id())),
+                    $page
+                ),
+            ));
+        }
     }
 
     /**

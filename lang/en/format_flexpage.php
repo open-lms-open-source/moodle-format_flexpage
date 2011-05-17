@@ -47,3 +47,7 @@ $string['formnamerequired'] = 'The page name is a required field.';
 $string['regrionwidths'] = 'Block region widths';
 $string['managepages'] = 'Manage pages';
 $string['pagename'] = 'Page name';
+$string['deletepage'] = 'Delete page';
+$string['deletepageaction'] = 'Delete page';
+$string['areyousuredeletepage'] = 'Are you sure that you want to permanently delete page <strong>{$a}</strong>?';
+$string['deletedpagex'] = 'Deleted page "{$a}"';

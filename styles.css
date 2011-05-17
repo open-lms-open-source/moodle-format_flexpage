@@ -147,3 +147,7 @@
     font-weight: bold;
     border-top: none;
 }
+
+.format_flexpage_deletepage {
+    padding: 15px 0;
+}
