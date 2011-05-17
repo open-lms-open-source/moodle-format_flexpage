@@ -6,5 +6,5 @@
  * @package format_flexpage
  */
 
-$plugin->version  = 2011042801;
+$plugin->version  = 2011042804;
 $plugin->requires = 2011033000;

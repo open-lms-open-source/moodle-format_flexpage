@@ -51,3 +51,4 @@ $string['deletepage'] = 'Delete page';
 $string['deletepageaction'] = 'Delete page';
 $string['areyousuredeletepage'] = 'Are you sure that you want to permanently delete page <strong>{$a}</strong>?';
 $string['deletedpagex'] = 'Deleted page "{$a}"';
+$string['flexpage:managepages'] = 'Manage pages';

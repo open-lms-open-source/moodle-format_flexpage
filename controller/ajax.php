@@ -27,8 +27,24 @@ class course_format_flexpage_controller_ajax extends mr_controller {
         set_exception_handler(array($this, 'exception_handler'));
     }
 
+    /**
+     * Must have manage pages for all and then also
+     * check block and activity capabilities for those actions.
+     *
+     * @return void
+     */
     public function require_capability() {
-        // @todo
+        require_capability('format/flexpage:managepages', $this->get_context());
+
+        switch ($this->action) {
+            case 'addblock':
+                require_capability('moodle/site:manageblocks', $this->get_context());
+                break;
+            case 'addexistingactivity':
+            case 'addactivity':
+                require_capability('moodle/course:manageactivities', $this->get_context());
+                break;
+        }
     }
 
     /**

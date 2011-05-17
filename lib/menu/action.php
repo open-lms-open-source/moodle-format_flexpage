@@ -12,7 +12,7 @@ class course_format_flexpage_lib_menu_action {
     protected $url;
     protected $visible = true;
 
-    public function __construct($action, $url = array(), $visible = true, $name = null) {
+    public function __construct($action, $visible = true, $url = array(), $name = null) {
         $this->action = $action;
 
         $this->set_name($name)
