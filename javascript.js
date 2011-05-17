@@ -4,6 +4,11 @@
 M.format_flexpage = M.format_flexpage || {};
 
 /**
+ * Keep track of when we need to reload the window or not
+ */
+M.format_flexpage.managepages_reload = true;
+
+/**
  * Generate the action bar menu
  *
  * @namespace M.format_flexpage
@@ -45,24 +50,25 @@ M.format_flexpage.init_addpages = function(Y, url) {
             );
         });
     });
+
+    return dialog;
 }
 
-M.format_flexpage.init_editpage= function(Y, url) {
+M.format_flexpage.init_editpage = function(Y, url) {
     var dialog = M.format_flexpage.init_default_dialog(Y, "editpagepanel");
 
     dialog.validate = function() {
         var data = this.getData();
         if (data.name == "" || data.name == undefined) {
             Y.one('input[name="name"]').addClass('format_flexpage_error_bg');
-            M.format_flexpage.error_dialog(Y, M.str.format_flexpage.formnamerequired);
+            M.format_flexpage.init_error_dialog(Y, M.str.format_flexpage.formnamerequired);
             return false;
         } else {
             return true;
         }
     };
 
-
-M.format_flexpage.populate_panel(Y, dialog, url, function() {
+    M.format_flexpage.populate_panel(Y, dialog, url, function() {
         // Clears any validation error coloring
         Y.one('input[name="name"]').on('focus', function(e) {
             e.target.removeClass('format_flexpage_error_bg');
@@ -80,8 +86,8 @@ M.format_flexpage.populate_panel(Y, dialog, url, function() {
             var buttonCompletion = new YAHOO.widget.Button('condition_completion_add_button');
             buttonCompletion.on("click", function () {
                 Y.one('#condition_completions').appendChild(
-                        Y.one('#condition_templates .format_flexpage_condition_completion').cloneNode(true)
-                        );
+                    Y.one('#condition_templates .format_flexpage_condition_completion').cloneNode(true)
+                );
             });
         }
         M.format_flexpage.init_calendar(Y, 'availablefrom');
@@ -90,6 +96,95 @@ M.format_flexpage.populate_panel(Y, dialog, url, function() {
         // Re-center because calendar rendering can extend the panel
         dialog.center();
     });
+
+    return dialog;
+}
+
+M.format_flexpage.init_managepages = function(Y, url) {
+    // Ensure our flag starts with true
+    M.format_flexpage.managepages_reload = true;
+
+    var panel = M.format_flexpage.init_default_panel(Y, "managepagespanel");
+
+    // When the user finally hides the panel, we reload the page
+    panel.hideEvent.subscribe(function(e) {
+        if (M.format_flexpage.managepages_reload) {
+            window.location.reload();
+        }
+    });
+
+    M.format_flexpage.populate_panel(Y, panel, url, function() {
+        // View port height minus overlay's view port padding minus fudge factor
+        var height = YAHOO.util.Dom.getViewportHeight() - (YAHOO.widget.Overlay.VIEWPORT_OFFSET * 2) - 60;
+
+        Y.one('#managepagespanel .bd').setStyle('maxHeight', height + 'px')
+                                      .setStyle('overflow', 'auto');
+
+        Y.all('select.format_flexpage_actions_select').each(function(node) {
+
+            var button = M.format_flexpage.init_button_menu(Y, node);
+            button.set('label', M.str.moodle.choosedots);
+
+            button.on("selectedMenuItemChange", function(e) {
+                var menuItem = e.newValue;
+                var info     = Y.JSON.parse(menuItem.value);
+                var funcName = 'init_' + info.action;
+                var dialog   = M.format_flexpage[funcName](Y, info.url);
+
+                M.format_flexpage.managepages_reload = false;
+
+                // When our dialog shows, hide our panel (smoothness!)
+                dialog.showEvent.subscribe(function(e) {
+                    panel.hide();
+                });
+
+                // Re-render manage pages once dialog has been closed
+                dialog.callback.success = function(o) {
+                    M.format_flexpage.init_managepages(Y, url);
+                };
+                dialog.callback.failure = function(o) {
+                    M.format_flexpage.init_error_dialog(Y, M.str.format_flexpage.genericasyncfail).hideEvent.subscribe(function(e) {
+                        M.format_flexpage.init_managepages(Y, url);
+                    });
+                };
+                dialog.cancelEvent.subscribe(function(e) {
+                    M.format_flexpage.init_managepages(Y, url);
+                });
+            });
+        });
+
+        Y.all('select.format_flexpage_display_select').each(function(node) {
+            var button = M.format_flexpage.init_button_menu(Y, node);
+
+            button.on("selectedMenuItemChange", function(e) {
+                var menuItem = e.newValue;
+                var label    = menuItem.cfg.getProperty("text");
+
+                // Have a loading image while the change is taking place
+                this.set("label", label + ' <img class="icon" src="' + M.util.image_url('i/loading') + '" />');
+                this.set('disabled', true);
+
+                Y.io(menuItem.value, {
+                    method: 'post',
+                    arguments: {
+                        button: button,
+                        label: label
+                    },
+                    on: {
+                        complete: function(id, o, arguments) {
+                            arguments.button.set("label", arguments.label);
+                            arguments.button.set('disabled', false);
+                        },
+                        failure: function(id, o, arguments) {
+                            M.format_flexpage.init_error_dialog(Y, M.str.format_flexpage.genericasyncfail);
+                        }
+                    }
+                });
+            });
+        });
+    });
+
+    return panel;
 }
 
 M.format_flexpage.init_addactivity = function(Y, url) {
@@ -110,6 +205,8 @@ M.format_flexpage.init_addactivity = function(Y, url) {
             document.getElementById('addactivity_form').submit();
         });
     });
+
+    return panel;
 }
 
 M.format_flexpage.init_addexistingactivity = function(Y, url) {
@@ -128,6 +225,8 @@ M.format_flexpage.init_addexistingactivity = function(Y, url) {
     M.format_flexpage.populate_panel(Y, dialog, url, function(buttons) {
         buttonGroup = M.format_flexpage.init_region_buttons(Y, buttons);
     });
+
+    return dialog;
 }
 
 M.format_flexpage.init_addblock = function(Y, url) {
@@ -151,6 +250,8 @@ M.format_flexpage.init_addblock = function(Y, url) {
             dialog.submit();
         });
     });
+
+    return dialog;
 }
 
 M.format_flexpage.init_movepage = function(Y, url) {
@@ -162,6 +263,8 @@ M.format_flexpage.init_movepage = function(Y, url) {
     ]);
 
     M.format_flexpage.populate_panel(Y, dialog, url);
+
+    return dialog;
 }
 
 M.format_flexpage.init_default_dialog = function(Y, id) {
@@ -179,7 +282,7 @@ M.format_flexpage.init_default_dialog = function(Y, id) {
         window.location.reload();
     };
     dialog.callback.failure = function(o) {
-        M.format_flexpage.error_dialog(Y, M.str.format_flexpage.genericasyncfail);
+        M.format_flexpage.init_error_dialog(Y, M.str.format_flexpage.genericasyncfail);
     };
     return dialog;
 }
@@ -223,14 +326,14 @@ M.format_flexpage.populate_panel = function(Y, panel, url, onsuccess) {
                 }
             },
             failure: function(id, o) {
-                M.format_flexpage.error_dialog(Y, M.str.format_flexpage.genericasyncfail);
+                M.format_flexpage.init_error_dialog(Y, M.str.format_flexpage.genericasyncfail);
             }
         }
     });
 }
 
-M.format_flexpage.error_dialog = function(Y, errorMessage) {
-    var errorDialog = new YAHOO.widget.SimpleDialog("errorDialog", {
+M.format_flexpage.init_error_dialog = function(Y, errorMessage) {
+    var dialog = new YAHOO.widget.SimpleDialog("errorDialog", {
         constraintoviewport: true,
         modal: true,
         underlay: "none",
@@ -241,10 +344,12 @@ M.format_flexpage.error_dialog = function(Y, errorMessage) {
             { text: M.str.format_flexpage.close, handler: function () { this.hide(); }, isDefault:true }
         ]
     });
-    errorDialog.setHeader(M.str.format_flexpage.error);
-    errorDialog.render(document.body);
-    errorDialog.show();
-    errorDialog.center();
+    dialog.setHeader(M.str.format_flexpage.error);
+    dialog.render(document.body);
+    dialog.show();
+    dialog.center();
+
+    return dialog;
 }
 
 M.format_flexpage.init_calendar = function(Y, name) {
@@ -302,4 +407,21 @@ M.format_flexpage.set_region_input = function(Y, buttonGroup, inputname) {
             break;
         }
     }
+}
+
+M.format_flexpage.init_button_menu = function(Y, select) {
+    var index  = select.get('selectedIndex');
+    var label  = select.get("options").item(index).get('innerHTML');
+
+    var button = new YAHOO.widget.Button({
+        id: select.get('id') + '_menuid',
+        name: select.get('id') + '_menuname',
+        label: label,
+        type: "menu",
+        menu: select.get('id'),
+        container: select.get('parentNode').get('id'),
+        lazyloadmenu: true
+    });
+
+    return button;
 }

@@ -193,6 +193,14 @@ class course_format_flexpage_model_page {
         return $this->releasecode;
     }
 
+    public function set_releasecode($code) {
+        if ($code === '') {
+            $code = null;
+        }
+        $this->releasecode = $code;
+        return $this;
+    }
+
     public function get_showavailability() {
         return $this->showavailability;
     }

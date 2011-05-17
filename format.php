@@ -1,5 +1,6 @@
 <?php
 
+require($CFG->dirroot.'/local/mr/bootstrap.php');
 require_once($CFG->dirroot.'/course/format/flexpage/lib/actionbar.php');
 
 $output   = $PAGE->get_renderer('format_flexpage');

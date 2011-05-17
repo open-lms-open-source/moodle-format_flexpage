@@ -37,6 +37,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
             'strings' => array(
                 array('savechanges'),
                 array('cancel'),
+                array('choosedots'),
                 array('close', 'format_flexpage'),
                 array('addpages', 'format_flexpage'),
                 array('genericasyncfail', 'format_flexpage'),
@@ -48,9 +49,12 @@ class format_flexpage_renderer extends plugin_renderer_base {
         );
     }
 
-    public function pad_page_name(course_format_flexpage_model_page $page, $amount = null) {
+    public function pad_page_name(course_format_flexpage_model_page $page, $amount = null, $link = false) {
         $name = format_string($page->get_display_name(), true, $page->get_courseid());
 
+        if ($link) {
+            $name = html_writer::link(new moodle_url('/course/view.php', array('id' => $page->get_courseid(), 'pageid' => $page->get_id())), $name);
+        }
         if (is_null($amount)) {
             $amount = format_flexpage_cache()->get_page_depth($page);
         }
@@ -80,6 +84,9 @@ class format_flexpage_renderer extends plugin_renderer_base {
                 )
             );
             foreach ($menu->get_actions() as $action) {
+                if (!$action->get_visible()) {
+                    continue;
+                }
                 $menuobj->submenu->itemdata[] = (object) array(
                     'text' => $action->get_name(),
                     'id' => $action->get_action(),
@@ -294,6 +301,75 @@ class format_flexpage_renderer extends plugin_renderer_base {
             $row->add_new_cell(html_writer::alist($items));
         }
         return $this->render($box);
+    }
+
+    /**
+     * @param moodle_url $url
+     * @param course_format_flexpage_model_page[] $pages
+     * @param course_format_flexpage_lib_menu_action[] $actions
+     * @return void
+     */
+    public function render_managepages(moodle_url $displayurl, array $pages, array $actions) {
+        global $CFG, $PAGE;
+
+        require($CFG->dirroot.'/local/mr/bootstrap.php');
+
+        $displayopts = course_format_flexpage_model_page::get_display_options();
+
+        $box = new course_format_flexpage_lib_box(array('class' => 'format_flexpage_box_managepages'));
+        $row = $box->add_new_row(array('class' => 'format_flexpage_box_headers'));
+        $row->add_new_cell(get_string('pagename', 'format_flexpage'))
+            ->add_new_cell(get_string('managemenu', 'format_flexpage'))
+            ->add_new_cell(get_string('display', 'format_flexpage'));
+
+        foreach ($pages as $page) {
+            $options = array();
+            $selected = '';
+            foreach ($displayopts as $option => $label) {
+                $displayurl->params(array(
+                    'pageid' => $page->get_id(),
+                    'display' => $option,
+                ));
+                $options[$displayurl->out(false)] = $label;
+
+                if ($option == $page->get_display()) {
+                    $selected = $displayurl->out(false);
+                }
+            }
+
+            $displayselect = html_writer::select($options, 'display', $selected, false, array(
+                'id'    => html_writer::random_id(),
+                'class' => 'format_flexpage_display_select'
+            ));
+
+            $options = array();
+            foreach ($actions as $action) {
+                if ($action->get_visible()) {
+                    $url = $action->get_url();
+                    $url->param('pageid', $page->get_id());
+
+                    $option = json_encode((object) array(
+                        'action' => $action->get_action(),
+                        'url' => $url->out(false),
+                    ));
+                    $options[$option] = $action->get_name();
+                }
+            }
+            $actionselect = html_writer::select($options, 'actions', '', false, array(
+                'id'    => html_writer::random_id(),
+                'class' => 'format_flexpage_actions_select'
+            ));
+
+            $pagename = html_writer::tag('div', $this->pad_page_name($page, null, true), array('id' => html_writer::random_id(), 'class' => 'format_flexpage_pagename'));
+
+            // @todo Display condition information below name
+            $row = $box->add_new_row(array('pageid' => $page->get_id()));
+            $row->add_new_cell($pagename)
+                ->add_new_cell($actionselect, array('id' => html_writer::random_id()))
+                ->add_new_cell($displayselect, array('id' => html_writer::random_id(), 'class' => 'format_flexpage_display_cell'));
+        }
+        return  $PAGE->get_renderer('local_mr')->render(new mr_html_notify('format_flexpage')).
+                $this->render($box);
     }
 
     public function render_editpage(moodle_url $url, course_format_flexpage_model_page $page, array $regions) {

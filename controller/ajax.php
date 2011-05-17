@@ -334,4 +334,65 @@ class course_format_flexpage_controller_ajax extends mr_controller {
             ));
         }
     }
+
+    /**
+     * Manage Page Modal
+     */
+    public function managepages_action() {
+        global $CFG;
+
+        require_once($CFG->dirroot.'/course/format/flexpage/lib/actionbar.php');
+
+        $args = array(
+            'displayurl' => $this->new_url(array('sesskey' => sesskey(), 'action' => 'setdisplay'))->out(false),
+            'menu' => array(),
+        );
+
+        $actionbar = course_format_flexpage_lib_actionbar::factory();
+        $menu = $actionbar->get_menu('manage');
+        $actions = array();
+        foreach (array('editpage', 'movepage') as $actionname) {
+            $action = $menu->get_action($actionname);
+            if ($action->get_visible()) {
+                $actions[$actionname] = $action;
+                // Ditch the pageid - will add this again later...
+                $url = $action->get_url();
+                $url->remove_params('pageid');
+
+                $args['menu'][] = (object) array(
+                    'text' => $action->get_name(),
+                    'id'   => $action->get_action(),
+                    'url'  => $url->out(false),
+                );
+            }
+        }
+
+        $cache = format_flexpage_cache();
+
+        echo json_encode((object) array(
+            'args'   => (object) $args,
+            'header' => get_string('managepages', 'format_flexpage'),
+            'body'   => $this->output->render_managepages(
+                $this->new_url(array('sesskey' => sesskey(), 'action' => 'setdisplay')),
+                $cache->get_pages(),
+                $actions
+            ),
+        ));
+    }
+
+    /**
+     * Allows the setting the display value of a page
+     */
+    public function setdisplay_action() {
+        require_sesskey();
+
+        $pageid  = required_param('pageid', PARAM_INT);
+        $display = required_param('display', PARAM_INT);
+
+        $repo = new course_format_flexpage_repository_page();
+        $page = $repo->get_page($pageid);
+        $page->set_display($display);
+        $repo->save_page($page);
+        format_flexpage_clear_cache();
+    }
 }

@@ -119,3 +119,31 @@
 .path-course-view.masked li.activity span.autocompletion, .path-course-view li.activity form.togglecompletion {
     z-index: 2;
 }
+
+.format_flexpage_box_managepages .format_flexpage_cell {
+    padding: 6px 5px 6px 5px;
+    border-top: 1px solid #CCCCCC;
+}
+
+.format_flexpage_box_managepages .format_flexpage_display_cell li.yui-button-selectedmenuitem {
+    font-weight: bold;
+}
+
+.format_flexpage_display_cell .yui-menu-button button {
+    width: 17em;
+    text-align: left;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -o-text-overflow: ellipsis;
+}
+
+#managepagespanel .bd {
+    padding-right: 30px;
+}
+
+.format_flexpage_box_managepages .format_flexpage_box_headers .format_flexpage_cell {
+    font-weight: bold;
+    border-top: none;
+}
