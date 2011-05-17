@@ -201,9 +201,15 @@ M.format_flexpage.init_managepages = function(Y, url) {
 }
 
 M.format_flexpage.init_addactivity = function(Y, url) {
-    var panel = M.format_flexpage.init_default_panel(Y, "addactivitypanel");
+    var dialog = M.format_flexpage.init_default_dialog(Y, "addactivitypanel");
 
-    M.format_flexpage.populate_panel(Y, panel, url, function(buttons) {
+    // Remove buttons
+    dialog.cfg.queueProperty("buttons", []);
+
+    // Actually post to the endpoint
+    dialog.cfg.queueProperty('postmethod', 'form');
+
+    M.format_flexpage.populate_panel(Y, dialog, url, function(buttons) {
         var buttonGroup = M.format_flexpage.init_region_buttons(Y, buttons);
 
         Y.all('a.format_flexpage_addactivity_link').on('click', function(e) {
@@ -215,11 +221,11 @@ M.format_flexpage.init_addactivity = function(Y, url) {
             // Update our form so we know what region was selected
             M.format_flexpage.set_region_input(Y, buttonGroup, 'region');
 
-            document.getElementById('addactivity_form').submit();
+            dialog.submit();
         });
     });
 
-    return panel;
+    return dialog;
 }
 
 M.format_flexpage.init_addexistingactivity = function(Y, url) {

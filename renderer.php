@@ -210,14 +210,6 @@ class format_flexpage_renderer extends plugin_renderer_base {
     }
 
     public function render_addactivity(moodle_url $url, array $activities) {
-        $form = html_writer::start_tag('form', array('id' => 'addactivity_form', 'method' => 'post', 'action' => $url->out_omit_querystring())).
-                html_writer::input_hidden_params($url).
-                html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'region', 'value' => '')).
-                html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'addurl', 'value' => '')).
-                html_writer::tag('div', get_string('addto', 'format_flexpage'), array('class' => 'format_flexpage_addactivity_heading')).
-                html_writer::tag('div', '', array('id' => 'format_flexpage_region_radios')).
-                html_writer::end_tag('form');
-
         $box   = new course_format_flexpage_lib_box();
         $cell1 = new course_format_flexpage_lib_box_cell();
         $cell2 = new course_format_flexpage_lib_box_cell();
@@ -242,11 +234,16 @@ class format_flexpage_renderer extends plugin_renderer_base {
                 $cell2->append_contents($contents);
             }
         }
-        $box->add_new_row()->add_new_cell($form);
-        $box->add_new_row()->add_cell($cell1)
-                           ->add_cell($cell2);
+        $box->add_new_row()->add_cell($cell1)->add_cell($cell2);
 
-        return $this->render($box);
+        return html_writer::start_tag('form', array('method' => 'post', 'action' => $url->out_omit_querystring())).
+               html_writer::input_hidden_params($url).
+               html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'region', 'value' => '')).
+               html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'addurl', 'value' => '')).
+               html_writer::tag('div', get_string('addto', 'format_flexpage'), array('class' => 'format_flexpage_addactivity_heading')).
+               html_writer::tag('div', '', array('id' => 'format_flexpage_region_radios')).
+               $this->render($box).
+               html_writer::end_tag('form');
     }
 
     public function render_addexistingactivity(moodle_url $url, array $activities) {
@@ -265,7 +262,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
             $checkboxes .= html_writer::tag('div', $title.$list, array('class' => 'format_flexpage_addactivity_group'));
 
         }
-        return html_writer::start_tag('form', array('id' => 'addactivity_form', 'method' => 'post', 'action' => $url->out_omit_querystring())).
+        return html_writer::start_tag('form', array('method' => 'post', 'action' => $url->out_omit_querystring())).
                html_writer::input_hidden_params($url).
                html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'region', 'value' => '')).
                html_writer::tag('div', get_string('addto', 'format_flexpage'), array('class' => 'format_flexpage_addactivity_heading')).
@@ -275,7 +272,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
     }
 
     public function render_addblock(moodle_url $url, array $blocks) {
-        $form = html_writer::start_tag('form', array('id' => 'addactivity_form', 'method' => 'post', 'action' => $url->out_omit_querystring())).
+        $form = html_writer::start_tag('form', array('method' => 'post', 'action' => $url->out_omit_querystring())).
                 html_writer::input_hidden_params($url).
                 html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'region', 'value' => '')).
                 html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'blockname', 'value' => '')).
@@ -450,7 +447,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
                                ->add_new_cell(html_writer::select($showopts, 'showavailability', $page->get_showavailability(), false, array('id' => 'id_showavailability')));
         }
 
-        return html_writer::start_tag('form', array('id' => 'addactivity_form', 'method' => 'post', 'action' => $url->out_omit_querystring())).
+        return html_writer::start_tag('form', array('method' => 'post', 'action' => $url->out_omit_querystring())).
                html_writer::input_hidden_params($url).
                $this->render($box).
                html_writer::end_tag('form').
