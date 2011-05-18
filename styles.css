@@ -148,6 +148,26 @@
     border-top: none;
 }
 
+.format_flexpage_box_managepages .format_flexpage_cell {
+    vertical-align: middle;
+}
+
+.format_flexpage_box_managepages .format_flexpage_name_cell {
+    vertical-align: top;
+}
+
+.format_flexpage_box_managepages .format_flexpage_name_cell .availabilityinfo {
+    max-width: 500px;
+}
+
 .format_flexpage_deletepage {
     padding: 15px 0;
+}
+
+.format_flexpage_page_availability .format_flexpage_cell {
+    padding: 10px 0;
+}
+
+.format_flexpage_page_availability .format_flexpage_pagename {
+    font-weight: bold;
 }

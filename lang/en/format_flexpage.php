@@ -52,3 +52,6 @@ $string['deletepageaction'] = 'Delete page';
 $string['areyousuredeletepage'] = 'Are you sure that you want to permanently delete page <strong>{$a}</strong>?';
 $string['deletedpagex'] = 'Deleted page "{$a}"';
 $string['flexpage:managepages'] = 'Manage pages';
+$string['pagexnotavailable'] = '{$a} is not available';
+$string['pagenotavailable'] = 'Not available';
+$string['pagenotavailable_help'] = 'This page is not available to you.  Below might be a list of conditions that you must satisfy to in order to view the page.';

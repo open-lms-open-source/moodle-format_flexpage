@@ -382,15 +382,12 @@ class course_format_flexpage_controller_ajax extends mr_controller {
                 );
             }
         }
-
-        $cache = format_flexpage_cache();
-
         echo json_encode((object) array(
             'args'   => (object) $args,
             'header' => get_string('managepages', 'format_flexpage'),
             'body'   => $this->output->render_managepages(
                 $this->new_url(array('sesskey' => sesskey(), 'action' => 'setdisplay')),
-                $cache->get_pages(),
+                format_flexpage_cache()->get_pages(),
                 $actions
             ),
         ));

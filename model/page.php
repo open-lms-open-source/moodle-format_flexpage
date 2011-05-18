@@ -277,10 +277,60 @@ class course_format_flexpage_model_page {
         $this->conditions = new condition_info_controller($conditions);
     }
 
-    public function is_available($inmenu = false) {
-        // This method should take into consideration the following:
-        //      1. The user's capabilities
-        //      2. Page display settings (in or not in a menu)
-        //      3. Page availability conditions (parent pages too?)
+    /**
+     * This method determines if the page is available to the user or not.
+     * If the page should be shown with availability information, that information
+     * string will be returned.  Otherwise, boolean.
+     *
+     * WARNING: does not take into account parent pages or menu display
+     *
+     * @return bool|string
+     */
+    public function is_available(course_modinfo $modinfo = null) {
+        // #1: If the user has manage pages cap, then it's available to them
+        if (has_capability('format/flexpage:managepages', get_context_instance(CONTEXT_COURSE, $this->get_courseid()))) {
+            return true;
+        }
+
+        // #2: If the page is hidden, then not available
+        if ($this->get_display() == self::DISPLAY_HIDDEN) {
+            return false;
+        }
+        $this->process_conditions($modinfo);
+
+        // #3: Based on conditions, it is available to the user?  If not, see if we still show it...
+        if (!$this->conditions->get_user_available()) {
+            $info = $this->conditions->get_user_available_info();
+
+            // #4: Not available, but if we have info and we are to show it, return it
+            if (!empty($info) and $this->get_showavailability() > 0) {
+                return $info;
+            }
+            // #5: Not available and no info to show
+            return false;
+        }
+        return true;
+    }
+
+    public function get_available_info(course_modinfo $modinfo = null) {
+        $this->process_conditions($modinfo);
+        return $this->conditions->get_user_available_info();
+    }
+
+    public function process_conditions(course_modinfo $modinfo = null) {
+        global $DB, $COURSE;
+
+        if (!$this->conditions->get_processed()) {
+            if (!$modinfo instanceof course_modinfo) {
+                if ($COURSE->id != $this->get_courseid()) {
+                    $course = $DB->get_record('course', array('id' => $this->get_courseid()), '*', MUST_EXIST);
+                } else {
+                    $course = $COURSE;
+                }
+                $modinfo = get_fast_modinfo($course);
+            }
+            $this->conditions->process_conditions($modinfo, true);
+        }
+        return $this;
     }
 }

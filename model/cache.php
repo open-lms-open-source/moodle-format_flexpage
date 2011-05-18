@@ -112,9 +112,27 @@ class course_format_flexpage_model_cache {
         return $this;
     }
 
-    public function get_page_parents($pageid) {
+    /**
+     * Get page parents
+     *
+     * @param int $pageid The page ID to find the parents of
+     * @param bool $includechild Include the passed pageid in the return
+     * @return course_format_flexpage_model_page[]
+     */
+    public function get_page_parents($pageid, $includechild = false) {
         $this->require_built();
-        // return array of parents of a page
+        $parents = array();
+        $page    = $this->get_page($pageid);
+
+        if ($includechild) {
+            $parents[$page->get_id()] = $page;
+        }
+        while ($page->get_parentid() != 0) {
+            $page = $this->get_page($page->get_parentid());
+            $parents[$page->get_id()] = $page;
+        }
+        // Get correct order
+        return array_reverse($parents, true);
     }
 
     public function set_repository_page(course_format_flexpage_repository_page $pagerepo) {
@@ -282,20 +300,41 @@ class course_format_flexpage_model_cache {
         $USER->format_flexpage_display[$COURSE->id] = 0;
 
         // Everything failed, so return first page
+        return $this->get_first_available_page();
+    }
+
+    /**
+     * @return course_format_flexpage_model_page
+     */
+    public function get_first_available_page() {
+        $this->require_built();
+
+        // First, try to find one that is actually available
+        foreach ($this->get_pages() as $page) {
+            if ($this->is_page_available($page->get_id())) {
+                return $page;
+            }
+        }
+
+        // OK, weird, just return first
         foreach ($this->get_pages() as $page) {
             return $page;
         }
     }
 
+    public function is_page_available($pageid) {
+        $parents = $this->get_page_parents($pageid, true);
+        foreach ($parents as $parent) {
+            if ($parent->is_available() !== true) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public function get_page_depth(course_format_flexpage_model_page $page) {
         $this->require_built();
-
-        $depth = 0;
-        while ($page->get_parentid() > 0) {
-            $depth++;
-            $page = $this->get_page($page->get_parentid());
-        }
-        return $depth;
+        return count($this->get_page_parents($page->get_id()));
     }
 
     public function is_child_page(course_format_flexpage_model_page $parent, course_format_flexpage_model_page $child) {

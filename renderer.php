@@ -177,6 +177,27 @@ class format_flexpage_renderer extends plugin_renderer_base {
         return html_writer::tag('div', $cell->get_contents(), $cell->get_attributes());
     }
 
+    /**
+     * @param course_format_flexpage_model_page[] $pages
+     * @return string
+     */
+    public function render_page_available_info(array $pages) {
+        $box = new course_format_flexpage_lib_box(array('class' => 'format_flexpage_page_availability'));
+        foreach ($pages as $page) {
+            $info = $page->is_available();
+            if (is_string($info)) {
+                $box->add_new_row()->add_new_cell(
+                    html_writer::tag('div', format_string($page->get_display_name()), array('class' => 'format_flexpage_pagename')).
+                    html_writer::tag('div', $info, array('class' => 'availabilityinfo'))
+                );
+            }
+        }
+        if (count($box->get_rows()) > 0) {
+            return $this->output->box($this->render($box), 'generalbox boxwidthwide boxaligncenter');
+        }
+        return '';
+    }
+
     public function render_addpages(moodle_url $url, array $pageoptions, array $moveoptions) {
         $elements   = array();
         $elements[] = html_writer::empty_tag('input', array('type' => 'text', 'name' => 'name[]'));
@@ -360,9 +381,11 @@ class format_flexpage_renderer extends plugin_renderer_base {
 
             $pagename = html_writer::tag('div', $this->pad_page_name($page, null, true), array('id' => html_writer::random_id(), 'class' => 'format_flexpage_pagename'));
 
-            // @todo Display condition information below name
+            if (!empty($CFG->enableavailability)) {
+                $pagename .= html_writer::tag('div', $page->get_available_info(), array('class' => 'availabilityinfo'));
+            }
             $row = $box->add_new_row(array('pageid' => $page->get_id()));
-            $row->add_new_cell($pagename)
+            $row->add_new_cell($pagename, array('class' => 'format_flexpage_name_cell'))
                 ->add_new_cell($actionselect, array('id' => html_writer::random_id()))
                 ->add_new_cell($displayselect, array('id' => html_writer::random_id(), 'class' => 'format_flexpage_display_cell'));
         }

@@ -54,21 +54,6 @@ function callback_flexpage_request_key() {
 }
 
 /**
- * Gets the name for the provided section.
- *
- * @param stdClass $course
- * @param stdClass $section
- * @return string
- */
-function callback_flexpage_get_section_name($course, $section) {
-    // @todo Probably delete this function
-    debugging('here');
-    global $CFG;
-    require_once($CFG->dirroot.'/course/format/topics/lib.php');
-    return callback_topics_get_section_name($course, $section);
-}
-
-/**
  * Declares support for course AJAX features
  *
  * @see course_format_ajax_support()
@@ -83,6 +68,60 @@ function callback_flexpage_ajax_support() {
 }
 
 /**
+ * Determines cm availability based on the pages that the cm is
+ * displayed on and their availability
+ *
+ * @param cm_info $cm
+ * @return bool
+ */
+function callback_flexpage_course_module_available(cm_info $cm) {
+    global $DB, $CFG;
+
+    require_once($CFG->dirroot.'/course/format/flexpage/locallib.php');
+
+    static $cmidtopages = null;
+
+    if (is_null($cmidtopages)) {
+        $context = get_context_instance(CONTEXT_COURSE, $cm->course);
+
+        $records = $DB->get_recordset_sql(
+            'SELECT i.subpagepattern AS pageid, f.cmid
+               FROM {block_instances} i
+         INNER JOIN {block_flexpagemod} f ON i.id = f.instanceid
+              WHERE i.parentcontextid = ?
+                AND i.subpagepattern IS NOT NULL',
+        array($context->id));
+
+        $cmidtopages = array();
+        foreach ($records as $record) {
+            if (!array_key_exists($record->cmid, $cmidtopages)) {
+                $cmidtopages[$record->cmid] = array();
+            }
+            $cmidtopages[$record->cmid][$record->pageid] = $record->pageid;
+        }
+        $records->close();
+    }
+    if (array_key_exists($cm->id, $cmidtopages)) {
+        $cache = format_flexpage_cache($cm->course);
+        foreach ($cmidtopages[$cm->id] as $pageid) {
+            $parents = $cache->get_page_parents($pageid, true);
+            foreach ($parents as $parent) {
+                if ($parent->is_available($cm->get_modinfo()) !== true) {
+                    // If any parent not available, then go onto next page
+                    continue 2;
+                }
+            }
+            // Means the page is visible (because itself and parents are visible),
+            // If one page is visible then cm is available
+            return true;
+        }
+        // Means no pages were visible, cm is not available
+        return false;
+    }
+    return true;
+}
+
+/**
  * Setup the page layout and other properties
  *
  * @param moodle_page $page
@@ -94,8 +133,11 @@ function callback_flexpage_set_pagelayout($page) {
     require_once($CFG->dirroot.'/course/format/flexpage/locallib.php');
     require_once($CFG->dirroot.'/course/format/flexpage/lib/moodlepage.php');
 
-    $currentpage = format_flexpage_cache()->get_current_page();
+    $cache = format_flexpage_cache();
+    $currentpage = $cache->get_current_page();
 
-    $page->set_pagelayout(course_format_flexpage_lib_moodlepage::LAYOUT);
-    $page->set_subpage($currentpage->get_id());
+    if (empty($CFG->enableavailability) or $cache->is_page_available($currentpage->get_id())) {
+        $page->set_pagelayout(course_format_flexpage_lib_moodlepage::LAYOUT);
+        $page->set_subpage($currentpage->get_id());
+    }
 }
