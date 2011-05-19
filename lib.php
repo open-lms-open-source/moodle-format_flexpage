@@ -1,36 +1,69 @@
 <?php
 /**
- * Indicates this format uses sections.
+ * Indicates this format uses sections or not
  *
- * @return bool Returns true
+ * @return bool
  */
 function callback_flexpage_uses_sections() {
     return false;
 }
 
 /**
- * Used to display the course structure for a course where format=weeks
+ * Used to display the course structure for a course
  *
  * This is called automatically by {@link load_course()} if the current course
  * format = flexpage.
  *
- * @param navigation_node $navigation The course node
- * @param array $path An array of keys to the course node
+ * @param global_navigation $navigation Navigation
  * @param stdClass $course The course we are loading the section for
+ * @param navigation_node $coursenode The course node
  */
-//function callback_flexpage_load_content(&$navigation, $course, $coursenode) {
-// @todo Implement, maybe populate with pages
-//}
+function callback_flexpage_load_content(global_navigation &$navigation, stdClass $course, navigation_node $coursenode) {
+    global $CFG;
 
-/**
- * Toogle display of course contents (sections, activities)
- *
- * @return bool
- */
-//function callback_flexpage_display_content() {
-// @todo Implement, has to do with navigation...
-//    return false;
-//}
+    require_once($CFG->dirroot.'/course/format/flexpage/locallib.php');
+
+    $cache         = format_flexpage_cache($course->id);
+    $current       = $cache->get_current_page();
+    $activepageids = $cache->get_page_parents($current->get_id());
+    $activepageids = array_keys($activepageids);
+    $parentnodes   = array(0 => $coursenode);
+
+    foreach ($cache->get_pages() as $page) {
+        /**
+         * @var navigation_node $node
+         * @var navigation_node $parentnode
+         */
+
+        if (!$cache->is_page_in_menu($page->get_id())) {
+            continue;
+        }
+        if (!array_key_exists($page->get_parentid(), $parentnodes)) {
+            continue;
+        }
+        $parentnode = $parentnodes[$page->get_parentid()];
+
+        if ($parentnode->hidden) {
+            continue;
+        }
+        $url  = new moodle_url('/course/view.php', array('id' => $course->id, 'pageid' => $page->get_id()));
+        $node = $parentnode->add(format_string($page->get_display_name()), $url, navigation_node::TYPE_CUSTOM, null, $page->get_id());
+        $node->hidden = (!$cache->is_page_available($page->get_id()));
+        $parentnodes[$page->get_id()] = $node;
+
+        if (in_array($page->get_id(), $activepageids)) {
+            $node->force_open();
+        } else if ($page->get_id() == $current->get_id()) {
+            $node->make_active();
+        }
+    }
+    unset($activepageids, $parentnodes);
+
+    // @todo Would be neat to return section zero with the name of "Activities" and it had every activity underneath it.
+    // @todo This would require though that every activity was stored in section zero and had proper ordering
+
+    return array();
+}
 
 /**
  * The string that is used to describe a section of the course
@@ -39,7 +72,6 @@ function callback_flexpage_uses_sections() {
  * @return string
  */
 function callback_flexpage_definition() {
-    debugging('here');
     return get_string('page', 'format_flexpage');
 }
 
@@ -51,20 +83,6 @@ function callback_flexpage_definition() {
  */
 function callback_flexpage_request_key() {
     return 'pageid';
-}
-
-/**
- * Declares support for course AJAX features
- *
- * @see course_format_ajax_support()
- * @return stdClass
- */
-function callback_flexpage_ajax_support() {
-    // @todo Finnish implementation...
-    $ajaxsupport = new stdClass();
-    $ajaxsupport->capable = true;
-    $ajaxsupport->testedbrowsers = array('MSIE' => 6.0, 'Gecko' => 20061111, 'Safari' => 531, 'Chrome' => 6.0);
-    return $ajaxsupport;
 }
 
 /**

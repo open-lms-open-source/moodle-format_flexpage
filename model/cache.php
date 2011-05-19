@@ -332,6 +332,16 @@ class course_format_flexpage_model_cache {
         return true;
     }
 
+    public function is_page_in_menu($pageid) {
+        $parents = $this->get_page_parents($pageid, true);
+        foreach ($parents as $parent) {
+            if ($parent->get_display() != course_format_flexpage_model_page::DISPLAY_VISIBLE_MENU) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public function get_page_depth(course_format_flexpage_model_page $page) {
         $this->require_built();
         return count($this->get_page_parents($page->get_id()));

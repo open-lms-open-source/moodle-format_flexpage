@@ -55,3 +55,5 @@ $string['flexpage:managepages'] = 'Manage pages';
 $string['pagexnotavailable'] = '{$a} is not available';
 $string['pagenotavailable'] = 'Not available';
 $string['pagenotavailable_help'] = 'This page is not available to you.  Below might be a list of conditions that you must satisfy to in order to view the page.';
+$string['sectionname'] = 'Page';
+$string['page'] = 'Page';
