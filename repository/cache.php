@@ -4,6 +4,9 @@
  */
 require_once($CFG->dirroot.'/course/format/flexpage/model/cache.php');
 
+/**
+ * Repository mapper for course_format_flexpage_model_cache
+ */
 class course_format_flexpage_repository_cache {
     /**
      * Gets the course cache

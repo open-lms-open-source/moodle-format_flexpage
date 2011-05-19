@@ -9,8 +9,16 @@ require_once($CFG->dirroot.'/course/format/flexpage/lib/moodlepage.php');
  */
 require_once($CFG->dirroot.'/course/format/flexpage/model/page.php');
 
+/**
+ * Repository mapper for course_format_flexpage_model_page
+ */
 class course_format_flexpage_repository_page {
-
+    /**
+     * Get a page from ID
+     *
+     * @param int $id
+     * @return course_format_flexpage_model_page
+     */
     public function get_page($id) {
         global $DB;
 
@@ -20,6 +28,8 @@ class course_format_flexpage_repository_page {
     }
 
     /**
+     * Get pages
+     *
      * @param array $conditions
      * @param string $sort
      * @return array|course_format_flexpage_model_page[]
@@ -37,20 +47,19 @@ class course_format_flexpage_repository_page {
         return $pages;
     }
 
-    public function create_default_page($courseorid) {
+    /**
+     * Create the course default page
+     *
+     * @param int $courseid
+     * @return course_format_flexpage_repository_page
+     */
+    public function create_default_page($courseid) {
         global $DB;
 
-        if (is_object($courseorid)) {
-            $courseid = $courseorid->id;
-        } else {
-            $courseid = $courseorid;
-        }
         if (!$DB->record_exists('format_flexpage_page', array('courseid' => $courseid))) {
-            if (is_object($courseorid)) {
-                $course = $courseorid;
-            } else {
-                $course = $DB->get_record('course', array('id' => $courseorid), 'id, fullname, shortname', MUST_EXIST);
-            }
+
+            $course = $DB->get_record('course', array('id' => $courseid), 'id, fullname, shortname', MUST_EXIST);
+
             $a = (object) array(
                 'fullname'  => $course->fullname,
                 'shortname' => $course->shortname
@@ -76,19 +85,18 @@ class course_format_flexpage_repository_page {
 
         $id = $page->get_id();
 
-        // @todo This doesn't seem the best... maybe model has to_record() method?
         $record = (object) array(
-            'courseid' => $page->get_courseid(),
-            'name' => $page->get_name(),
-            'altname' => $page->get_altname(),
-            'display' => $page->get_display(),
-            'navigation' => $page->get_navigation(),
-            'availablefrom' => $page->get_availablefrom(),
-            'availableuntil' => $page->get_availableuntil(),
-            'releasecode' => $page->get_releasecode(),
+            'courseid'         => $page->get_courseid(),
+            'name'             => $page->get_name(),
+            'altname'          => $page->get_altname(),
+            'display'          => $page->get_display(),
+            'navigation'       => $page->get_navigation(),
+            'availablefrom'    => $page->get_availablefrom(),
+            'availableuntil'   => $page->get_availableuntil(),
+            'releasecode'      => $page->get_releasecode(),
             'showavailability' => $page->get_showavailability(),
-            'parentid' => $page->get_parentid(),
-            'weight' => $page->get_weight(),
+            'parentid'         => $page->get_parentid(),
+            'weight'           => $page->get_weight(),
         );
 
         if (!empty($id)) {
@@ -102,6 +110,12 @@ class course_format_flexpage_repository_page {
         return $this;
     }
 
+    /**
+     * Get page region widths
+     *
+     * @param int $pageid
+     * @return array
+     */
     public function get_page_region_widths($pageid) {
         global $DB;
 
@@ -114,16 +128,24 @@ class course_format_flexpage_repository_page {
         return $regionwidths;
     }
 
+    /**
+     * Get page region widths and set them to the page
+     *
+     * @param course_format_flexpage_model_page $page
+     * @return void
+     */
     public function set_page_region_widths(course_format_flexpage_model_page $page) {
         $page->set_region_widths($this->get_page_region_widths($page->get_id()));
     }
 
-    public function remove_page_region_widths(course_format_flexpage_model_page $page) {
-        $this->save_page_region_widths($page, array());
-        $page->set_region_widths(array());
-    }
-
-    public function save_page_region_widths(course_format_flexpage_model_page $page, $regionwidths) {
+    /**
+     * Save page region widths
+     *
+     * @param course_format_flexpage_model_page $page
+     * @param array $regionwidths Key, region name, value, region width
+     * @return void
+     */
+    public function save_page_region_widths(course_format_flexpage_model_page $page, array $regionwidths) {
         global $DB;
 
         foreach ($regionwidths as $region => $width) {
@@ -149,6 +171,25 @@ class course_format_flexpage_repository_page {
         }
     }
 
+    /**
+     * Delete page region widths and remove from page
+     *
+     * @param course_format_flexpage_model_page $page
+     * @return void
+     */
+    public function remove_page_region_widths(course_format_flexpage_model_page $page) {
+        $this->save_page_region_widths($page, array());
+        $page->set_region_widths(array());
+    }
+
+    /**
+     * Move page in association to another page
+     *
+     * @param course_format_flexpage_model_page $page
+     * @param int $move Page model move constant
+     * @param int $referencepageid The page ID to reference the move action
+     * @return course_format_flexpage_repository_page
+     */
     public function move_page(course_format_flexpage_model_page $page, $move, $referencepageid) {
         global $DB;
 
@@ -206,6 +247,12 @@ class course_format_flexpage_repository_page {
         return $this;
     }
 
+    /**
+     * Remove a page from hierarchy
+     *
+     * @param course_format_flexpage_model_page $page
+     * @return course_format_flexpage_repository_page
+     */
     protected function remove_page_position(course_format_flexpage_model_page $page) {
         global $DB;
 
