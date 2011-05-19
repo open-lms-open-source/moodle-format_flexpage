@@ -86,6 +86,19 @@ function callback_flexpage_request_key() {
 }
 
 /**
+ * Declares support for course AJAX features
+ *
+ * @see course_format_ajax_support()
+ * @return stdClass
+ */
+function callback_flexpage_ajax_support() {
+    $ajaxsupport = new stdClass();
+    $ajaxsupport->capable = true;
+    $ajaxsupport->testedbrowsers = array('MSIE' => 6.0, 'Gecko' => 20061111, 'Safari' => 531, 'Chrome' => 6.0);
+    return $ajaxsupport;
+}
+
+/**
  * Determines cm availability based on the pages that the cm is
  * displayed on and their availability
  *

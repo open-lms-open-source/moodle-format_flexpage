@@ -60,7 +60,7 @@ class course_format_flexpage_model_page {
     /**
      * @var condition_info_controller
      */
-    protected $conditions;
+    protected $conditions = null;
 
     public function __construct($options = array()) {
         $this->set_options($options);
@@ -208,7 +208,7 @@ class course_format_flexpage_model_page {
     /**
      * Get condition information
      *
-     * @return condition_info_controller
+     * @return condition_info_controller|null
      */
     public function get_conditions() {
         return $this->conditions;
@@ -273,8 +273,11 @@ class course_format_flexpage_model_page {
                 $this->availableuntil
             );
         }
-        // @todo Don't make an instance if conditions are empty? Would reduce cache size...
-        $this->conditions = new condition_info_controller($conditions);
+        if (!empty($conditions)) {
+            $this->conditions = new condition_info_controller($conditions);
+        } else {
+            $this->conditions = null;
+        }
     }
 
     /**
@@ -296,23 +299,28 @@ class course_format_flexpage_model_page {
         if ($this->get_display() == self::DISPLAY_HIDDEN) {
             return false;
         }
-        $this->process_conditions($modinfo);
+        if (!is_null($this->get_conditions())) {
+            $this->process_conditions($modinfo);
 
-        // #3: Based on conditions, it is available to the user?  If not, see if we still show it...
-        if (!$this->conditions->get_user_available()) {
-            $info = $this->conditions->get_user_available_info();
+            // #3: Based on conditions, it is available to the user?  If not, see if we still show it...
+            if (!$this->conditions->get_user_available()) {
+                $info = $this->conditions->get_user_available_info();
 
-            // #4: Not available, but if we have info and we are to show it, return it
-            if (!empty($info) and $this->get_showavailability() > 0) {
-                return $info;
+                // #4: Not available, but if we have info and we are to show it, return it
+                if (!empty($info) and $this->get_showavailability() > 0) {
+                    return $info;
+                }
+                // #5: Not available and no info to show
+                return false;
             }
-            // #5: Not available and no info to show
-            return false;
         }
         return true;
     }
 
     public function get_available_info(course_modinfo $modinfo = null) {
+        if (is_null($this->get_conditions())) {
+            return '';
+        }
         $this->process_conditions($modinfo);
         return $this->conditions->get_user_available_info();
     }
@@ -320,7 +328,7 @@ class course_format_flexpage_model_page {
     public function process_conditions(course_modinfo $modinfo = null) {
         global $DB, $COURSE;
 
-        if (!$this->conditions->get_processed()) {
+        if (!is_null($this->get_conditions()) and !$this->conditions->get_processed()) {
             if (!$modinfo instanceof course_modinfo) {
                 if ($COURSE->id != $this->get_courseid()) {
                     $course = $DB->get_record('course', array('id' => $this->get_courseid()), '*', MUST_EXIST);

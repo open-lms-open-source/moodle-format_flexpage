@@ -118,6 +118,11 @@ class course_format_flexpage_repository_page {
         $page->set_region_widths($this->get_page_region_widths($page->get_id()));
     }
 
+    public function remove_page_region_widths(course_format_flexpage_model_page $page) {
+        $this->save_page_region_widths($page, array());
+        $page->set_region_widths(array());
+    }
+
     public function save_page_region_widths(course_format_flexpage_model_page $page, $regionwidths) {
         global $DB;
 
@@ -224,7 +229,9 @@ class course_format_flexpage_repository_page {
      * @return void
      */
     public function delete_page(course_format_flexpage_model_page $page) {
-        global $DB;
+        global $CFG, $DB;
+
+        require_once($CFG->dirroot.'/course/format/flexpage/repository/condition.php');
 
         $parentid = $page->get_parentid();
         $context  = get_context_instance(CONTEXT_COURSE, $page->get_courseid());
@@ -260,7 +267,15 @@ class course_format_flexpage_repository_page {
             $move = course_format_flexpage_model_page::MOVE_AFTER;
         }
 
+        // Remove conditions, region widths and finally the page
+        $condrepo = new course_format_flexpage_repository_condition();
+        $condrepo->remove_page_conditions($page);
+
+        $this->remove_page_region_widths($page);
+
         $DB->delete_records('format_flexpage_page', array('id' => $page->get_id()));
+
+        // Null out id!
         $page->set_id(null);
     }
 }

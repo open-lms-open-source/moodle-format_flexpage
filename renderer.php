@@ -479,7 +479,11 @@ class format_flexpage_renderer extends plugin_renderer_base {
 
     public function render_conditions(course_format_flexpage_model_page $page, $conditionclass) {
         $renderfunc = 'render_'.$conditionclass;
-        $conditions = $page->get_conditions()->get_conditions($conditionclass);
+        $conditions = $page->get_conditions();
+
+        if (!is_null($conditions)) {
+            $conditions = $conditions->get_conditions($conditionclass);
+        }
 
         // Render a blank one if none exist
         if (empty($conditions)) {

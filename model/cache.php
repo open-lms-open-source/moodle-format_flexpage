@@ -156,6 +156,8 @@ class course_format_flexpage_model_cache {
     }
 
     public function build() {
+        global $CFG;
+
         if (is_null($this->get_courseid())) {
             throw new coding_exception('Must set course ID before building cache');
         }
@@ -164,20 +166,22 @@ class course_format_flexpage_model_cache {
         $this->pagerepo->create_default_page($this->get_courseid());
 
         // Fetch our pages and conditions
-        $pages       = $this->pagerepo->get_pages(array('courseid' => $this->get_courseid()), 'parentid, weight');
-        $conditions  = $this->condrepo->get_course_conditions($this->get_courseid());
+        $pages = $this->pagerepo->get_pages(array('courseid' => $this->get_courseid()), 'parentid, weight');
 
         // Make sure our weights are all in order
         $this->repair_page_weights($pages);
 
-        // Associate conditions to pages
-        foreach ($pages as $page) {
-            if (array_key_exists($page->get_id(), $conditions)) {
-                $pageconditions = $conditions[$page->get_id()];
-            } else {
-                $pageconditions = array();
+        if (!empty($CFG->enableavailability)) {
+            // Associate conditions to pages
+            $conditions = $this->condrepo->get_course_conditions($this->get_courseid());
+            foreach ($pages as $page) {
+                if (array_key_exists($page->get_id(), $conditions)) {
+                    $pageconditions = $conditions[$page->get_id()];
+                } else {
+                    $pageconditions = array();
+                }
+                $page->set_conditions($pageconditions);
             }
-            $page->set_conditions($pageconditions);
         }
 
         // Sort all of the pages
@@ -296,8 +300,8 @@ class course_format_flexpage_model_cache {
             }
         }
 
-        // Set to zero, AKA default page
-        $USER->format_flexpage_display[$COURSE->id] = 0;
+        // Unset, AKA default page
+        unset($USER->format_flexpage_display[$COURSE->id]);
 
         // Everything failed, so return first page
         return $this->get_first_available_page();
