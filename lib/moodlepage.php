@@ -98,14 +98,13 @@ class course_format_flexpage_lib_moodlepage {
      * @return void
      */
     public static function add_activity_block($cmid, $region = false) {
-        global $DB;
+        global $DB, $SESSION;
 
-        $cm = $DB->get_record('course_modules', array('id' => $cmid), '*', MUST_EXIST);
+        $cm = $DB->get_record('course_modules', array('id' => $cmid), 'id, course', MUST_EXIST);
 
-        if ($instance = self::add_block('flexpagemod', $cm->course, $region)) {
-            $block = block_instance('flexpagemod', $instance);
-            $block->instance_config_save((object) array('cmid' => $cm->id));
-        }
+        $SESSION->block_flexpagemod_create_cmids = array($cm->id);
+
+        self::add_block('flexpagemod', $cm->course, $region);
     }
 
     /**
@@ -115,11 +114,9 @@ class course_format_flexpage_lib_moodlepage {
      * @param string $blockname The block's name
      * @param int $courseid
      * @param string|bool $region The region to add the block to
-     * @return bool|mixed
+     * @return void
      */
     public static function add_block($blockname, $courseid, $region = false) {
-        global $DB;
-
         $page = self::new_moodle_page($courseid);
         $page->blocks->load_blocks(true);
 
@@ -142,19 +139,6 @@ class course_format_flexpage_lib_moodlepage {
         } else {
             $page->blocks->add_block_at_end_of_default_region($blockname);
         }
-
-        // This should fetch the instance that we just created (being overly specific here)
-        $instances = $DB->get_records('block_instances', array(
-            'blockname'       => $blockname,
-            'parentcontextid' => $page->context->id,
-            'pagetypepattern' => 'course-view-*',
-            'subpagepattern'  => $page->subpage,
-        ), 'id DESC', '*', 0, 1);
-
-        if (!empty($instances)) {
-            return current($instances);
-        }
-        return false;
     }
 
     /**
