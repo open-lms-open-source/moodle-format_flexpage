@@ -34,13 +34,13 @@ class course_format_flexpage_lib_eventhandler {
             $format = $COURSE->format;
         }
         if ($format === 'flexpage') {
-
+            require_once($CFG->dirroot.'/course/format/flexpage/locallib.php');
             require_once($CFG->dirroot.'/course/format/flexpage/lib/moodlepage.php');
 
             try {
-                course_format_flexpage_lib_moodlepage::add_activity_block($eventdata->cmid, $region);
+                $page = format_flexpage_cache()->get_current_page();
+                course_format_flexpage_lib_moodlepage::add_activity_block($page, $eventdata->cmid, $region);
             } catch (Exception $e) {
-                throw $e; // @todo Remove
             }
         }
     }

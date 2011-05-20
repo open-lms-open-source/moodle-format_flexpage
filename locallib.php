@@ -12,7 +12,7 @@ function format_flexpage_cache($courseid = null) {
     global $COURSE;
 
     /**
-     * @var course_format_flexpage_model_cache[]
+     * @var course_format_flexpage_model_cache[] $caches
      */
     static $caches = array();
 
@@ -62,7 +62,7 @@ function format_flexpage_region_width($region, $default = null) {
     if (is_null($widths)) {
         $page   = format_flexpage_cache()->get_current_page();
         $repo   = new course_format_flexpage_repository_page();
-        $widths = $repo->get_page_region_widths($page->get_id());
+        $widths = $repo->get_page_region_widths($page);
     }
     if (array_key_exists($region, $widths)) {
         return $widths[$region];

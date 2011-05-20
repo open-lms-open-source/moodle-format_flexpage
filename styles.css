@@ -116,7 +116,8 @@
 }
 
 /* Fixes bleeding of completion check boxes when modals are up */
-.path-course-view.masked li.activity span.autocompletion, .path-course-view li.activity form.togglecompletion {
+.path-course-view.yui-skin-sam li.activity span.autocompletion,
+.path-course-view.yui-skin-sam li.activity form.togglecompletion {
     z-index: 2;
 }
 

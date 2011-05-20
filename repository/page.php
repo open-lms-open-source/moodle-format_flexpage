@@ -113,19 +113,13 @@ class course_format_flexpage_repository_page {
     /**
      * Get page region widths
      *
-     * @param int $pageid
+     * @param course_format_flexpage_model_page $page
      * @return array
      */
-    public function get_page_region_widths($pageid) {
+    public function get_page_region_widths(course_format_flexpage_model_page $page) {
         global $DB;
 
-        $regionwidths = array();
-        if ($regions = $DB->get_records('format_flexpage_region', array('pageid' => $pageid))) {
-            foreach ($regions as $region) {
-                $regionwidths[$region->region] = $region->width;
-            }
-        }
-        return $regionwidths;
+        return $DB->get_records_menu('format_flexpage_region', array('pageid' => $page->get_id()), '', 'region, width');
     }
 
     /**
@@ -135,7 +129,7 @@ class course_format_flexpage_repository_page {
      * @return void
      */
     public function set_page_region_widths(course_format_flexpage_model_page $page) {
-        $page->set_region_widths($this->get_page_region_widths($page->get_id()));
+        $page->set_region_widths($this->get_page_region_widths($page));
     }
 
     /**
@@ -281,10 +275,9 @@ class course_format_flexpage_repository_page {
         require_once($CFG->dirroot.'/course/format/flexpage/repository/condition.php');
 
         $parentid = $page->get_parentid();
-        $context  = get_context_instance(CONTEXT_COURSE, $page->get_courseid());
 
         // Remove page blocks
-        course_format_flexpage_lib_moodlepage::delete_blocks($context->id, $page->get_id());
+        course_format_flexpage_lib_moodlepage::delete_blocks($page);
 
         // Get the page out of the way
         $this->remove_page_position($page);

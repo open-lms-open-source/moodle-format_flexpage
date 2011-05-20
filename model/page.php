@@ -82,6 +82,10 @@ class course_format_flexpage_model_page {
         return $this->courseid;
     }
 
+    /**
+     * @param int $id
+     * @return course_format_flexpage_model_page
+     */
     public function set_courseid($id) {
         $this->courseid = $id;
         return $this;
@@ -91,6 +95,10 @@ class course_format_flexpage_model_page {
         return $this->name;
     }
 
+    /**
+     * @param string $name
+     * @return course_format_flexpage_model_page
+     */
     public function set_name($name) {
         $this->name = $name;
         return $this;

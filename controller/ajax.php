@@ -5,6 +5,11 @@
 require_once($CFG->dirroot.'/course/format/flexpage/repository/page.php');
 
 /**
+ * @see course_format_flexpage_repository_condition
+ */
+require_once($CFG->dirroot.'/course/format/flexpage/repository/condition.php');
+
+/**
  * @see course_format_flexpage_lib_mod
  */
 require_once($CFG->dirroot.'/course/format/flexpage/lib/mod.php');
@@ -72,6 +77,7 @@ class course_format_flexpage_controller_ajax extends mr_controller {
 
             $names = optional_param('name', array(), PARAM_MULTILANG);
             $moves = optional_param('move', array(), PARAM_ACTION);
+            $copypageids = optional_param('copypageid', array(), PARAM_INT);
             $referencepageids = optional_param('referencepageid', array(), PARAM_INT);
 
             // Add pages in reverse order, will match user expectations better
@@ -79,21 +85,37 @@ class course_format_flexpage_controller_ajax extends mr_controller {
             $moves = array_reverse($moves, true);
             $referencepageids = array_reverse($referencepageids, true);
 
-            $repo = new course_format_flexpage_repository_page();
+            $pagerepo = new course_format_flexpage_repository_page();
+            $condrepo = new course_format_flexpage_repository_condition();
             $addedpages = array();
             foreach ($names as $key => $name) {
                 // Required values...
                 if (empty($name) or empty($moves[$key]) or empty($referencepageids[$key])) {
                     continue;
                 }
+                if (!empty($copypageids[$key])) {
+                    $copypage = $pagerepo->get_page($copypageids[$key]);
+                    $page     = clone($copypage);
+                } else {
+                    $copypage = null;
+                    $page     = new course_format_flexpage_model_page();
+                }
+
                 $addedpages[] = format_string($name);
 
-                $page = new course_format_flexpage_model_page();
-                $page->set_name($name);
-                $page->set_courseid($COURSE->id);
+                $page->set_id(null)
+                     ->set_name($name)
+                     ->set_courseid($COURSE->id);
 
-                $repo->move_page($page, $moves[$key], $referencepageids[$key])
-                     ->save_page($page);
+                $pagerepo->move_page($page, $moves[$key], $referencepageids[$key])
+                         ->save_page($page);
+
+                // Copy widths, conditions and blocks
+                if ($copypage instanceof course_format_flexpage_model_page) {
+                    $pagerepo->save_page_region_widths($page, $pagerepo->get_page_region_widths($copypage));
+                    $condrepo->save_page_conditions($page, $condrepo->get_page_condtions($copypage));
+                    course_format_flexpage_lib_moodlepage::copy_page_blocks($copypage, $page);
+                }
             }
             format_flexpage_clear_cache();
 
@@ -105,13 +127,14 @@ class course_format_flexpage_controller_ajax extends mr_controller {
             foreach (format_flexpage_cache()->get_pages() as $page) {
                 $pageoptions[$page->get_id()] = $this->output->pad_page_name($page);
             }
+            $copyoptions = array(0 => get_string('copydotdotdot', 'format_flexpage')) + $pageoptions;
             $moveoptions = course_format_flexpage_model_page::get_move_options();
 
             $submiturl = $this->new_url(array('sesskey' => sesskey(), 'action' => 'addpages', 'add' => 1));
 
             echo json_encode((object) array(
                 'header' => get_string('addpages', 'format_flexpage'),
-                'body' => $this->output->render_addpages($submiturl, $pageoptions, $moveoptions),
+                'body' => $this->output->render_addpages($submiturl, $pageoptions, $moveoptions, $copyoptions),
             ));
         }
     }
@@ -194,6 +217,10 @@ class course_format_flexpage_controller_ajax extends mr_controller {
      */
     public function addexistingactivity_action() {
 
+        $pageid = required_param('pageid', PARAM_INT);
+        $repo   = new course_format_flexpage_repository_page();
+        $page   = $repo->get_page($pageid);
+
         if (optional_param('add', 0, PARAM_BOOL)) {
             require_sesskey();
 
@@ -204,14 +231,14 @@ class course_format_flexpage_controller_ajax extends mr_controller {
                 $cmids = array($cmids);
             }
             foreach ($cmids as $cmid) {
-                course_format_flexpage_lib_moodlepage::add_activity_block($cmid, $region);
+                course_format_flexpage_lib_moodlepage::add_activity_block($page, $cmid, $region);
             }
         } else {
             echo json_encode((object) array(
                 'args' => course_format_flexpage_lib_moodlepage::get_region_json_options(),
                 'header' => get_string('addexistingactivity', 'format_flexpage'),
                 'body' => $this->output->render_addexistingactivity(
-                    $this->new_url(array('sesskey' => sesskey(), 'action' => 'addexistingactivity', 'add' => 1)),
+                    $this->new_url(array('sesskey' => sesskey(), 'action' => 'addexistingactivity', 'pageid' => $page->get_id(), 'add' => 1)),
                     course_format_flexpage_lib_mod::get_existing_options()
                 ),
             ));
@@ -222,7 +249,10 @@ class course_format_flexpage_controller_ajax extends mr_controller {
      * Add Block Modal
      */
     public function addblock_action() {
-        global $COURSE;
+
+        $pageid = required_param('pageid', PARAM_INT);
+        $repo   = new course_format_flexpage_repository_page();
+        $page   = $repo->get_page($pageid);
 
         if (optional_param('add', 0, PARAM_BOOL)) {
             require_sesskey();
@@ -231,15 +261,15 @@ class course_format_flexpage_controller_ajax extends mr_controller {
             $region    = optional_param('region', false, PARAM_ACTION);
 
             if (!empty($blockname)) {
-                course_format_flexpage_lib_moodlepage::add_block($blockname, $COURSE->id, $region);
+                course_format_flexpage_lib_moodlepage::add_block($page, $blockname, $region);
             }
         } else {
             echo json_encode((object) array(
                 'args' => course_format_flexpage_lib_moodlepage::get_region_json_options(),
                 'header' => get_string('addblock', 'format_flexpage'),
                 'body' => $this->output->render_addblock(
-                    $this->new_url(array('sesskey' => sesskey(), 'action' => 'addblock', 'add' => 1)),
-                    course_format_flexpage_lib_moodlepage::get_add_block_options($COURSE->id)
+                    $this->new_url(array('sesskey' => sesskey(), 'action' => 'addblock', 'pageid' => $page->get_id(), 'add' => 1)),
+                    course_format_flexpage_lib_moodlepage::get_add_block_options($page)
                 ),
             ));
         }
@@ -317,11 +347,9 @@ class course_format_flexpage_controller_ajax extends mr_controller {
                     }
                     $conditions[] = new condition_grade($gradeitemid, $min, $max);
                 }
-                $condrepo->save_page_grade_conditions($page, $conditions);
 
                 $completion = new completion_info($COURSE);
                 if ($completion->is_enabled()) {
-                    $conditions = array();
                     $cmids = optional_param('cmids', array(), PARAM_INT);
                     $requiredcompletions = optional_param('requiredcompletions', array(), PARAM_INT);
 
@@ -334,8 +362,8 @@ class course_format_flexpage_controller_ajax extends mr_controller {
                         }
                         $conditions[] = new condition_completion($cmid, $requiredcompletions[$key]);
                     }
-                    $condrepo->save_page_completion_conditions($page, $conditions);
                 }
+                $condrepo->save_page_conditions($page, $conditions);
             }
             $pagerepo->save_page($page);
             format_flexpage_clear_cache();

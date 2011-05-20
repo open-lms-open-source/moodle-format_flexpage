@@ -161,11 +161,33 @@ class course_format_flexpage_repository_condition {
     }
 
     /**
+     * Save an array of conditions
+     *
+     * @param course_format_flexpage_model_page $page
+     * @param condition_base[] $conditions
+     * @return course_format_flexpage_repository_condition
+     */
+    public function save_page_conditions(course_format_flexpage_model_page $page, array $conditions) {
+        $grade = $completion = array();
+        foreach ($conditions as $condition) {
+            if ($condition instanceof condition_grade) {
+                $grade[] = $condition;
+            } else if ($condition instanceof condition_completion) {
+                $completion[] = $condition;
+            }
+        }
+        $this->save_page_grade_conditions($page, $grade)
+             ->save_page_completion_conditions($page, $completion);
+
+        return $this;
+    }
+
+    /**
      * Save grade conditions
      *
      * @param course_format_flexpage_model_page $page
      * @param condition_grade[] $conditions
-     * @return void
+     * @return course_format_flexpage_repository_condition
      */
     public function save_page_grade_conditions(course_format_flexpage_model_page $page, array $conditions) {
         global $DB;
@@ -199,6 +221,7 @@ class course_format_flexpage_repository_condition {
         } else {
             $DB->delete_records('format_flexpage_grade', array('pageid' => $page->get_id()));
         }
+        return $this;
     }
 
     /**
@@ -206,7 +229,7 @@ class course_format_flexpage_repository_condition {
      *
      * @param course_format_flexpage_model_page $page
      * @param condition_completion[] $conditions
-     * @return void
+     * @return course_format_flexpage_repository_condition
      */
     public function save_page_completion_conditions(course_format_flexpage_model_page $page, array $conditions) {
         global $DB;
@@ -239,5 +262,6 @@ class course_format_flexpage_repository_condition {
         } else {
             $DB->delete_records('format_flexpage_completion', array('pageid' => $page->get_id()));
         }
+        return $this;
     }
 }

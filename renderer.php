@@ -198,11 +198,12 @@ class format_flexpage_renderer extends plugin_renderer_base {
         return '';
     }
 
-    public function render_addpages(moodle_url $url, array $pageoptions, array $moveoptions) {
+    public function render_addpages(moodle_url $url, array $pageoptions, array $moveoptions, array $copyoptions) {
         $elements   = array();
         $elements[] = html_writer::empty_tag('input', array('type' => 'text', 'name' => 'name[]'));
         $elements[] = html_writer::select($moveoptions, 'move[]', 'child', false);
         $elements[] = html_writer::select($pageoptions, 'referencepageid[]', '', false);
+        $elements[] = html_writer::select($copyoptions, 'copypageid[]', '', false);
 
         $elements     = html_writer::tag('div', implode('&nbsp;&nbsp;', $elements), array('class' => 'format_flexpage_addpages_elements'));
         $addbutton    = html_writer::tag('button', '+', array('type' => 'button', 'value' => '+', 'id' => 'addpagebutton'));

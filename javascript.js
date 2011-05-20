@@ -147,7 +147,7 @@ M.format_flexpage.init_managepages = function(Y, url) {
                 M.format_flexpage.managepages_reload = false;
 
                 // When our dialog shows, hide our panel (smoothness!)
-                dialog.showEvent.subscribe(function(e) {
+                dialog.beforeShowEvent.subscribe(function(e) {
                     panel.hide();
                 });
 
@@ -161,7 +161,7 @@ M.format_flexpage.init_managepages = function(Y, url) {
                     });
                 };
                 dialog.cancelEvent.subscribe(function(e) {
-                    M.format_flexpage.init_managepages(Y, url);
+                    panel.show();
                 });
             });
         });
@@ -330,8 +330,6 @@ M.format_flexpage.populate_panel = function(Y, panel, url, onsuccess) {
                 if (response.footer != undefined) {
                     panel.setFooter(response.footer);
                 }
-
-                // @todo Remove this?
                 panel.render(document.body);
                 panel.show();
                 panel.center();
