@@ -54,7 +54,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
         $name = format_string($page->get_display_name(), true, $page->get_courseid());
 
         if ($link) {
-            $name = html_writer::link(new moodle_url('/course/view.php', array('id' => $page->get_courseid(), 'pageid' => $page->get_id())), $name);
+            $name = html_writer::link($page->get_url(), $name);
         }
         if (is_null($amount)) {
             $amount = format_flexpage_cache()->get_page_depth($page);
@@ -116,16 +116,16 @@ class format_flexpage_renderer extends plugin_renderer_base {
             $options[$page->get_id()] = $this->pad_page_name($page);
         }
 
-        if ($prevpage = format_flexpage_cache()->get_previous_page($currentpage)) {
+        if ($prevpage = format_flexpage_cache()->get_previous_page($currentpage, true)) {
             $previcon = new pix_icon('t/moveleft', get_string('gotoa', 'format_flexpage', format_string($prevpage->get_display_name())));
-            $prevpage = $this->output->action_icon(new moodle_url('/course/view.php', array('id' => $prevpage->get_courseid(), 'pageid' => $prevpage->get_id())), $previcon);
+            $prevpage = $this->output->action_icon($prevpage->get_url(), $previcon);
             $prevpage = html_writer::tag('span', $prevpage, array('id' => 'format_flexpage_prevpage'));
         } else {
             $prevpage = '';
         }
-        if ($nextpage = format_flexpage_cache()->get_next_page($currentpage)) {
+        if ($nextpage = format_flexpage_cache()->get_next_page($currentpage, true)) {
             $nexticon = new pix_icon('t/removeright', get_string('gotoa', 'format_flexpage', format_string($nextpage->get_display_name())));
-            $nextpage = $this->output->action_icon(new moodle_url('/course/view.php', array('id' => $nextpage->get_courseid(), 'pageid' => $nextpage->get_id())), $nexticon);
+            $nextpage = $this->output->action_icon($nextpage->get_url(), $nexticon);
             $nextpage = html_writer::tag('span', $nextpage, array('id' => 'format_flexpage_nextpage'));
         } else {
             $nextpage = '';

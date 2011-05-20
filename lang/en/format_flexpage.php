@@ -58,3 +58,5 @@ $string['pagenotavailable_help'] = 'This page is not available to you.  Below mi
 $string['sectionname'] = 'Page';
 $string['page'] = 'Page';
 $string['copydotdotdot'] = 'Copy...';
+$string['nextpage'] = 'Next ({$a}) >';
+$string['previouspage'] = '< Previous ({$a})';

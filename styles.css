@@ -172,3 +172,8 @@
 .format_flexpage_page_availability .format_flexpage_pagename {
     font-weight: bold;
 }
+
+#format_flexpage_previous_page.yui-link-button a:hover,
+#format_flexpage_next_page.yui-link-button a:hover {
+    text-decoration: none;
+}

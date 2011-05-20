@@ -179,6 +179,22 @@ class course_format_flexpage_model_page {
         return $this;
     }
 
+    public function has_navigation_next() {
+        $nav = $this->get_navigation();
+        if ($nav == self::NAV_NEXT or $nav == self::NAV_BOTH) {
+            return true;
+        }
+        return false;
+    }
+
+    public function has_navigation_previous() {
+        $nav = $this->get_navigation();
+        if ($nav == self::NAV_PREV or $nav == self::NAV_BOTH) {
+            return true;
+        }
+        return false;
+    }
+
     public function get_availablefrom() {
         return $this->availablefrom;
     }
@@ -229,6 +245,13 @@ class course_format_flexpage_model_page {
     public function set_region_widths(array $widths) {
         $this->regionwidths = $widths;
         return $this;
+    }
+
+    public function get_url($extraparams = array()) {
+        return new moodle_url('/course/view.php', array_merge(
+            array('id' => $this->get_courseid(), 'pageid' => $this->get_id()),
+            $extraparams
+        ));
     }
 
     public static function get_display_options() {

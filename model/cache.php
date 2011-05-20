@@ -363,25 +363,49 @@ class course_format_flexpage_model_cache {
         return false;
     }
 
-    // @todo add visibility checks?
-    public function get_next_page(course_format_flexpage_model_page $page) {
+    /**
+     * Get the next page if it's available
+     *
+     * @param course_format_flexpage_model_page $page
+     * @param bool $ignoremenu Ignore menu display settings
+     * @return bool|course_format_flexpage_model_page
+     */
+    public function get_next_page(course_format_flexpage_model_page $page, $ignoremenu = false) {
         $found = false;
         foreach ($this->get_pages() as $nextpage) {
             if ($nextpage->get_id() == $page->get_id()) {
                 $found = true;
             } else if ($found) {
+                if (!$this->is_page_available($nextpage->get_id())) {
+                    continue;
+                }
+                if (!$ignoremenu and !$this->is_page_in_menu($nextpage->get_id())) {
+                    continue;
+                }
                 return $nextpage;
             }
         }
         return false;
     }
 
-    // @todo add visibility checks?
-    public function get_previous_page(course_format_flexpage_model_page $page) {
+    /**
+     * Get the previous page if it's available
+     *
+     * @param course_format_flexpage_model_page $page
+     * @param bool $ignoremenu Ignore menu display settings
+     * @return bool|course_format_flexpage_model_page
+     */
+    public function get_previous_page(course_format_flexpage_model_page $page, $ignoremenu = false) {
         $previouspage = false;
         foreach ($this->get_pages() as $apage) {
             if ($apage->get_id() == $page->get_id()) {
                 return $previouspage;
+            }
+            if (!$this->is_page_available($apage->get_id())) {
+                continue;
+            }
+            if (!$ignoremenu and !$this->is_page_in_menu($apage->get_id())) {
+                continue;
             }
             $previouspage = $apage;
         }
