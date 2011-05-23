@@ -232,17 +232,24 @@ class format_flexpage_renderer extends plugin_renderer_base {
     }
 
     public function render_addactivity(moodle_url $url, array $activities) {
+        $sm    = get_string_manager();
         $box   = new course_format_flexpage_lib_box();
         $cell1 = new course_format_flexpage_lib_box_cell();
         $cell2 = new course_format_flexpage_lib_box_cell();
         foreach ($activities as $groupname => $modules) {
             $items = array();
             foreach ($modules as $addurl => $module) {
+                if ($sm->string_exists('modulename_help', $module['module'])) {
+                    $title = trim(html_to_text(get_string('modulename_help', $module['module'])));
+                } else {
+                    $title = '';
+                }
+
                 $icon    = $this->output->pix_icon('icon', $module['label'], $module['module']);
                 $items[] = html_writer::link(
                     new moodle_url($addurl),
                     $icon.' '.$module['label'],
-                    array('class' => 'format_flexpage_addactivity_link')
+                    array('class' => 'format_flexpage_addactivity_link', 'title' => $title)
                 );
             }
             $title = html_writer::tag('div', "$groupname:", array('class' => 'format_flexpage_addactivity_heading'));
