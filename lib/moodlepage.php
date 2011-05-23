@@ -12,6 +12,47 @@ class course_format_flexpage_lib_moodlepage {
     const LAYOUT = 'format_flexpage';
 
     /**
+     * Determine if a layout exists in the page's theme
+     *
+     * @static
+     * @param moodle_page|null $page
+     * @param string|null $layout
+     * @return bool
+     */
+    public static function layout_exists(moodle_page $page = null, $layout = null) {
+        global $PAGE;
+
+        if (is_null($page)) {
+            $page = $PAGE;
+        }
+        if (is_null($layout)) {
+            $layout = self::LAYOUT;
+        }
+        return array_key_exists($layout, $page->theme->layouts);
+    }
+
+    /**
+     * Get a layout from a page
+     *
+     * @static
+     * @throws coding_exception
+     * @param string $layout
+     * @param moodle_page|null $page
+     * @return array
+     */
+    public static function get_layout($layout, moodle_page $page = null) {
+        global $PAGE;
+
+        if (is_null($page)) {
+            $page = $PAGE;
+        }
+        if (!self::layout_exists($page, $layout)) {
+            throw new coding_exception("Layout does not exist in current theme: $layout");
+        }
+        return $page->theme->layouts[$layout];
+    }
+
+    /**
      * Get theme regions
      *
      * @static
@@ -20,8 +61,7 @@ class course_format_flexpage_lib_moodlepage {
     public static function get_regions() {
         global $PAGE;
 
-        // @todo better validation
-        $layout  = $PAGE->theme->layouts[self::LAYOUT];
+        $layout  = self::get_layout(self::LAYOUT);
         $regions = $PAGE->theme->get_all_block_regions();
 
         $return = array();
@@ -54,10 +94,8 @@ class course_format_flexpage_lib_moodlepage {
      * @return array
      */
     public static function get_default_region() {
-        global $PAGE;
-
-        // @todo better validation
-        return $PAGE->theme->layouts[self::LAYOUT]['defaultregion'];
+        $layout = self::get_layout(self::LAYOUT);
+        return $layout['defaultregion'];
     }
 
     /**
