@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="course/format/flexpage/db" VERSION="20110512" COMMENT="XMLDB file for Moodle format/flexpage"
+<XMLDB PATH="course/format/flexpage/db" VERSION="20110523" COMMENT="XMLDB file for Moodle format/flexpage"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+    xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
     <TABLE NAME="format_flexpage_page" COMMENT="Flexpage pages" NEXT="format_flexpage_region">
@@ -71,8 +71,9 @@
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="courseid"/>
         <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" PREVIOUS="id" NEXT="pages"/>
-        <FIELD NAME="pages" TYPE="text" LENGTH="big" NOTNULL="false" SEQUENCE="false" COMMENT="Page cache" PREVIOUS="courseid" NEXT="timemodified"/>
-        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="The last time the cache was rebuilt" PREVIOUS="pages"/>
+        <FIELD NAME="pages" TYPE="text" LENGTH="big" NOTNULL="false" SEQUENCE="false" COMMENT="Page cache" PREVIOUS="courseid" NEXT="buildcode"/>
+        <FIELD NAME="buildcode" TYPE="int" LENGTH="3" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="A code to know how the cache was built" PREVIOUS="pages" NEXT="timemodified"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="The last time the cache was rebuilt" PREVIOUS="buildcode"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="courseid"/>

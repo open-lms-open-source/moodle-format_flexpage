@@ -26,7 +26,10 @@ function format_flexpage_cache($courseid = null) {
     }
     $cache =& $caches[$courseid];
 
-    if (!$cache->has_been_built()) {
+    // Build cache when:
+    //    * The cache hasn't been built yet
+    //    * The cache's current build code doesn't match what the new build could would be
+    if (!$cache->has_been_built() or $cache->get_buildcode() != $cache->get_new_buildcode()) {
         $cache->build();
         $repo = new course_format_flexpage_repository_cache();
         $repo->save_cache($cache);

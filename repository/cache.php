@@ -24,9 +24,10 @@ class course_format_flexpage_repository_cache {
         }
         if ($record = $DB->get_record('format_flexpage_cache', array('courseid' => $courseid))) {
             $cache = new course_format_flexpage_model_cache();
-            $cache->set_id($record->id);
-            $cache->set_courseid($record->courseid);
-            $cache->set_timemodified($record->timemodified);
+            $cache->set_id($record->id)
+                  ->set_courseid($record->courseid)
+                  ->set_buildcode($record->buildcode)
+                  ->set_timemodified($record->timemodified);
 
             if (!empty($record->pages)) {
                 $pages = unserialize($record->pages);
@@ -64,6 +65,7 @@ class course_format_flexpage_repository_cache {
         $record = (object) array(
             'courseid' => $cache->get_courseid(),
             'pages' => $pages,
+            'buildcode' => $cache->get_buildcode(),
             'timemodified' => $cache->get_timemodified(),
         );
 

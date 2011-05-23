@@ -11,6 +11,26 @@ require_once($CFG->dirroot.'/course/format/flexpage/repository/condition.php');
 
 class course_format_flexpage_model_cache {
     /**
+     * Cache has not been built
+     */
+    const BUILD_CODE_NOT = 0;
+
+    /**
+     * Cache was built with just pages
+     */
+    const BUILD_CODE_BASIC = 1;
+
+    /**
+     * Cache was built with pages and availability conditions
+     */
+    const BUILD_CODE_AVAILABLE = 2;
+
+    /**
+     * Cache was built with pages, availability conditions and completion conditions
+     */
+    const BUILD_CODE_AVAILABLE_COMPLETE = 3;
+
+    /**
      * @var int
      */
     protected $id;
@@ -26,16 +46,16 @@ class course_format_flexpage_model_cache {
     protected $pages;
 
     /**
+     * This code is used to determine how the cache was built
+     *
+     * @var int
+     */
+    protected $buildcode = 0;
+
+    /**
      * @var int
      */
     protected $timemodified;
-
-    /**
-     * Flag for if the cache has been built or not
-     *
-     * @var bool
-     */
-    protected $built = false;
 
     /**
      * @var course_format_flexpage_repository_page
@@ -65,6 +85,7 @@ class course_format_flexpage_model_cache {
 
     public function set_id($id) {
         $this->id = $id;
+        return $this;
     }
 
     public function get_courseid() {
@@ -73,6 +94,7 @@ class course_format_flexpage_model_cache {
 
     public function set_courseid($id) {
         $this->courseid = $id;
+        return $this;
     }
 
     public function get_timemodified() {
@@ -85,6 +107,33 @@ class course_format_flexpage_model_cache {
         }
         $this->timemodified = $time;
         return $this;
+    }
+
+    public function get_buildcode() {
+        return $this->buildcode;
+    }
+
+    public function set_buildcode($code) {
+        $this->buildcode = $code;
+        return $this;
+    }
+
+    public function get_new_buildcode() {
+        global $CFG, $DB, $COURSE;
+
+        if (!empty($CFG->enableavailability)) {
+            if ($COURSE->id == $this->get_courseid()) {
+                $course = $COURSE;
+            } else {
+                $course = $DB->get_record('course', array('id' => $this->get_courseid()), '*', MUST_EXIST);
+            }
+            $completion = new completion_info($course);
+            if ($completion->is_enabled()) {
+                return self::BUILD_CODE_AVAILABLE_COMPLETE;
+            }
+            return self::BUILD_CODE_AVAILABLE;
+        }
+        return self::BUILD_CODE_BASIC;
     }
 
     /**
@@ -106,9 +155,11 @@ class course_format_flexpage_model_cache {
         return $this->pages;
     }
 
-    public function set_pages(array $pages) {
+    public function set_pages(array $pages = null) {
+        if (is_null($pages)) {
+            unset($this->pages); // Might help with garbage collection?
+        }
         $this->pages = $pages;
-        $this->built = true;
         return $this;
     }
 
@@ -146,7 +197,7 @@ class course_format_flexpage_model_cache {
     }
 
     public function has_been_built() {
-        return $this->built;
+        return ($this->get_buildcode() != self::BUILD_CODE_NOT);
     }
 
     public function require_built() {
@@ -187,17 +238,18 @@ class course_format_flexpage_model_cache {
         // Sort all of the pages
         $pages = $this->sort_pages($pages);
 
-        // Store in house
-        $this->set_pages($pages);
-        $this->set_timemodified();
+        // Update instance with new info
+        $this->set_pages($pages)
+             ->set_timemodified()
+             ->set_buildcode($this->get_new_buildcode());
+
         unset($pages);
     }
 
     public function clear() {
-        unset($this->pages);
-        $this->pages = null;
-        $this->built = false;
-        $this->set_timemodified();
+        $this->set_pages(null)
+             ->set_buildcode(self::BUILD_CODE_NOT)
+             ->set_timemodified();
     }
 
     /**
