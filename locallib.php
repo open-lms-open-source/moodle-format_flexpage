@@ -140,13 +140,18 @@ EOT;
  * @return bool|course_format_flexpage_model_page
  */
 function format_flexpage_previous_page() {
-    $cache = format_flexpage_cache();
-    $page  = $cache->get_current_page();
+    static $return = null;
 
-    if ($page->has_navigation_previous()) {
-        return $cache->get_previous_page($page);
+    if (is_null($return)) {
+        $return = false;
+        $cache  = format_flexpage_cache();
+        $page   = $cache->get_current_page();
+
+        if ($page->has_navigation_previous()) {
+            $return = $cache->get_previous_page($page);
+        }
     }
-    return false;
+    return $return;
 }
 
 /**
@@ -155,13 +160,18 @@ function format_flexpage_previous_page() {
  * @return bool|course_format_flexpage_model_page
  */
 function format_flexpage_next_page() {
-    $cache = format_flexpage_cache();
-    $page  = $cache->get_current_page();
+    static $return = null;
 
-    if ($page->has_navigation_next()) {
-        return $cache->get_next_page($page);
+    if (is_null($return)) {
+        $return = false;
+        $cache  = format_flexpage_cache();
+        $page   = $cache->get_current_page();
+
+        if ($page->has_navigation_next()) {
+            $return = $cache->get_next_page($page);
+        }
     }
-    return false;
+    return $return;
 }
 
 /**
