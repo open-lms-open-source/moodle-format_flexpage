@@ -34,6 +34,42 @@ M.format_flexpage.init_actionbar = function(Y, menuitems) {
     });
 }
 
+/**
+ * General method to execute JS after DOM has loaded on the editing screen
+ *
+ * @param Y
+ */
+M.format_flexpage.init_edit = function(Y) {
+    // Add a warning when the delete widget is click for a module
+    Y.all('.editing .commands a.editing_delete').on('click', function(e) {
+        if (e.target.test('a')) {
+            var url = e.target.get('href');
+        } else if ((targetancestor = e.target.ancestor('a')) !== null) {
+            var url = targetancestor.get('href');
+        }
+        if (url != undefined) {
+            e.preventDefault();
+
+            var dialog = new YAHOO.widget.SimpleDialog("modDeleteDialog", {
+                constraintoviewport: true,
+                modal: true,
+                underlay: "none",
+                close: true,
+                text: M.str.format_flexpage.deletemodwarn,
+                icon: YAHOO.widget.SimpleDialog.ICON_WARN,
+                buttons: [
+                    { text: M.str.moodle.cancel, handler: function () { this.hide(); }, isDefault:true },
+                    { text: M.str.format_flexpage.continuedotdotdot, handler: function () { this.hide(); window.location = url } }
+                ]
+            });
+            dialog.setHeader(M.str.format_flexpage.warning);
+            dialog.render(document.body);
+            dialog.show();
+            dialog.center();
+        }
+    });
+}
+
 M.format_flexpage.init_addpages = function(Y, url) {
     var dialog = M.format_flexpage.init_default_dialog(Y, "addpagespanel");
 

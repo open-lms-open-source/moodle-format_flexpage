@@ -46,6 +46,9 @@ class format_flexpage_renderer extends plugin_renderer_base {
                 array('addactivities', 'format_flexpage'),
                 array('formnamerequired', 'format_flexpage'),
                 array('deletepage', 'format_flexpage'),
+                array('deletemodwarn', 'format_flexpage'),
+                array('continuedotdotdot', 'format_flexpage'),
+                array('warning', 'format_flexpage'),
             )
         );
     }
@@ -244,7 +247,6 @@ class format_flexpage_renderer extends plugin_renderer_base {
                 } else {
                     $title = '';
                 }
-
                 $icon    = $this->output->pix_icon('icon', $module['label'], $module['module']);
                 $items[] = html_writer::link(
                     new moodle_url($addurl),

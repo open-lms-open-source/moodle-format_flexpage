@@ -227,6 +227,29 @@ class course_format_flexpage_lib_moodlepage {
     }
 
     /**
+     * Deletes all blocks linked to display the passed course module ID
+     *
+     * @static
+     * @param int $cmid
+     * @return void
+     */
+    public static function delete_mod_blocks($cmid) {
+        global $DB;
+
+        $instances = $DB->get_recordset_sql("
+            SELECT i.*
+              FROM {block_instances} i
+        INNER JOIN {block_flexpagemod} f ON i.id = f.instanceid
+             WHERE f.cmid = ?
+        ", array($cmid));
+
+        foreach ($instances as $instance) {
+            blocks_delete_instance($instance, true);
+        }
+        $instances->close();
+    }
+
+    /**
      * Generate a new moodle_page that looks like the
      * page made on course/view.php
      *

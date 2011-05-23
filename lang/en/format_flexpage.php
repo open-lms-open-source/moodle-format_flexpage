@@ -61,3 +61,6 @@ $string['copydotdotdot'] = 'Copy...';
 $string['nextpage'] = 'Next ({$a}) >';
 $string['previouspage'] = '< Previous ({$a})';
 $string['themelayoutmissing'] = 'Your current theme does not support Flexpage.  Please change the theme (or if enabled, the course theme or your preferred theme in your profile) to one that has a "{$a}" layout.';
+$string['deletemodwarn'] = 'If this activity is deleted, then it will be removed from all pages.';
+$string['continuedotdotdot'] = 'Continue...';
+$string['warning'] = 'Warning';

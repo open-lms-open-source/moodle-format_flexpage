@@ -26,6 +26,8 @@ if (!course_format_flexpage_lib_moodlepage::layout_exists($PAGE, $layout)) {
     echo $output->render(course_format_flexpage_lib_actionbar::factory());
     echo $mroutput->render(new mr_html_notify('format_flexpage'));
 
+    $PAGE->requires->js_init_call('M.format_flexpage.init_edit', null, true, $output->get_js_module());
+
 } else if (!empty($CFG->enableavailability)) {
     $cache = format_flexpage_cache();
     $page  = $cache->get_current_page();
