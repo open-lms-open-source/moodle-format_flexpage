@@ -67,6 +67,22 @@ function xmldb_format_flexpage_install() {
                                 $max = 100;
                             }
                             $conditions[] = new condition_grade($lock['id'], $lockgrades[0], $max);
+                        } else if ($lock['type'] == 'access') {
+                            if ($cm = get_coursemodule_from_id(false, $lock['cmid'])) {
+                                if (plugin_supports('mod', $cm->modname, FEATURE_COMPLETION_TRACKS_VIEWS, false)) {
+                                    if ($cm->completionview != COMPLETION_VIEW_NOT_REQUIRED) {
+                                        if ($cm->completion == COMPLETION_TRACKING_NONE) {
+                                            $cm->completion = COMPLETION_TRACKING_AUTOMATIC;
+                                        }
+                                        $DB->update_record('course_modules', (object) array(
+                                            'id' => $cm->id,
+                                            'completion' => $cm->completion,
+                                            'completionview' => COMPLETION_VIEW_REQUIRED,
+                                        ));
+                                    }
+                                    $conditions[] = new condition_completion($cm->id, COMPLETION_COMPLETE);
+                                }
+                            }
                         }
                     }
                 }
