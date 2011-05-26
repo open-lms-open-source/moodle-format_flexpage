@@ -137,13 +137,13 @@ EOT;
 /**
  * Get the previous page
  *
- * @return bool|course_format_flexpage_model_page
+ * @return null|course_format_flexpage_model_page
  */
 function format_flexpage_previous_page() {
-    static $return = null;
+    static $return = true;
 
-    if (is_null($return)) {
-        $return = false;
+    if ($return === true) {
+        $return = null;
         $cache  = format_flexpage_cache();
         $page   = $cache->get_current_page();
 
@@ -157,13 +157,13 @@ function format_flexpage_previous_page() {
 /**
  * Get the next page
  *
- * @return bool|course_format_flexpage_model_page
+ * @return null|course_format_flexpage_model_page
  */
 function format_flexpage_next_page() {
-    static $return = null;
+    static $return = true;
 
-    if (is_null($return)) {
-        $return = false;
+    if ($return === true) {
+        $return = null;
         $cache  = format_flexpage_cache();
         $page   = $cache->get_current_page();
 
@@ -177,25 +177,25 @@ function format_flexpage_next_page() {
 /**
  * Get the previous page URL
  *
- * @return bool|moodle_url
+ * @return null|moodle_url
  */
 function format_flexpage_previous_url() {
     if ($page = format_flexpage_previous_page()) {
         return $page->get_url();
     }
-    return false;
+    return null;
 }
 
 /**
  * Get the next page URL
  *
- * @return bool|moodle_url
+ * @return null|moodle_url
  */
 function format_flexpage_next_url() {
     if ($page = format_flexpage_next_page()) {
         return $page->get_url();
     }
-    return false;
+    return null;
 }
 
 /**
@@ -205,13 +205,8 @@ function format_flexpage_next_url() {
  * @return string
  */
 function format_flexpage_previous_link($label = null) {
-    if ($page = format_flexpage_previous_page()) {
-        if (is_null($label)) {
-            $label = get_string('previouspage', 'format_flexpage', format_string($page->get_display_name()));
-        }
-        return html_writer::link($page->get_url(), $label, array('id' => 'format_flexpage_previous_page'));
-    }
-    return '';
+    global $PAGE;
+    return $PAGE->get_renderer('format_flexpage')->navigation_link('previous', format_flexpage_previous_page(), $label);
 }
 
 /**
@@ -221,13 +216,8 @@ function format_flexpage_previous_link($label = null) {
  * @return string
  */
 function format_flexpage_next_link($label = null) {
-    if ($page = format_flexpage_next_page()) {
-        if (is_null($label)) {
-            $label = get_string('nextpage', 'format_flexpage', format_string($page->get_display_name()));
-        }
-        return html_writer::link($page->get_url(), $label, array('id' => 'format_flexpage_next_page'));
-    }
-    return '';
+    global $PAGE;
+    return $PAGE->get_renderer('format_flexpage')->navigation_link('next', format_flexpage_next_page(), $label);
 }
 
 /**
@@ -238,13 +228,7 @@ function format_flexpage_next_link($label = null) {
  */
 function format_flexpage_previous_button($label = null) {
     global $PAGE;
-
-    $link = format_flexpage_previous_link($label);
-    if (!empty($link)) {
-        $PAGE->requires->yui2_lib('button');
-        $PAGE->requires->js_init_call('(function(Y) { new YAHOO.widget.Button("format_flexpage_previous_page"); })');
-    }
-    return $link;
+    return $PAGE->get_renderer('format_flexpage')->navigation_button('previous', format_flexpage_previous_page(), $label);
 }
 
 /**
@@ -255,11 +239,5 @@ function format_flexpage_previous_button($label = null) {
  */
 function format_flexpage_next_button($label = null) {
     global $PAGE;
-
-    $link = format_flexpage_next_link($label);
-    if (!empty($link)) {
-        $PAGE->requires->yui2_lib('button');
-        $PAGE->requires->js_init_call('(function(Y) { new YAHOO.widget.Button("format_flexpage_next_page"); })');
-    }
-    return $link;
+    return $PAGE->get_renderer('format_flexpage')->navigation_button('next', format_flexpage_next_page(), $label);
 }

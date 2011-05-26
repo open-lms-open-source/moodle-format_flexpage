@@ -1,9 +1,14 @@
 <?php
 /**
  * Abstract representation of a box
+ *
+ * @author Mark Nielsen
+ * @package format_flexpage
  */
 abstract class course_format_flexpage_lib_box_abstract implements renderable {
     /**
+     * HTML tag attributes
+     *
      * @var array
      */
     protected $attributes;

@@ -2,7 +2,18 @@
 
 require_once($CFG->libdir.'/conditionlib.php');
 
-class course_format_flexpage_model_page {
+/**
+ * @see course_format_flexpage_model_abstract
+ */
+require_once($CFG->dirroot.'/course/format/flexpage/model/abstract.php');
+
+/**
+ * Flexpage Model Page
+ *
+ * @author Mark Nielsen
+ * @package format_flexpage
+ */
+class course_format_flexpage_model_page extends course_format_flexpage_model_abstract {
     /**
      * Page is hidden
      */
@@ -38,23 +49,100 @@ class course_format_flexpage_model_page {
      */
     const NAV_BOTH = 3;
 
+    /**
+     * Move action: before
+     */
     const MOVE_BEFORE = 'before';
+
+    /**
+     * Move action: after
+     */
     const MOVE_AFTER = 'after';
+
+    /**
+     * Move action: child
+     */
     const MOVE_CHILD = 'child';
 
-    protected $id;
+    /**
+     * @var int
+     */
     protected $courseid;
+
+    /**
+     * @var string
+     */
     protected $name;
+
+    /**
+     * The page's alternative name, generally used for display
+     * in menus.
+     *
+     * @var null|string
+     */
     protected $altname = null;
+
+    /**
+     * Set to one of the DISPLAY_XXX constants
+     *
+     * @var int
+     */
     protected $display = 0;
+
+    /**
+     * The page's parent page ID
+     *
+     * @var int
+     */
     protected $parentid = 0;
+
+    /**
+     * The page's sort weight
+     *
+     * @var int
+     */
     protected $weight = 0;
-    protected $template = 0;
+
+    /**
+     * Set to one of the NAV_XXX constants
+     *
+     * @var int
+     */
     protected $navigation = 0;
+
+    /**
+     * Conditional release: release code
+     *
+     * @var null|string
+     */
     protected $releasecode = null;
+
+    /**
+     * Conditional release: available after this time
+     *
+     * @var int
+     */
     protected $availablefrom = 0;
+
+    /**
+     * Conditional release: available until this time
+     *
+     * @var int
+     */
     protected $availableuntil = 0;
-    protected $showavailability = 1; // CONDITION_STUDENTVIEW_SHOW
+
+    /**
+     * Determine if we show availability information or not
+     *
+     * @var int
+     */
+    protected $showavailability;
+
+    /**
+     * Page region widths
+     *
+     * @var array
+     */
     protected $regionwidths = array();
 
     /**
@@ -63,13 +151,15 @@ class course_format_flexpage_model_page {
     protected $conditions = null;
 
     public function __construct($options = array()) {
+        $this->showavailability = CONDITION_STUDENTVIEW_SHOW;
         $this->set_options($options);
     }
 
-    public function get_id() {
-        return $this->id;
-    }
-
+    /**
+     * @throws coding_exception
+     * @param int|null $id
+     * @return course_format_flexpage_model_page
+     */
     public function set_id($id) {
         if (!empty($this->id) and !is_null($id)) {
             throw new coding_exception('Cannot re-assign page ID');
@@ -78,6 +168,9 @@ class course_format_flexpage_model_page {
         return $this;
     }
 
+    /**
+     * @return int
+     */
     public function get_courseid() {
         return $this->courseid;
     }
@@ -91,6 +184,9 @@ class course_format_flexpage_model_page {
         return $this;
     }
 
+    /**
+     * @return string
+     */
     public function get_name() {
         return $this->name;
     }
@@ -104,10 +200,17 @@ class course_format_flexpage_model_page {
         return $this;
     }
 
+    /**
+     * @return null|string
+     */
     public function get_altname() {
         return $this->altname;
     }
 
+    /**
+     * @param string|null $name
+     * @return course_format_flexpage_model_page
+     */
     public function set_altname($name) {
         if (empty($name)) {
             $this->altname = null;
@@ -130,10 +233,18 @@ class course_format_flexpage_model_page {
         return $name;
     }
 
+    /**
+     * @return int
+     */
     public function get_display() {
         return $this->display;
     }
 
+    /**
+     * @throws coding_exception
+     * @param int $display  One of the DISPLAY_XXX constants
+     * @return course_format_flexpage_model_page
+     */
     public function set_display($display) {
         if (!array_key_exists($display, self::get_display_options())) {
             throw new coding_exception("Try to set unknown display value: $display");
@@ -142,19 +253,34 @@ class course_format_flexpage_model_page {
         return $this;
     }
 
+    /**
+     * @return int
+     */
     public function get_parentid() {
         return $this->parentid;
     }
 
+    /**
+     * @param  $id
+     * @return course_format_flexpage_model_page
+     */
     public function set_parentid($id) {
         $this->parentid = $id;
         return $this;
     }
 
+    /**
+     * @return int
+     */
     public function get_weight() {
         return $this->weight;
     }
 
+    /**
+     * @throws coding_exception
+     * @param int $weight Must be zero or more
+     * @return course_format_flexpage_model_page
+     */
     public function set_weight($weight) {
         if ($weight < 0) {
             throw new coding_exception("Page weight must be zero or more: $weight");
@@ -163,14 +289,18 @@ class course_format_flexpage_model_page {
         return $this;
     }
 
-    public function get_template() {
-        return $this->template;
-    }
-
+    /**
+     * @return int
+     */
     public function get_navigation() {
         return $this->navigation;
     }
 
+    /**
+     * @throws coding_exception
+     * @param int $navigation Navigation constant
+     * @return course_format_flexpage_model_page
+     */
     public function set_navigation($navigation) {
         if (!array_key_exists($navigation, self::get_navigation_options())) {
             throw new coding_exception("Try to set unknown navigation value: $navigation");
@@ -179,6 +309,11 @@ class course_format_flexpage_model_page {
         return $this;
     }
 
+    /**
+     * Determines if the page is set to show next navigation
+     *
+     * @return bool
+     */
     public function has_navigation_next() {
         $nav = $this->get_navigation();
         if ($nav == self::NAV_NEXT or $nav == self::NAV_BOTH) {
@@ -187,6 +322,11 @@ class course_format_flexpage_model_page {
         return false;
     }
 
+    /**
+     * Determines if the page is set to show previous navigation
+     *
+     * @return bool
+     */
     public function has_navigation_previous() {
         $nav = $this->get_navigation();
         if ($nav == self::NAV_PREV or $nav == self::NAV_BOTH) {
@@ -195,28 +335,49 @@ class course_format_flexpage_model_page {
         return false;
     }
 
+    /**
+     * @return int
+     */
     public function get_availablefrom() {
         return $this->availablefrom;
     }
 
+    /**
+     * @param int $time
+     * @return course_format_flexpage_model_page
+     */
     public function set_availablefrom($time) {
         $this->availablefrom = (int) $time;
         return $this;
     }
 
+    /**
+     * @return int
+     */
     public function get_availableuntil() {
         return $this->availableuntil;
     }
 
+    /**
+     * @param int $time
+     * @return course_format_flexpage_model_page
+     */
     public function set_availableuntil($time) {
         $this->availableuntil = (int) $time;
         return $this;
     }
 
+    /**
+     * @return null|string
+     */
     public function get_releasecode() {
         return $this->releasecode;
     }
 
+    /**
+     * @param string|null $code
+     * @return course_format_flexpage_model_page
+     */
     public function set_releasecode($code) {
         if ($code === '') {
             $code = null;
@@ -225,6 +386,9 @@ class course_format_flexpage_model_page {
         return $this;
     }
 
+    /**
+     * @return int
+     */
     public function get_showavailability() {
         return $this->showavailability;
     }
@@ -238,15 +402,28 @@ class course_format_flexpage_model_page {
         return $this->conditions;
     }
 
+    /**
+     * @return array
+     */
     public function get_region_widths() {
         return $this->regionwidths;
     }
 
+    /**
+     * @param array $widths
+     * @return course_format_flexpage_model_page
+     */
     public function set_region_widths(array $widths) {
         $this->regionwidths = $widths;
         return $this;
     }
 
+    /**
+     * Get a URL to view this page
+     *
+     * @param array $extraparams
+     * @return moodle_url
+     */
     public function get_url($extraparams = array()) {
         return new moodle_url('/course/view.php', array_merge(
             array('id' => $this->get_courseid(), 'pageid' => $this->get_id()),
@@ -254,46 +431,12 @@ class course_format_flexpage_model_page {
         ));
     }
 
-    public static function get_display_options() {
-        return array(
-            self::DISPLAY_HIDDEN       => get_string('displayhidden', 'format_flexpage'),
-            self::DISPLAY_VISIBLE      => get_string('displayvisible', 'format_flexpage'),
-            self::DISPLAY_VISIBLE_MENU => get_string('displayvisiblemenu', 'format_flexpage'),
-        );
-    }
-
-    public static function get_navigation_options() {
-        return array(
-            self::NAV_NONE => get_string('navnone', 'format_flexpage'),
-            self::NAV_PREV => get_string('navprev', 'format_flexpage'),
-            self::NAV_NEXT => get_string('navnext', 'format_flexpage'),
-            self::NAV_BOTH => get_string('navboth', 'format_flexpage'),
-        );
-    }
-
-    public static function get_move_options() {
-        return array(
-            self::MOVE_CHILD  => get_string('movechild', 'format_flexpage'),
-            self::MOVE_BEFORE => get_string('movebefore', 'format_flexpage'),
-            self::MOVE_AFTER  => get_string('moveafter', 'format_flexpage'),
-        );
-    }
-
-    public function set_options($options) {
-        foreach ($options as $name => $value) {
-            $method = "set_$name";
-            if (method_exists($this, $method)) {
-                $this->$method($value);
-            } else {
-                if (!property_exists($this, $name)) {
-                    throw new coding_exception("Property does not exist: $name");
-                }
-                $this->$name = $value;
-            }
-        }
-        return $this;
-    }
-
+    /**
+     * Set page conditions
+     *
+     * @param array $conditions
+     * @return void
+     */
     public function set_conditions(array $conditions) {
         if (!is_null($this->releasecode)) {
             $conditions[] = new condition_releasecode($this->releasecode);
@@ -348,6 +491,12 @@ class course_format_flexpage_model_page {
         return true;
     }
 
+    /**
+     * Get available info
+     *
+     * @param course_modinfo|null $modinfo
+     * @return string
+     */
     public function get_available_info(course_modinfo $modinfo = null) {
         if (is_null($this->get_conditions())) {
             return '';
@@ -356,6 +505,12 @@ class course_format_flexpage_model_page {
         return $this->conditions->get_user_available_info();
     }
 
+    /**
+     * Process conditions
+     *
+     * @param course_modinfo|null $modinfo
+     * @return course_format_flexpage_model_page
+     */
     public function process_conditions(course_modinfo $modinfo = null) {
         global $DB, $COURSE;
 
@@ -371,5 +526,48 @@ class course_format_flexpage_model_page {
             $this->conditions->process_conditions($modinfo, true);
         }
         return $this;
+    }
+
+    /**
+     * Get page display options
+     *
+     * @static
+     * @return array
+     */
+    public static function get_display_options() {
+        return array(
+            self::DISPLAY_HIDDEN       => get_string('displayhidden', 'format_flexpage'),
+            self::DISPLAY_VISIBLE      => get_string('displayvisible', 'format_flexpage'),
+            self::DISPLAY_VISIBLE_MENU => get_string('displayvisiblemenu', 'format_flexpage'),
+        );
+    }
+
+    /**
+     * Get page navigation options
+     *
+     * @static
+     * @return array
+     */
+    public static function get_navigation_options() {
+        return array(
+            self::NAV_NONE => get_string('navnone', 'format_flexpage'),
+            self::NAV_PREV => get_string('navprev', 'format_flexpage'),
+            self::NAV_NEXT => get_string('navnext', 'format_flexpage'),
+            self::NAV_BOTH => get_string('navboth', 'format_flexpage'),
+        );
+    }
+
+    /**
+     * Get page move options
+     *
+     * @static
+     * @return array
+     */
+    public static function get_move_options() {
+        return array(
+            self::MOVE_CHILD  => get_string('movechild', 'format_flexpage'),
+            self::MOVE_BEFORE => get_string('movebefore', 'format_flexpage'),
+            self::MOVE_AFTER  => get_string('moveafter', 'format_flexpage'),
+        );
     }
 }

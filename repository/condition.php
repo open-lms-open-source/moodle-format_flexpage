@@ -10,6 +10,9 @@ require_once($CFG->dirroot.'/course/format/flexpage/model/page.php');
 
 /**
  * Repository mapper for page conditions
+ *
+ * @author Mark Nielsen
+ * @package format_flexpage
  */
 class course_format_flexpage_repository_condition {
     /**

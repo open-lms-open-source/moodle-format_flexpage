@@ -18,13 +18,14 @@ class course_format_flexpage_repository_page {
      *
      * @param int $id
      * @return course_format_flexpage_model_page
+     * @throws Exception
      */
     public function get_page($id) {
         global $DB;
 
-        $record = $DB->get_record('format_flexpage_page', array('id' => $id), '*', MUST_EXIST);
-
-        return new course_format_flexpage_model_page($record);
+        return new course_format_flexpage_model_page(
+            $DB->get_record('format_flexpage_page', array('id' => $id), '*', MUST_EXIST)
+        );
     }
 
     /**
@@ -48,6 +49,41 @@ class course_format_flexpage_repository_page {
     }
 
     /**
+     * Save a page
+     *
+     * On insert, automatically populates the page object with the new ID
+     *
+     * @param course_format_flexpage_model_page $page
+     * @return course_format_flexpage_repository_page
+     */
+    public function save_page(course_format_flexpage_model_page $page) {
+        global $DB;
+
+        $record = (object) array(
+            'courseid'         => $page->get_courseid(),
+            'name'             => $page->get_name(),
+            'altname'          => $page->get_altname(),
+            'display'          => $page->get_display(),
+            'navigation'       => $page->get_navigation(),
+            'availablefrom'    => $page->get_availablefrom(),
+            'availableuntil'   => $page->get_availableuntil(),
+            'releasecode'      => $page->get_releasecode(),
+            'showavailability' => $page->get_showavailability(),
+            'parentid'         => $page->get_parentid(),
+            'weight'           => $page->get_weight(),
+        );
+
+        if ($page->attach_id($record)) {
+            $DB->update_record('format_flexpage_page', $record);
+        } else {
+            $page->set_id(
+                $DB->insert_record('format_flexpage_page', $record)
+            );
+        }
+        return $this;
+    }
+
+    /**
      * Create the course default page
      *
      * @param int $courseid
@@ -68,44 +104,6 @@ class course_format_flexpage_repository_page {
                 'courseid' => $courseid,
                 'name'     => get_string('defaultcoursepagename', 'format_flexpage', $a),
             )));
-        }
-        return $this;
-    }
-
-    /**
-     * Save a page
-     *
-     * On insert, automatically populates the page object with the new ID
-     *
-     * @param course_format_flexpage_model_page $page
-     * @return course_format_flexpage_repository_page
-     */
-    public function save_page(course_format_flexpage_model_page $page) {
-        global $DB;
-
-        $id = $page->get_id();
-
-        $record = (object) array(
-            'courseid'         => $page->get_courseid(),
-            'name'             => $page->get_name(),
-            'altname'          => $page->get_altname(),
-            'display'          => $page->get_display(),
-            'navigation'       => $page->get_navigation(),
-            'availablefrom'    => $page->get_availablefrom(),
-            'availableuntil'   => $page->get_availableuntil(),
-            'releasecode'      => $page->get_releasecode(),
-            'showavailability' => $page->get_showavailability(),
-            'parentid'         => $page->get_parentid(),
-            'weight'           => $page->get_weight(),
-        );
-
-        if (!empty($id)) {
-            $record->id = $id;
-            $DB->update_record('format_flexpage_page', $record);
-        } else {
-            $page->set_id(
-                $DB->insert_record('format_flexpage_page', $record)
-            );
         }
         return $this;
     }
@@ -189,7 +187,7 @@ class course_format_flexpage_repository_page {
 
         $refpage = $this->get_page($referencepageid);
 
-        if ($page->get_id() > 0) {
+        if ($page->has_id()) {
             $this->remove_page_position($page);
         }
 

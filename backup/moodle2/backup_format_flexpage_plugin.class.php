@@ -1,6 +1,9 @@
 <?php
 /**
  * Flexpage backup plugin
+ *
+ * @author Mark Nielsen
+ * @package format_flexpage
  */
 class backup_format_flexpage_plugin extends backup_format_plugin {
     /**

@@ -4,6 +4,12 @@
  */
 require_once($CFG->dirroot.'/course/format/flexpage/lib/menu/action.php');
 
+/**
+ * Menu
+ *
+ * @author Mark Nielsen
+ * @package format_flexpage
+ */
 class course_format_flexpage_lib_menu implements renderable {
     /**
      * @var string
@@ -15,6 +21,9 @@ class course_format_flexpage_lib_menu implements renderable {
      */
     protected $actions = array();
 
+    /**
+     * @param string $id
+     */
     public function __construct($id) {
         $this->id = $id;
     }

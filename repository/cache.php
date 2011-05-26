@@ -6,12 +6,15 @@ require_once($CFG->dirroot.'/course/format/flexpage/model/cache.php');
 
 /**
  * Repository mapper for course_format_flexpage_model_cache
+ *
+ * @author Mark Nielsen
+ * @package format_flexpage
  */
 class course_format_flexpage_repository_cache {
     /**
      * Gets the course cache
      *
-     * This can update the cache record if it needs to be rebuilt.
+     * Does not guarantee that the cache has been built though
      *
      * @param int $courseid The course ID
      * @return course_format_flexpage_model_cache
@@ -52,8 +55,6 @@ class course_format_flexpage_repository_cache {
     public function save_cache(course_format_flexpage_model_cache &$cache) {
         global $DB;
 
-        $pages = null;
-
         // Generally, when the cache hasn't been built and we are saving, then really
         // what we are doing is saving the cleared cache...
         if ($cache->has_been_built()) {
@@ -61,6 +62,8 @@ class course_format_flexpage_repository_cache {
             if (!empty($pages)) {
                 $pages = serialize($pages);
             }
+        } else {
+            $pages = null;
         }
         $record = (object) array(
             'courseid' => $cache->get_courseid(),
@@ -70,11 +73,10 @@ class course_format_flexpage_repository_cache {
         );
 
         // Ensure only one per course, try by course id if cache id is not set
-        if (!($cache->get_id() > 0) and $id = $DB->get_field('format_flexpage_cache', 'id', array('courseid' => $cache->get_courseid()))) {
+        if (!$cache->has_id() and $id = $DB->get_field('format_flexpage_cache', 'id', array('courseid' => $cache->get_courseid()))) {
             $cache->set_id($id);
         }
-        if ($cache->get_id() > 0) {
-            $record->id = $cache->get_id();
+        if ($cache->attach_id($record)) {
             $DB->update_record('format_flexpage_cache', $record);
         } else {
             $cache->set_id(

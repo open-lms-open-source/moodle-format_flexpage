@@ -1,5 +1,10 @@
 <?php
-
+/**
+ * Flexpage language definitions
+ *
+ * @author Mark Nielsen
+ * @package format_flexpage
+ */
 $string['pluginname'] = 'Flexpage';
 $string['defaultcoursepagename'] = '{$a->fullname} ({$a->shortname})';
 $string['pagenotfound'] = 'The page with id = {$a} does not exist in this course.';
@@ -58,8 +63,8 @@ $string['pagenotavailable_help'] = 'This page is not available to you.  Below mi
 $string['sectionname'] = 'Page';
 $string['page'] = 'Page';
 $string['copydotdotdot'] = 'Copy...';
-$string['nextpage'] = 'Next ({$a}) >';
-$string['previouspage'] = '< Previous ({$a})';
+$string['nextpage'] = 'Next >';
+$string['previouspage'] = '< Previous';
 $string['themelayoutmissing'] = 'Your current theme does not support Flexpage.  Please change the theme (or if enabled, the course theme or your preferred theme in your profile) to one that has a "{$a}" layout.';
 $string['deletemodwarn'] = 'If this activity is deleted, then it will be removed from all pages.';
 $string['continuedotdotdot'] = 'Continue...';

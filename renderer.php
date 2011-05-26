@@ -53,6 +53,14 @@ class format_flexpage_renderer extends plugin_renderer_base {
         );
     }
 
+    /**
+     * Pads a page's name with spaces and a hyphen based on hierarchy depth or passed amount
+     *
+     * @param course_format_flexpage_model_page $page
+     * @param null|int $amount Amount of padding
+     * @param bool $link To link the page name or not
+     * @return string
+     */
     public function pad_page_name(course_format_flexpage_model_page $page, $amount = null, $link = false) {
         $name = format_string($page->get_display_name(), true, $page->get_courseid());
 
@@ -103,7 +111,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
         $arguments = array($menus);
 
         $PAGE->requires->js_init_call('M.format_flexpage.init_actionbar', $arguments, false, $this->get_js_module());
-        $menudiv = html_writer::tag('div', $this->render_actionbar_navigation(), array('id' => 'format_flexpage_actionbar_menu'));
+        $menudiv = html_writer::tag('div', $this->actionbar_navigation(), array('id' => 'format_flexpage_actionbar_menu'));
         return html_writer::tag('div', $menudiv, array('id' => 'format_flexpage_actionbar'));
     }
 
@@ -112,21 +120,21 @@ class format_flexpage_renderer extends plugin_renderer_base {
      *
      * @return string
      */
-    public function render_actionbar_navigation() {
+    public function actionbar_navigation() {
         $currentpage = format_flexpage_cache()->get_current_page();
         $options = array();
         foreach (format_flexpage_cache()->get_pages() as $page) {
             $options[$page->get_id()] = $this->pad_page_name($page);
         }
 
-        if ($prevpage = format_flexpage_cache()->get_previous_page($currentpage, true)) {
+        if ($prevpage = format_flexpage_cache()->get_previous_page($currentpage)) {
             $previcon = new pix_icon('t/moveleft', get_string('gotoa', 'format_flexpage', format_string($prevpage->get_display_name())));
             $prevpage = $this->output->action_icon($prevpage->get_url(), $previcon);
             $prevpage = html_writer::tag('span', $prevpage, array('id' => 'format_flexpage_prevpage'));
         } else {
             $prevpage = '';
         }
-        if ($nextpage = format_flexpage_cache()->get_next_page($currentpage, true)) {
+        if ($nextpage = format_flexpage_cache()->get_next_page($currentpage)) {
             $nexticon = new pix_icon('t/removeright', get_string('gotoa', 'format_flexpage', format_string($nextpage->get_display_name())));
             $nextpage = $this->output->action_icon($nextpage->get_url(), $nexticon);
             $nextpage = html_writer::tag('span', $nextpage, array('id' => 'format_flexpage_nextpage'));
@@ -181,10 +189,12 @@ class format_flexpage_renderer extends plugin_renderer_base {
     }
 
     /**
+     * Render page availability information
+     *
      * @param course_format_flexpage_model_page[] $pages
      * @return string
      */
-    public function render_page_available_info(array $pages) {
+    public function page_available_info(array $pages) {
         $box = new course_format_flexpage_lib_box(array('class' => 'format_flexpage_page_availability'));
         foreach ($pages as $page) {
             $info = $page->is_available();
@@ -201,7 +211,16 @@ class format_flexpage_renderer extends plugin_renderer_base {
         return '';
     }
 
-    public function render_addpages(moodle_url $url, array $pageoptions, array $moveoptions, array $copyoptions) {
+    /**
+     * Add pages UI
+     *
+     * @param moodle_url $url
+     * @param array $pageoptions An array of available pages
+     * @param array $moveoptions Page move options
+     * @param array $copyoptions An array of copy page options
+     * @return string
+     */
+    public function add_pages(moodle_url $url, array $pageoptions, array $moveoptions, array $copyoptions) {
         $elements   = array();
         $elements[] = html_writer::empty_tag('input', array('type' => 'text', 'name' => 'name[]'));
         $elements[] = html_writer::select($moveoptions, 'move[]', 'child', false);
@@ -223,7 +242,16 @@ class format_flexpage_renderer extends plugin_renderer_base {
                $copyelements;
     }
 
-    public function render_movepage(course_format_flexpage_model_page $page, moodle_url $url, array $pageoptions, array $moveoptions) {
+    /**
+     * Move page UI
+     *
+     * @param course_format_flexpage_model_page $page
+     * @param moodle_url $url
+     * @param array $pageoptions An array of available pages
+     * @param array $moveoptions Page move options
+     * @return string
+     */
+    public function move_page(course_format_flexpage_model_page $page, moodle_url $url, array $pageoptions, array $moveoptions) {
         $output  = html_writer::tag('span', get_string('movepagea', 'format_flexpage', format_string($page->get_display_name())), array('id' => 'format_flexpage_movingtext'));
         $output .= html_writer::select($moveoptions, 'move', 'child', false);
         $output .= html_writer::select($pageoptions, 'referencepageid', '', false);
@@ -234,7 +262,14 @@ class format_flexpage_renderer extends plugin_renderer_base {
                html_writer::end_tag('form');
     }
 
-    public function render_addactivity(moodle_url $url, array $activities) {
+    /**
+     * Add activity UI
+     *
+     * @param moodle_url $url
+     * @param array $activities Available activities to add, grouped by a group name
+     * @return string
+     */
+    public function add_activity(moodle_url $url, array $activities) {
         $sm    = get_string_manager();
         $box   = new course_format_flexpage_lib_box();
         $cell1 = new course_format_flexpage_lib_box_cell();
@@ -277,7 +312,14 @@ class format_flexpage_renderer extends plugin_renderer_base {
                html_writer::end_tag('form');
     }
 
-    public function render_addexistingactivity(moodle_url $url, array $activities) {
+    /**
+     * Add existing activity UI
+     *
+     * @param moodle_url $url
+     * @param array $activities  An array of existing activities, grouped by a group name
+     * @return string
+     */
+    public function add_existing_activity(moodle_url $url, array $activities) {
         $checkboxes = '';
         foreach ($activities as $groupname => $modules) {
             $items = array();
@@ -302,7 +344,14 @@ class format_flexpage_renderer extends plugin_renderer_base {
                html_writer::end_tag('form');
     }
 
-    public function render_addblock(moodle_url $url, array $blocks) {
+    /**
+     * Add block UI
+     *
+     * @param moodle_url $url
+     * @param array $blocks List of available blocks to add
+     * @return string
+     */
+    public function add_block(moodle_url $url, array $blocks) {
         $form = html_writer::start_tag('form', array('method' => 'post', 'action' => $url->out_omit_querystring())).
                 html_writer::input_hidden_params($url).
                 html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'region', 'value' => '')).
@@ -333,12 +382,14 @@ class format_flexpage_renderer extends plugin_renderer_base {
     }
 
     /**
+     * Manage pages UI
+     *
      * @param moodle_url $url
      * @param course_format_flexpage_model_page[] $pages
-     * @param course_format_flexpage_lib_menu_action[] $actions
+     * @param course_format_flexpage_lib_menu_action[] $actions Actions to take on pages
      * @return void
      */
-    public function render_managepages(moodle_url $displayurl, array $pages, array $actions) {
+    public function manage_pages(moodle_url $displayurl, array $pages, array $actions) {
         global $CFG, $PAGE;
 
         require($CFG->dirroot.'/local/mr/bootstrap.php');
@@ -403,7 +454,14 @@ class format_flexpage_renderer extends plugin_renderer_base {
                $this->render($box);
     }
 
-    public function render_deletepage(moodle_url $url, course_format_flexpage_model_page $page) {
+    /**
+     * Delete page UI
+     *
+     * @param moodle_url $url
+     * @param course_format_flexpage_model_page $page
+     * @return string
+     */
+    public function delete_page(moodle_url $url, course_format_flexpage_model_page $page) {
         $areyousure = get_string('areyousuredeletepage', 'format_flexpage', format_string($page->get_name()));
 
         return html_writer::start_tag('form', array('method' => 'post', 'action' => $url->out_omit_querystring())).
@@ -412,7 +470,15 @@ class format_flexpage_renderer extends plugin_renderer_base {
                html_writer::end_tag('form');
     }
 
-    public function render_editpage(moodle_url $url, course_format_flexpage_model_page $page, array $regions) {
+    /**
+     * Edit page UI
+     *
+     * @param moodle_url $url
+     * @param course_format_flexpage_model_page $page
+     * @param array $regions All possible regions
+     * @return string
+     */
+    public function edit_page(moodle_url $url, course_format_flexpage_model_page $page, array $regions) {
         global $CFG, $COURSE;
 
         $navigationopts = course_format_flexpage_model_page::get_navigation_options();
@@ -452,25 +518,25 @@ class format_flexpage_renderer extends plugin_renderer_base {
 
         if (!empty($CFG->enableavailability)) {
             $box->add_new_row()->add_new_cell(get_string('availablefrom', 'condition'), $labelattr)
-                               ->add_new_cell($this->render_calendar('availablefrom', $page->get_availablefrom()));
+                               ->add_new_cell($this->calendar('availablefrom', $page->get_availablefrom()));
 
             $box->add_new_row()->add_new_cell(get_string('availableuntil', 'condition'), $labelattr)
-                               ->add_new_cell($this->render_calendar('availableuntil', $page->get_availableuntil()));
+                               ->add_new_cell($this->calendar('availableuntil', $page->get_availableuntil()));
 
             $box->add_new_row()->add_new_cell(html_writer::label(get_string('releasecode', 'local_mrooms'), 'id_releasecode'), $labelattr)
                                ->add_new_cell(html_writer::empty_tag('input', array('id' => 'id_releasecode', 'type' => 'text', 'name' => 'releasecode', 'maxlength' => 50, 'size' => 50, 'value' => $page->get_releasecode())));
 
             $box->add_new_row()->add_new_cell(get_string('gradecondition', 'condition'), $labelattr)
-                               ->add_new_cell($this->render_conditions($page, 'condition_grade'));
+                               ->add_new_cell($this->page_conditions($page, 'condition_grade'));
 
-            $templates = $this->render_condition_grade();
+            $templates = $this->condition_grade();
 
             $completion = new completion_info($COURSE);
             if ($completion->is_enabled()) {
                 $box->add_new_row()->add_new_cell(get_string('completioncondition', 'condition'), $labelattr)
-                                   ->add_new_cell($this->render_conditions($page, 'condition_completion'));
+                                   ->add_new_cell($this->page_conditions($page, 'condition_completion'));
 
-                $templates .= $this->render_condition_completion();
+                $templates .= $this->condition_completion();
             }
             $showopts = array(
                 CONDITION_STUDENTVIEW_SHOW => get_string('showavailability_show', 'condition'),
@@ -487,10 +553,15 @@ class format_flexpage_renderer extends plugin_renderer_base {
                html_writer::tag('div', $templates, array('id' => 'condition_templates'));
     }
 
-    public function render_conditions(course_format_flexpage_model_page $page, $conditionclass) {
-        $renderfunc = 'render_'.$conditionclass;
+    /**
+     * Condition UI
+     *
+     * @param course_format_flexpage_model_page $page
+     * @param string $conditionclass
+     * @return string
+     */
+    public function page_conditions(course_format_flexpage_model_page $page, $conditionclass) {
         $conditions = $page->get_conditions();
-
         if (!is_null($conditions)) {
             $conditions = $conditions->get_conditions($conditionclass);
         }
@@ -506,7 +577,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
 
         foreach ($conditions as $condition) {
             $condcell->append_contents(
-                $this->$renderfunc($condition)
+                $this->$conditionclass($condition)
             );
         }
         $condbox->add_new_row()->add_cell($condcell)
@@ -515,7 +586,13 @@ class format_flexpage_renderer extends plugin_renderer_base {
         return $this->render($condbox);
     }
 
-    public function render_condition_grade(condition_grade $condition = null) {
+    /**
+     * Grade condition specific UI
+     *
+     * @param condition_grade|null $condition
+     * @return string
+     */
+    public function condition_grade(condition_grade $condition = null) {
         global $CFG, $COURSE;
 
         require_once($CFG->libdir.'/gradelib.php');
@@ -552,7 +629,13 @@ class format_flexpage_renderer extends plugin_renderer_base {
         return html_writer::tag('div', $elements, array('class' => 'format_flexpage_condition_grade'));
     }
 
-    public function render_condition_completion(condition_completion $condition = null) {
+    /**
+     * Completion condition specific UI
+     *
+     * @param condition_completion|null $condition
+     * @return string
+     */
+    public function condition_completion(condition_completion $condition = null) {
         global $COURSE;
 
         static $completionoptions = null;
@@ -587,9 +670,17 @@ class format_flexpage_renderer extends plugin_renderer_base {
         return html_writer::tag('div', $elements, array('class' => 'format_flexpage_condition_completion'));
     }
 
-    public function render_calendar($name, $defaulttime = 0, $optional = true) {
-        if ($defaulttime > 0) {
-            $value = date('m/d/Y', $defaulttime);
+    /**
+     * Calendar element
+     *
+     * @param string $name Should be unique
+     * @param int $timedefault
+     * @param bool $optional
+     * @return string
+     */
+    public function calendar($name, $timedefault = 0, $optional = true) {
+        if ($timedefault > 0) {
+            $value = date('m/d/Y', $timedefault);
         } else {
             $value = date('m/d/Y');
         }
@@ -597,7 +688,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
         $output = '';
         $attributes  = array('id' => "calendar$name");
         if ($optional) {
-            $output = html_writer::checkbox("enable$name", 1, ($defaulttime > 0), '&nbsp;'.get_string('enable'));
+            $output = html_writer::checkbox("enable$name", 1, ($timedefault > 0), '&nbsp;'.get_string('enable'));
             $output = html_writer::tag('div', $output);
             $attributes['class'] = 'hiddenifjs';
         }
@@ -605,5 +696,39 @@ class format_flexpage_renderer extends plugin_renderer_base {
                    html_writer::tag('div', '', $attributes);
 
         return $output;
+    }
+
+    /**
+     * @param string $type Basically next or previous
+     * @param null|course_format_flexpage_model_page $page
+     * @param null|string $label
+     * @return string
+     */
+    public function navigation_link($type, course_format_flexpage_model_page $page = null, $label = null) {
+        if ($page) {
+            if (is_null($label)) {
+                $label = get_string("{$type}page", 'format_flexpage', format_string($page->get_display_name()));
+            }
+            return html_writer::link($page->get_url(), $label, array('id' => "format_flexpage_{$type}_page"));
+        }
+        return '';
+    }
+
+    /**
+     * @param string $type Basically next or previous
+     * @param null|course_format_flexpage_model_page $page
+     * @param null|string $label
+     * @return string
+     */
+    public function navigation_button($type, course_format_flexpage_model_page $page = null, $label = null) {
+        global $PAGE;
+
+        $link = $this->navigation_link($type, $page, $label);
+        if (!empty($link)) {
+            // This will render the link as a button
+            $PAGE->requires->yui2_lib('button');
+            $PAGE->requires->js_init_call("(function(Y) { new YAHOO.widget.Button(\"format_flexpage_{$type}_page\"); })");
+        }
+        return $link;
     }
 }

@@ -21,6 +21,9 @@ require_once($CFG->dirroot.'/course/format/flexpage/lib/moodlepage.php');
 
 /**
  * AJAX Controller
+ *
+ * @author Mark Nielsen
+ * @package format_flexpage
  */
 class course_format_flexpage_controller_ajax extends mr_controller {
     /**
@@ -85,8 +88,8 @@ class course_format_flexpage_controller_ajax extends mr_controller {
             $moves = array_reverse($moves, true);
             $referencepageids = array_reverse($referencepageids, true);
 
-            $pagerepo = new course_format_flexpage_repository_page();
-            $condrepo = new course_format_flexpage_repository_condition();
+            $pagerepo   = new course_format_flexpage_repository_page();
+            $condrepo   = new course_format_flexpage_repository_condition();
             $addedpages = array();
             foreach ($names as $key => $name) {
                 // Required values...
@@ -134,7 +137,7 @@ class course_format_flexpage_controller_ajax extends mr_controller {
 
             echo json_encode((object) array(
                 'header' => get_string('addpages', 'format_flexpage'),
-                'body' => $this->output->render_addpages($submiturl, $pageoptions, $moveoptions, $copyoptions),
+                'body' => $this->output->add_pages($submiturl, $pageoptions, $moveoptions, $copyoptions),
             ));
         }
     }
@@ -180,7 +183,7 @@ class course_format_flexpage_controller_ajax extends mr_controller {
 
             echo json_encode((object) array(
                 'header' => get_string('movepage', 'format_flexpage'),
-                'body' => $this->output->render_movepage($movepage, $submiturl, $pageoptions, $moveoptions),
+                'body' => $this->output->move_page($movepage, $submiturl, $pageoptions, $moveoptions),
             ));
         }
     }
@@ -205,7 +208,7 @@ class course_format_flexpage_controller_ajax extends mr_controller {
         echo json_encode((object) array(
             'args' => course_format_flexpage_lib_moodlepage::get_region_json_options(),
             'header' => get_string('addactivity', 'format_flexpage'),
-            'body' => $this->output->render_addactivity(
+            'body' => $this->output->add_activity(
                 $this->new_url(array('sesskey' => sesskey(), 'action' => 'addactivity', 'add' => 1)),
                 course_format_flexpage_lib_mod::get_add_options()
             ),
@@ -237,7 +240,7 @@ class course_format_flexpage_controller_ajax extends mr_controller {
             echo json_encode((object) array(
                 'args' => course_format_flexpage_lib_moodlepage::get_region_json_options(),
                 'header' => get_string('addexistingactivity', 'format_flexpage'),
-                'body' => $this->output->render_addexistingactivity(
+                'body' => $this->output->add_existing_activity(
                     $this->new_url(array('sesskey' => sesskey(), 'action' => 'addexistingactivity', 'pageid' => $page->get_id(), 'add' => 1)),
                     course_format_flexpage_lib_mod::get_existing_options()
                 ),
@@ -267,7 +270,7 @@ class course_format_flexpage_controller_ajax extends mr_controller {
             echo json_encode((object) array(
                 'args' => course_format_flexpage_lib_moodlepage::get_region_json_options(),
                 'header' => get_string('addblock', 'format_flexpage'),
-                'body' => $this->output->render_addblock(
+                'body' => $this->output->add_block(
                     $this->new_url(array('sesskey' => sesskey(), 'action' => 'addblock', 'pageid' => $page->get_id(), 'add' => 1)),
                     course_format_flexpage_lib_moodlepage::get_add_block_options($page)
                 ),
@@ -347,9 +350,11 @@ class course_format_flexpage_controller_ajax extends mr_controller {
                     }
                     $conditions[] = new condition_grade($gradeitemid, $min, $max);
                 }
+                $condrepo->save_page_grade_conditions($page, $conditions);
 
                 $completion = new completion_info($COURSE);
                 if ($completion->is_enabled()) {
+                    $conditions = array();
                     $cmids = optional_param('cmids', array(), PARAM_INT);
                     $requiredcompletions = optional_param('requiredcompletions', array(), PARAM_INT);
 
@@ -362,15 +367,15 @@ class course_format_flexpage_controller_ajax extends mr_controller {
                         }
                         $conditions[] = new condition_completion($cmid, $requiredcompletions[$key]);
                     }
+                    $condrepo->save_page_completion_conditions($page, $conditions);
                 }
-                $condrepo->save_page_conditions($page, $conditions);
             }
             $pagerepo->save_page($page);
             format_flexpage_clear_cache();
         } else {
             echo json_encode((object) array(
                 'header' => get_string('editpage', 'format_flexpage'),
-                'body'   => $this->output->render_editpage(
+                'body'   => $this->output->edit_page(
                     $this->new_url(array('sesskey' => sesskey(), 'action' => 'editpage', 'pageid' => $page->get_id(), 'edit' => 1)),
                     $page,
                     course_format_flexpage_lib_moodlepage::get_regions()
@@ -413,7 +418,7 @@ class course_format_flexpage_controller_ajax extends mr_controller {
         echo json_encode((object) array(
             'args'   => (object) $args,
             'header' => get_string('managepages', 'format_flexpage'),
-            'body'   => $this->output->render_managepages(
+            'body'   => $this->output->manage_pages(
                 $this->new_url(array('sesskey' => sesskey(), 'action' => 'setdisplay')),
                 format_flexpage_cache()->get_pages(),
                 $actions
@@ -437,7 +442,7 @@ class course_format_flexpage_controller_ajax extends mr_controller {
         } else {
             echo json_encode((object) array(
                 'header' => get_string('deletepage', 'format_flexpage'),
-                'body'   => $this->output->render_deletepage(
+                'body'   => $this->output->delete_page(
                     $this->new_url(array('sesskey' => sesskey(), 'action' => 'deletepage', 'delete' => 1, 'pageid' => $page->get_id())),
                     $page
                 ),

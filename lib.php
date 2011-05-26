@@ -25,7 +25,7 @@ function callback_flexpage_load_content(global_navigation &$navigation, stdClass
 
     $cache         = format_flexpage_cache($course->id);
     $current       = $cache->get_current_page();
-    $activepageids = $cache->get_page_parents($current->get_id());
+    $activepageids = $cache->get_page_parents($current);
     $activepageids = array_keys($activepageids);
     $parentnodes   = array(0 => $coursenode);
 
@@ -35,7 +35,7 @@ function callback_flexpage_load_content(global_navigation &$navigation, stdClass
          * @var navigation_node $parentnode
          */
 
-        if (!$cache->is_page_in_menu($page->get_id())) {
+        if (!$cache->is_page_in_menu($page)) {
             continue;
         }
         if (!array_key_exists($page->get_parentid(), $parentnodes)) {
@@ -48,7 +48,7 @@ function callback_flexpage_load_content(global_navigation &$navigation, stdClass
         }
         $url  = new moodle_url('/course/view.php', array('id' => $course->id, 'pageid' => $page->get_id()));
         $node = $parentnode->add(format_string($page->get_display_name()), $url, navigation_node::TYPE_CUSTOM, null, $page->get_id());
-        $node->hidden = (!$cache->is_page_available($page->get_id()));
+        $node->hidden = (!$cache->is_page_available($page));
         $parentnodes[$page->get_id()] = $node;
 
         if (in_array($page->get_id(), $activepageids)) {
@@ -72,7 +72,7 @@ function callback_flexpage_load_content(global_navigation &$navigation, stdClass
  * @return string
  */
 function callback_flexpage_definition() {
-    return get_string('page', 'format_flexpage');
+    return get_string('section');
 }
 
 /**
@@ -82,7 +82,7 @@ function callback_flexpage_definition() {
  * @return string
  */
 function callback_flexpage_request_key() {
-    return 'pageid';
+    return 'section';
 }
 
 /**
@@ -135,7 +135,7 @@ function callback_flexpage_course_module_available(cm_info $cm) {
     if (array_key_exists($cm->id, $cmidtopages)) {
         $cache = format_flexpage_cache($cm->course);
         foreach ($cmidtopages[$cm->id] as $pageid) {
-            $parents = $cache->get_page_parents($pageid, true);
+            $parents = $cache->get_page_parents($cache->get_page($pageid), true);
             foreach ($parents as $parent) {
                 if ($parent->is_available($cm->get_modinfo()) !== true) {
                     // If any parent not available, then go onto next page
@@ -167,7 +167,7 @@ function callback_flexpage_set_pagelayout($page) {
     $cache = format_flexpage_cache();
     $currentpage = $cache->get_current_page();
 
-    if (empty($CFG->enableavailability) or $cache->is_page_available($currentpage->get_id())) {
+    if (empty($CFG->enableavailability) or $cache->is_page_available($currentpage)) {
         $page->set_pagelayout(course_format_flexpage_lib_moodlepage::LAYOUT);
         $page->set_subpage($currentpage->get_id());
     }

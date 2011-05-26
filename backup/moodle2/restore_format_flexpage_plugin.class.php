@@ -1,5 +1,10 @@
 <?php
-
+/**
+ * Flexpage restore plugin
+ *
+ * @author Mark Nielsen
+ * @package format_flexpage
+ */
 class restore_format_flexpage_plugin extends restore_format_plugin {
     /**
      * Returns the paths to be handled by the plugin at course level

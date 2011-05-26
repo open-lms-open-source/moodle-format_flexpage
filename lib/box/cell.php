@@ -5,7 +5,10 @@
 require_once($CFG->dirroot.'/course/format/flexpage/lib/box/abstract.php');
 
 /**
- * A box cell
+ * A box cell that can contain content
+ *
+ * @author Mark Nielsen
+ * @package format_flexpage
  */
 class course_format_flexpage_lib_box_cell extends course_format_flexpage_lib_box_abstract {
     /**

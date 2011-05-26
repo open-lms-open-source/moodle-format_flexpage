@@ -9,6 +9,12 @@ require_once($CFG->dirroot.'/course/format/flexpage/lib/menu.php');
  */
 require_once($CFG->dirroot.'/course/format/flexpage/lib/menu/action.php');
 
+/**
+ * Represents the action menu bar
+ *
+ * @author Mark Nielsen
+ * @package format_flexpage
+ */
 class course_format_flexpage_lib_actionbar implements renderable {
     /**
      * @var course_format_flexpage_lib_menu[]
@@ -44,6 +50,8 @@ class course_format_flexpage_lib_actionbar implements renderable {
     }
 
     /**
+     * Generates an instance of the action bar with all the menu items
+     *
      * @static
      * @return course_format_flexpage_lib_actionbar
      */

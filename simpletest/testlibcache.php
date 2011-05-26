@@ -23,6 +23,13 @@ class course_format_flexpage_lib_cache_test extends UnitTestCase {
     protected $fixture;
 
     public function setUp() {
+        global $CFG;
+
+        /**
+         * So cache doesn't do anything extra...
+         */
+        $CFG->enableavailability = 0;
+
         // Mimic DB call
         $this->fixture = array(
             1 => new course_format_flexpage_model_page(array(
@@ -85,11 +92,10 @@ class course_format_flexpage_lib_cache_test extends UnitTestCase {
         $condrepo->setReturnValue('get_course_conditions', array());
 
         $cache = new course_format_flexpage_model_cache();
+        $cache->set_courseid(0);
         $cache->set_repository_page($pagerepo);
         $cache->set_repository_condition($condrepo);
-        $cache->rebuild();
-
-        print_object($cache);
+        $cache->build();
 
         $this->assertIdentical(array(1,2,3,4,5,6,7,8,9,10), array_keys($cache->get_pages()));
     }
@@ -101,9 +107,10 @@ class course_format_flexpage_lib_cache_test extends UnitTestCase {
         $condrepo->setReturnValue('get_course_conditions', array());
 
         $cache = new course_format_flexpage_model_cache();
+        $cache->set_courseid(0);
         $cache->set_repository_page($pagerepo);
         $cache->set_repository_condition($condrepo);
-        $cache->rebuild();
+        $cache->build();
 
         $this->assertEqual(2, $cache->get_page_depth($cache->get_page(4)));
     }
@@ -115,9 +122,10 @@ class course_format_flexpage_lib_cache_test extends UnitTestCase {
         $condrepo->setReturnValue('get_course_conditions', array());
 
         $cache = new course_format_flexpage_model_cache();
+        $cache->set_courseid(0);
         $cache->set_repository_page($pagerepo);
         $cache->set_repository_condition($condrepo);
-        $cache->rebuild();
+        $cache->build();
 
         $this->assertTrue($cache->is_child_page($cache->get_page(1), $cache->get_page(4)));
         $this->assertFalse($cache->is_child_page($cache->get_page(4), $cache->get_page(1)));

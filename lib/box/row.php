@@ -11,6 +11,9 @@ require_once($CFG->dirroot.'/course/format/flexpage/lib/box/cell.php');
 
 /**
  * A box row that can contain cells
+ *
+ * @author Mark Nielsen
+ * @package format_flexpage
  */
 class course_format_flexpage_lib_box_row extends course_format_flexpage_lib_box_abstract {
     /**

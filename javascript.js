@@ -11,8 +11,6 @@ M.format_flexpage.managepages_reload = true;
 /**
  * Generate the action bar menu
  *
- * @namespace M.format_flexpage
- * @function
  * @param {YUI} Y
  * @param {object} menuitems
  */
@@ -70,6 +68,12 @@ M.format_flexpage.init_edit = function(Y) {
     });
 }
 
+/**
+ * Init add pages modal
+ *
+ * @param Y
+ * @param url
+ */
 M.format_flexpage.init_addpages = function(Y, url) {
     var dialog = M.format_flexpage.init_default_dialog(Y, "addpagespanel");
 
@@ -90,6 +94,12 @@ M.format_flexpage.init_addpages = function(Y, url) {
     return dialog;
 }
 
+/**
+ * Init edit page modal
+ *
+ * @param Y
+ * @param url
+ */
 M.format_flexpage.init_editpage = function(Y, url) {
     var dialog = M.format_flexpage.init_default_dialog(Y, "editpagepanel");
 
@@ -136,6 +146,12 @@ M.format_flexpage.init_editpage = function(Y, url) {
     return dialog;
 }
 
+/**
+ * Init delete page modal
+ *
+ * @param Y
+ * @param url
+ */
 M.format_flexpage.init_deletepage = function(Y, url) {
     var dialog = M.format_flexpage.init_default_dialog(Y, "deletepagepanel");
 
@@ -149,6 +165,12 @@ M.format_flexpage.init_deletepage = function(Y, url) {
     return dialog;
 }
 
+/**
+ * Init Manage pages modal (this opens other modals)
+ *
+ * @param Y
+ * @param url
+ */
 M.format_flexpage.init_managepages = function(Y, url) {
     // Ensure our flag starts with true
     M.format_flexpage.managepages_reload = true;
@@ -236,6 +258,14 @@ M.format_flexpage.init_managepages = function(Y, url) {
     return panel;
 }
 
+/**
+ * Init add activity modal
+ *
+ * This one actually submits instead of using AJAX
+ *
+ * @param Y
+ * @param url
+ */
 M.format_flexpage.init_addactivity = function(Y, url) {
     var dialog = M.format_flexpage.init_default_dialog(Y, "addactivitypanel");
 
@@ -264,6 +294,12 @@ M.format_flexpage.init_addactivity = function(Y, url) {
     return dialog;
 }
 
+/**
+ * Init add existing activity modal
+ *
+ * @param Y
+ * @param url
+ */
 M.format_flexpage.init_addexistingactivity = function(Y, url) {
     var dialog = M.format_flexpage.init_default_dialog(Y, "addexistingactivitypanel");
 
@@ -284,6 +320,12 @@ M.format_flexpage.init_addexistingactivity = function(Y, url) {
     return dialog;
 }
 
+/**
+ * Init add block modal
+ *
+ * @param Y
+ * @param url
+ */
 M.format_flexpage.init_addblock = function(Y, url) {
     var dialog = M.format_flexpage.init_default_dialog(Y, "addblockpanel");
 
@@ -309,6 +351,12 @@ M.format_flexpage.init_addblock = function(Y, url) {
     return dialog;
 }
 
+/**
+ * Init move page modal
+ *
+ * @param Y
+ * @param url
+ */
 M.format_flexpage.init_movepage = function(Y, url) {
     var dialog = M.format_flexpage.init_default_dialog(Y, "movepagepanel");
 
@@ -322,6 +370,12 @@ M.format_flexpage.init_movepage = function(Y, url) {
     return dialog;
 }
 
+/**
+ * Init default dialog
+ *
+ * @param Y
+ * @param url
+ */
 M.format_flexpage.init_default_dialog = function(Y, id) {
     var dialog = new YAHOO.widget.Dialog(id, {
         // postmethod: 'form', // Very handy for debugging
@@ -342,6 +396,12 @@ M.format_flexpage.init_default_dialog = function(Y, id) {
     return dialog;
 }
 
+/**
+ * Init default panel
+ *
+ * @param Y
+ * @param url
+ */
 M.format_flexpage.init_default_panel = function(Y, id) {
     return new YAHOO.widget.Panel(id, {
         constraintoviewport: true,
@@ -351,6 +411,12 @@ M.format_flexpage.init_default_panel = function(Y, id) {
     });
 }
 
+/**
+ * Populates a panel (or dialog) with information found at endpoint
+ *
+ * @param Y
+ * @param url
+ */
 M.format_flexpage.populate_panel = function(Y, panel, url, onsuccess) {
     Y.io(url, {
         on: {
@@ -385,6 +451,12 @@ M.format_flexpage.populate_panel = function(Y, panel, url, onsuccess) {
     });
 }
 
+/**
+ * Init generic error dialog
+ *
+ * @param Y
+ * @param url
+ */
 M.format_flexpage.init_error_dialog = function(Y, errorMessage) {
     var dialog = new YAHOO.widget.SimpleDialog("errorDialog", {
         constraintoviewport: true,
@@ -405,6 +477,12 @@ M.format_flexpage.init_error_dialog = function(Y, errorMessage) {
     return dialog;
 }
 
+/**
+ * Init calendar
+ *
+ * @param Y
+ * @param url
+ */
 M.format_flexpage.init_calendar = function(Y, name) {
 
     var renderingId   = "calendar" + name;
@@ -440,6 +518,12 @@ M.format_flexpage.init_calendar = function(Y, name) {
     }
 }
 
+/**
+ * Init region buttons (turns a radio group into buttons
+ *
+ * @param Y
+ * @param url
+ */
 M.format_flexpage.init_region_buttons = function(Y, buttons) {
     var buttonGroup = new YAHOO.widget.ButtonGroup({
         id: "format_flexpage_region_radios_id",
@@ -451,6 +535,13 @@ M.format_flexpage.init_region_buttons = function(Y, buttons) {
     return buttonGroup;
 }
 
+/**
+ * Syncs currently selected region button to a hidden input element
+ *
+ * @param Y
+ * @param buttonGroup
+ * @param inputname
+ */
 M.format_flexpage.set_region_input = function(Y, buttonGroup, inputname) {
     var buttons = buttonGroup.getButtons();
     for (var i = 0; i < buttons.length; i++) {
@@ -462,6 +553,12 @@ M.format_flexpage.set_region_input = function(Y, buttonGroup, inputname) {
     }
 }
 
+/**
+ * Converts a select element into a YUI button menu
+ *
+ * @param Y
+ * @param select
+ */
 M.format_flexpage.init_button_menu = function(Y, select) {
     var index  = select.get('selectedIndex');
     var label  = select.get("options").item(index).get('innerHTML');

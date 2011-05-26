@@ -5,7 +5,6 @@
  * @author Mark Nielsen
  * @package format_flexpage
  */
-
 $capabilities = array(
 
     'format/flexpage:managepages' => array (

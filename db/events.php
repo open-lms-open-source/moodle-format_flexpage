@@ -5,7 +5,6 @@
  * @author Mark Nielsen
  * @package format_flexpage
  **/
-
 $handlers = array(
     'mod_created' => array(
         'handlerfile'     => '/course/format/flexpage/lib/eventhandler.php',
