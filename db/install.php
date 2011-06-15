@@ -58,7 +58,64 @@ function xmldb_format_flexpage_install() {
                 }
                 if (!empty($locks->locks)) {
                     foreach ($locks->locks as $lock) {
-                        if ($lock['type'] == 'grade') {
+                        if ($lock['type'] == 'post') {
+                            if ($cm = get_coursemodule_from_id(false, $lock['cmid'])) {
+                                switch ($cm->modname) {
+                                    case 'forum':
+                                        if ($cm->completion == COMPLETION_TRACKING_NONE) {
+                                            $DB->set_field('course_modules', 'completion', COMPLETION_TRACKING_AUTOMATIC, array('id' => $cm->id));
+                                        }
+                                        if ($DB->record_exists('forum', array('id' => $cm->instance, 'completionposts' => 0))) {
+                                            $DB->set_field('forum', 'completionposts', 1, array('id' => $cm->instance));
+                                        }
+                                        $conditions[] = new condition_completion($cm->id, COMPLETION_COMPLETE);
+                                        break;
+
+                                    case 'choice':
+                                        if ($cm->completion == COMPLETION_TRACKING_NONE) {
+                                            $DB->set_field('course_modules', 'completion', COMPLETION_TRACKING_AUTOMATIC, array('id' => $cm->id));
+                                        }
+                                        $DB->set_field('choice', 'completionsubmit', 1, array('id' => $cm->instance));
+                                        $conditions[] = new condition_completion($cm->id, COMPLETION_COMPLETE);
+                                        break;
+
+                                    case 'feedback':
+                                        if ($cm->completion == COMPLETION_TRACKING_NONE) {
+                                            $DB->set_field('course_modules', 'completion', COMPLETION_TRACKING_AUTOMATIC, array('id' => $cm->id));
+                                        }
+                                        $DB->set_field('feedback', 'completionsubmit', 1, array('id' => $cm->instance));
+                                        $conditions[] = new condition_completion($cm->id, COMPLETION_COMPLETE);
+                                        break;
+
+                                    case 'glossary':
+                                        if ($cm->completion == COMPLETION_TRACKING_NONE) {
+                                            $DB->set_field('course_modules', 'completion', COMPLETION_TRACKING_AUTOMATIC, array('id' => $cm->id));
+                                        }
+                                        if ($DB->record_exists('glossary', array('id' => $cm->instance, 'completionentries' => 0))) {
+                                            $DB->set_field('glossary', 'completionentries', 1, array('id' => $cm->instance));
+                                        }
+                                        $conditions[] = new condition_completion($cm->id, COMPLETION_COMPLETE);
+                                        break;
+
+                                    default:
+                                        if (plugin_supports('mod', $cm->modname, FEATURE_GRADE_HAS_GRADE, false)) {
+                                            if (is_null($cm->completiongradeitemnumber)) {
+                                                if ($cm->completion == COMPLETION_TRACKING_NONE) {
+                                                    $cm->completion = COMPLETION_TRACKING_AUTOMATIC;
+                                                }
+                                                $DB->update_record('course_modules', (object) array(
+                                                    'id' => $cm->id,
+                                                    'completion' => $cm->completion,
+                                                    'completiongradeitemnumber' => 0,
+                                                ));
+                                            }
+                                            if (is_null($cm->completiongradeitemnumber) or $cm->completiongradeitemnumber == 0) {
+                                                $conditions[] = new condition_completion($cm->id, COMPLETION_COMPLETE);
+                                            }
+                                        }
+                                }
+                            }
+                        } else if ($lock['type'] == 'grade') {
                             $lockgrades = explode(':', $lock['grade']);
 
                             if (count($lockgrades) == 2) {
