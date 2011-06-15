@@ -389,25 +389,30 @@ class format_flexpage_renderer extends plugin_renderer_base {
      * @param course_format_flexpage_lib_menu_action[] $actions Actions to take on pages
      * @return void
      */
-    public function manage_pages(moodle_url $displayurl, array $pages, array $actions) {
+    public function manage_pages(moodle_url $url, array $pages, array $actions) {
         global $CFG, $PAGE;
 
         require($CFG->dirroot.'/local/mr/bootstrap.php');
 
-        $displayopts = course_format_flexpage_model_page::get_display_options();
+        $displayopts    = course_format_flexpage_model_page::get_display_options();
+        $navigationopts = course_format_flexpage_model_page::get_navigation_options();
 
         $box = new course_format_flexpage_lib_box(array('class' => 'format_flexpage_box_managepages'));
         $row = $box->add_new_row(array('class' => 'format_flexpage_box_headers'));
         $row->add_new_cell(get_string('pagename', 'format_flexpage'))
             ->add_new_cell(get_string('managemenu', 'format_flexpage'))
-            ->add_new_cell(get_string('display', 'format_flexpage'));
+            ->add_new_cell(get_string('display', 'format_flexpage'))
+            ->add_new_cell(get_string('navigation', 'format_flexpage'));
 
         foreach ($pages as $page) {
             $options = array();
             $selected = '';
             foreach ($displayopts as $option => $label) {
+                $displayurl = clone($url);
                 $displayurl->params(array(
-                    'pageid' => $page->get_id(),
+                    'sesskey' => sesskey(),
+                    'action'  => 'setdisplay',
+                    'pageid'  => $page->get_id(),
                     'display' => $option,
                 ));
                 $options[$displayurl->out(false)] = $label;
@@ -419,7 +424,29 @@ class format_flexpage_renderer extends plugin_renderer_base {
 
             $displayselect = html_writer::select($options, 'display', $selected, false, array(
                 'id'    => html_writer::random_id(),
-                'class' => 'format_flexpage_display_select'
+                'class' => 'format_flexpage_action_select'
+            ));
+
+            $options = array();
+            $selected = '';
+            foreach ($navigationopts as $option => $label) {
+                $navurl = clone($url);
+                $navurl->params(array(
+                    'sesskey'    => sesskey(),
+                    'action'     => 'setnavigation',
+                    'pageid'     => $page->get_id(),
+                    'navigation' => $option,
+                ));
+                $options[$navurl->out(false)] = $label;
+
+                if ($option == $page->get_display()) {
+                    $selected = $navurl->out(false);
+                }
+            }
+
+            $navigationselect = html_writer::select($options, 'navigation', $selected, false, array(
+                'id'    => html_writer::random_id(),
+                'class' => 'format_flexpage_action_select'
             ));
 
             $options = array();
@@ -448,7 +475,8 @@ class format_flexpage_renderer extends plugin_renderer_base {
             $row = $box->add_new_row(array('pageid' => $page->get_id()));
             $row->add_new_cell($pagename, array('class' => 'format_flexpage_name_cell'))
                 ->add_new_cell($actionselect, array('id' => html_writer::random_id()))
-                ->add_new_cell($displayselect, array('id' => html_writer::random_id(), 'class' => 'format_flexpage_display_cell'));
+                ->add_new_cell($displayselect, array('id' => html_writer::random_id(), 'class' => 'format_flexpage_display_cell'))
+                ->add_new_cell($navigationselect, array('id' => html_writer::random_id(), 'class' => 'format_flexpage_navigation_cell'));
         }
         return $PAGE->get_renderer('local_mr')->render(new mr_html_notify('format_flexpage')).
                $this->render($box);

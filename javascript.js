@@ -224,7 +224,7 @@ M.format_flexpage.init_managepages = function(Y, url) {
             });
         });
 
-        Y.all('select.format_flexpage_display_select').each(function(node) {
+        Y.all('select.format_flexpage_action_select').each(function(node) {
             var button = M.format_flexpage.init_button_menu(Y, node);
 
             button.on("selectedMenuItemChange", function(e) {

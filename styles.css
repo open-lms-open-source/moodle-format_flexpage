@@ -126,10 +126,12 @@
     border-top: 1px solid #CCCCCC;
 }
 
+.format_flexpage_box_managepages .format_flexpage_navigation_cell li.yui-button-selectedmenuitem,
 .format_flexpage_box_managepages .format_flexpage_display_cell li.yui-button-selectedmenuitem {
     font-weight: bold;
 }
 
+.format_flexpage_navigation_cell .yui-menu-button button,
 .format_flexpage_display_cell .yui-menu-button button {
     width: 17em;
     text-align: left;
@@ -138,6 +140,10 @@
     overflow: hidden;
     text-overflow: ellipsis;
     -o-text-overflow: ellipsis;
+}
+
+.format_flexpage_navigation_cell .yui-menu-button button {
+    width: 18em;
 }
 
 #managepagespanel .bd {

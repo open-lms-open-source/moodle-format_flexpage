@@ -419,7 +419,7 @@ class course_format_flexpage_controller_ajax extends mr_controller {
             'args'   => (object) $args,
             'header' => get_string('managepages', 'format_flexpage'),
             'body'   => $this->output->manage_pages(
-                $this->new_url(array('sesskey' => sesskey(), 'action' => 'setdisplay')),
+                $this->new_url(),
                 format_flexpage_cache()->get_pages(),
                 $actions
             ),
@@ -462,6 +462,22 @@ class course_format_flexpage_controller_ajax extends mr_controller {
         $repo = new course_format_flexpage_repository_page();
         $page = $repo->get_page($pageid);
         $page->set_display($display);
+        $repo->save_page($page);
+        format_flexpage_clear_cache();
+    }
+
+    /**
+     * Allows the setting the navigation value of a page
+     */
+    public function setnavigation_action() {
+        require_sesskey();
+
+        $pageid     = required_param('pageid', PARAM_INT);
+        $navigation = required_param('navigation', PARAM_INT);
+
+        $repo = new course_format_flexpage_repository_page();
+        $page = $repo->get_page($pageid);
+        $page->set_navigation($navigation);
         $repo->save_page($page);
         format_flexpage_clear_cache();
     }
