@@ -147,8 +147,8 @@ function format_flexpage_previous_page() {
         $cache  = format_flexpage_cache();
         $page   = $cache->get_current_page();
 
-        if ($page->has_navigation_previous()) {
-            $return = $cache->get_previous_page($page);
+        if ($page->has_navigation_previous() and $previous = $cache->get_previous_page($page)) {
+            $return = $previous;
         }
     }
     return $return;
@@ -167,8 +167,8 @@ function format_flexpage_next_page() {
         $cache  = format_flexpage_cache();
         $page   = $cache->get_current_page();
 
-        if ($page->has_navigation_next()) {
-            $return = $cache->get_next_page($page);
+        if ($page->has_navigation_next() and $next = $cache->get_next_page($page)) {
+            $return = $next;
         }
     }
     return $return;
