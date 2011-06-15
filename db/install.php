@@ -26,7 +26,7 @@ function xmldb_format_flexpage_install() {
         $oldtonew = array();
         $pagerepo = new course_format_flexpage_repository_page();
         $condrepo = new course_format_flexpage_repository_condition();
-        $records  = $DB->get_recordset('format_page', null, 'courseid, parent, weight');
+        $records  = $DB->get_recordset('format_page', null, 'courseid, parent, sortorder');
         foreach ($records as $record) {
             // Migrate display value
             if (($record->display & 4) == 4) {
