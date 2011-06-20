@@ -392,31 +392,16 @@ class course_format_flexpage_controller_ajax extends mr_controller {
 
         require_once($CFG->dirroot.'/course/format/flexpage/lib/actionbar.php');
 
-        $args = array(
-            'displayurl' => $this->new_url(array('sesskey' => sesskey(), 'action' => 'setdisplay'))->out(false),
-            'menu' => array(),
-        );
-
         $actionbar = course_format_flexpage_lib_actionbar::factory();
-        $menu = $actionbar->get_menu('manage');
-        $actions = array();
+        $menu      = $actionbar->get_menu('manage');
+        $actions   = array();
         foreach (array('editpage', 'movepage', 'deletepage') as $actionname) {
             $action = $menu->get_action($actionname);
             if ($action->get_visible()) {
                 $actions[$actionname] = $action;
-                // Ditch the pageid - will add this again later...
-                $url = $action->get_url();
-                $url->remove_params('pageid');
-
-                $args['menu'][] = (object) array(
-                    'text' => $action->get_name(),
-                    'id'   => $action->get_action(),
-                    'url'  => $url->out(false),
-                );
             }
         }
         echo json_encode((object) array(
-            'args'   => (object) $args,
             'header' => get_string('managepages', 'format_flexpage'),
             'body'   => $this->output->manage_pages(
                 $this->new_url(),

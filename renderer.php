@@ -9,6 +9,9 @@ require_once($CFG->dirroot.'/course/format/flexpage/lib/box.php');
 
 /**
  * Format Flexpage Renderer
+ *
+ * @author Mark Nielsen
+ * @package format_flexpage
  */
 class format_flexpage_renderer extends plugin_renderer_base {
     /**
@@ -110,7 +113,11 @@ class format_flexpage_renderer extends plugin_renderer_base {
 
         $arguments = array($menus);
 
+        $renderer = $PAGE->get_renderer('block_flexpagenav');
+
         $PAGE->requires->js_init_call('M.format_flexpage.init_actionbar', $arguments, false, $this->get_js_module());
+        $PAGE->requires->js_init_call('M.format_flexpage.init_flexpagenav_actionbar', null, false, $renderer->get_js_module());
+
         $menudiv = html_writer::tag('div', $this->actionbar_navigation(), array('id' => 'format_flexpage_actionbar_menu'));
         return html_writer::tag('div', $menudiv, array('id' => 'format_flexpage_actionbar'));
     }

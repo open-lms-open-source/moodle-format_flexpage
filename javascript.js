@@ -6,7 +6,7 @@ M.format_flexpage = M.format_flexpage || {};
 /**
  * Keep track of when we need to reload the window or not
  */
-M.format_flexpage.managepages_reload = true;
+M.format_flexpage.require_page_reload = true;
 
 /**
  * Generate the action bar menu
@@ -30,7 +30,7 @@ M.format_flexpage.init_actionbar = function(Y, menuitems) {
         var funcName = 'init_' + e.target.get('parentNode').get('id');
         M.format_flexpage[funcName](Y, e.target.get('href'));
     });
-}
+};
 
 /**
  * General method to execute JS after DOM has loaded on the editing screen
@@ -66,7 +66,7 @@ M.format_flexpage.init_edit = function(Y) {
             dialog.center();
         }
     });
-}
+};
 
 /**
  * Init add pages modal
@@ -92,7 +92,7 @@ M.format_flexpage.init_addpages = function(Y, url) {
     });
 
     return dialog;
-}
+};
 
 /**
  * Init edit page modal
@@ -144,7 +144,7 @@ M.format_flexpage.init_editpage = function(Y, url) {
     });
 
     return dialog;
-}
+};
 
 /**
  * Init delete page modal
@@ -163,7 +163,7 @@ M.format_flexpage.init_deletepage = function(Y, url) {
     M.format_flexpage.populate_panel(Y, dialog, url);
 
     return dialog;
-}
+};
 
 /**
  * Init Manage pages modal (this opens other modals)
@@ -173,13 +173,13 @@ M.format_flexpage.init_deletepage = function(Y, url) {
  */
 M.format_flexpage.init_managepages = function(Y, url) {
     // Ensure our flag starts with true
-    M.format_flexpage.managepages_reload = true;
+    M.format_flexpage.require_page_reload = true;
 
     var panel = M.format_flexpage.init_default_panel(Y, "managepagespanel");
 
     // When the user finally hides the panel, we reload the page
     panel.hideEvent.subscribe(function(e) {
-        if (M.format_flexpage.managepages_reload) {
+        if (M.format_flexpage.require_page_reload) {
             window.location.reload();
         }
     });
@@ -192,35 +192,8 @@ M.format_flexpage.init_managepages = function(Y, url) {
                                       .setStyle('overflow', 'auto');
 
         Y.all('select.format_flexpage_actions_select').each(function(node) {
-
-            var button = M.format_flexpage.init_button_menu(Y, node);
-            button.set('label', M.str.moodle.choosedots);
-
-            button.on("selectedMenuItemChange", function(e) {
-                var menuItem = e.newValue;
-                var info     = Y.JSON.parse(menuItem.value);
-                var funcName = 'init_' + info.action;
-                var dialog   = M.format_flexpage[funcName](Y, info.url);
-
-                M.format_flexpage.managepages_reload = false;
-
-                // When our dialog shows, hide our panel (smoothness!)
-                dialog.beforeShowEvent.subscribe(function(e) {
-                    panel.hide();
-                });
-
-                // Re-render manage pages once dialog has been closed
-                dialog.callback.success = function(o) {
-                    M.format_flexpage.init_managepages(Y, url);
-                };
-                dialog.callback.failure = function(o) {
-                    M.format_flexpage.init_error_dialog(Y, M.str.format_flexpage.genericasyncfail).hideEvent.subscribe(function(e) {
-                        M.format_flexpage.init_managepages(Y, url);
-                    });
-                };
-                dialog.cancelEvent.subscribe(function(e) {
-                    panel.show();
-                });
+            M.format_flexpage.init_action_menu(Y, node, panel, function () {
+                M.format_flexpage.init_managepages(Y, url);
             });
         });
 
@@ -256,7 +229,7 @@ M.format_flexpage.init_managepages = function(Y, url) {
     });
 
     return panel;
-}
+};
 
 /**
  * Init add activity modal
@@ -292,7 +265,7 @@ M.format_flexpage.init_addactivity = function(Y, url) {
     });
 
     return dialog;
-}
+};
 
 /**
  * Init add existing activity modal
@@ -318,7 +291,7 @@ M.format_flexpage.init_addexistingactivity = function(Y, url) {
     });
 
     return dialog;
-}
+};
 
 /**
  * Init add block modal
@@ -349,7 +322,7 @@ M.format_flexpage.init_addblock = function(Y, url) {
     });
 
     return dialog;
-}
+};
 
 /**
  * Init move page modal
@@ -368,7 +341,7 @@ M.format_flexpage.init_movepage = function(Y, url) {
     M.format_flexpage.populate_panel(Y, dialog, url);
 
     return dialog;
-}
+};
 
 /**
  * Init default dialog
@@ -394,7 +367,7 @@ M.format_flexpage.init_default_dialog = function(Y, id) {
         M.format_flexpage.init_error_dialog(Y, M.str.format_flexpage.genericasyncfail);
     };
     return dialog;
-}
+};
 
 /**
  * Init default panel
@@ -409,7 +382,7 @@ M.format_flexpage.init_default_panel = function(Y, id) {
         underlay: "none",
         close: true
     });
-}
+};
 
 /**
  * Populates a panel (or dialog) with information found at endpoint
@@ -449,6 +422,38 @@ M.format_flexpage.populate_panel = function(Y, panel, url, onsuccess) {
             }
         }
     });
+};
+
+/**
+ * Connect two dialogs - used when one dialog pops up another
+ *
+ * @param Y
+ * @param parent Parent dialog
+ * @param child Child dialog (spawned from parent)
+ * @param reInit A callback to re-initialize the parent dialog
+ */
+M.format_flexpage.connect_dialogs = function(Y, parent, child, reInit) {
+    // When child shows, hide parent
+    child.beforeShowEvent.subscribe(function(e) {
+        parent.hide();
+    });
+
+    // Re-init parent when child submits
+    child.callback.success = function(o) {
+        reInit();
+    };
+
+    // Show error dialog and re-init parent when child submit fails
+    child.callback.failure = function(o) {
+        M.format_flexpage.init_error_dialog(Y, M.str.format_flexpage.genericasyncfail).hideEvent.subscribe(function(e) {
+            reInit();
+        });
+    };
+
+    // Show parent when child has been canceled
+    child.cancelEvent.subscribe(function(e) {
+        parent.show();
+    });
 }
 
 /**
@@ -475,7 +480,7 @@ M.format_flexpage.init_error_dialog = function(Y, errorMessage) {
     dialog.center();
 
     return dialog;
-}
+};
 
 /**
  * Init calendar
@@ -516,7 +521,7 @@ M.format_flexpage.init_calendar = function(Y, name) {
             }
         });
     }
-}
+};
 
 /**
  * Init region buttons (turns a radio group into buttons
@@ -533,7 +538,7 @@ M.format_flexpage.init_region_buttons = function(Y, buttons) {
     buttonGroup.addButtons(buttons);
 
     return buttonGroup;
-}
+};
 
 /**
  * Syncs currently selected region button to a hidden input element
@@ -551,7 +556,7 @@ M.format_flexpage.set_region_input = function(Y, buttonGroup, inputname) {
             break;
         }
     }
-}
+};
 
 /**
  * Converts a select element into a YUI button menu
@@ -563,7 +568,7 @@ M.format_flexpage.init_button_menu = function(Y, select) {
     var index  = select.get('selectedIndex');
     var label  = select.get("options").item(index).get('innerHTML');
 
-    var button = new YAHOO.widget.Button({
+    return new YAHOO.widget.Button({
         id: select.get('id') + '_menuid',
         name: select.get('id') + '_menuname',
         label: label,
@@ -572,6 +577,27 @@ M.format_flexpage.init_button_menu = function(Y, select) {
         container: select.get('parentNode').get('id'),
         lazyloadmenu: true
     });
+};
 
-    return button;
-}
+/**
+ * Convert a select element into a menu button that launches other modals
+ *
+ * @param Y
+ * @param selectNode
+ * @param parentDialog
+ * @param reInitParentDialog
+ */
+M.format_flexpage.init_action_menu = function(Y, selectNode, parentDialog, reInitParentDialog) {
+    var button = M.format_flexpage.init_button_menu(Y, selectNode);
+    button.set('label', M.str.moodle.choosedots);
+
+    button.on("selectedMenuItemChange", function(e) {
+        var menuItem = e.newValue;
+        var info     = Y.JSON.parse(menuItem.value);
+        var funcName = 'init_' + info.action;
+        var dialog   = M.format_flexpage[funcName](Y, info.url);
+
+        M.format_flexpage.require_page_reload = false;
+        M.format_flexpage.connect_dialogs(Y, parentDialog, dialog, reInitParentDialog);
+    });
+};

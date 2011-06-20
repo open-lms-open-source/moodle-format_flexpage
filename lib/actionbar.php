@@ -62,6 +62,10 @@ class course_format_flexpage_lib_actionbar implements renderable {
         $haspagecap  = has_capability('format/flexpage:managepages', $context);
         $hasblockcap = (has_capability('moodle/site:manageblocks', $context) and $haspagecap);
         $hasmodcap   = (has_capability('moodle/course:manageactivities', $context) and $haspagecap);
+        $hasnavcap   = has_capability('block/flexpagenav:manage', $context);
+
+        $navaddurl    = new moodle_url('/blocks/flexpagenav/view.php', array('controller' => 'ajax', 'courseid' => $COURSE->id, 'action' => 'addexistingmenu'));
+        $navmanageurl = new moodle_url('/blocks/flexpagenav/view.php', array('controller' => 'ajax', 'courseid' => $COURSE->id, 'action' => 'managemenus'));
 
         $actionbar = new course_format_flexpage_lib_actionbar();
 
@@ -69,13 +73,15 @@ class course_format_flexpage_lib_actionbar implements renderable {
         $addmenu->add_action(new course_format_flexpage_lib_menu_action('addpages', $haspagecap))
                 ->add_action(new course_format_flexpage_lib_menu_action('addactivity', $hasmodcap))
                 ->add_action(new course_format_flexpage_lib_menu_action('addexistingactivity', $hasmodcap))
-                ->add_action(new course_format_flexpage_lib_menu_action('addblock', $hasblockcap));
+                ->add_action(new course_format_flexpage_lib_menu_action('addblock', $hasblockcap))
+                ->add_action(new course_format_flexpage_lib_menu_action('addexistingmenu', $hasnavcap, $navaddurl, get_string('addexistingmenuaction', 'block_flexpagenav')));
 
         $managemenu = new course_format_flexpage_lib_menu('manage');
         $managemenu->add_action(new course_format_flexpage_lib_menu_action('editpage', $haspagecap))
                    ->add_action(new course_format_flexpage_lib_menu_action('movepage', $haspagecap))
                    ->add_action(new course_format_flexpage_lib_menu_action('deletepage', $haspagecap))
-                   ->add_action(new course_format_flexpage_lib_menu_action('managepages', $haspagecap));
+                   ->add_action(new course_format_flexpage_lib_menu_action('managepages', $haspagecap))
+                   ->add_action(new course_format_flexpage_lib_menu_action('managemenus', $hasnavcap, $navmanageurl, get_string('managemenusaction', 'block_flexpagenav')));
 
         return $actionbar->add_menu($addmenu)->add_menu($managemenu);
     }
