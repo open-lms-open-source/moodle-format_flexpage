@@ -4,11 +4,6 @@
 M.format_flexpage = M.format_flexpage || {};
 
 /**
- * Keep track of when we need to reload the window or not
- */
-M.format_flexpage.require_page_reload = true;
-
-/**
  * Keeps track of opened panels
  */
 M.format_flexpage.panel_stack = [];
@@ -177,14 +172,11 @@ M.format_flexpage.init_deletepage = function(Y, url) {
  * @param url
  */
 M.format_flexpage.init_managepages = function(Y, url) {
-    // Ensure our flag starts with true
-    M.format_flexpage.require_page_reload = true;
-
     var panel = M.format_flexpage.init_default_panel(Y, "managepagespanel");
 
     // When the user finally hides the panel, we reload the page
     panel.hideEvent.subscribe(function(e) {
-        if (M.format_flexpage.require_page_reload) {
+        if (M.format_flexpage.panel_stack.length == 0) {
             window.location.reload();
         }
     });
@@ -451,9 +443,7 @@ M.format_flexpage.connect_dialogs = function(Y, parent, child, reInit) {
 M.format_flexpage.connect_dialogs_attach_events = function(Y, child) {
     // When child shows, hide parent
     child.beforeShowEvent.subscribe(function(e) {
-        var last = M.format_flexpage.panel_stack.pop();
-        last.dialog.hide();
-        M.format_flexpage.panel_stack.push(last);
+        M.format_flexpage.panel_stack[M.format_flexpage.panel_stack.length - 1].dialog.hide();
     });
 
     // Re-init parent when child submits
@@ -615,7 +605,6 @@ M.format_flexpage.init_action_menu = function(Y, selectNode, parentDialog, reIni
         var funcName = 'init_' + info.action;
         var dialog   = M.format_flexpage[funcName](Y, info.url);
 
-        M.format_flexpage.require_page_reload = false;
         M.format_flexpage.connect_dialogs(Y, parentDialog, dialog, reInitParentDialog);
     });
 

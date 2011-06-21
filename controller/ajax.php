@@ -152,7 +152,7 @@ class course_format_flexpage_controller_ajax extends mr_controller {
         $movepage    = $repo->get_page($pageid);
         $moveoptions = course_format_flexpage_model_page::get_move_options();
 
-        if (optional_param('move', 0, PARAM_BOOL)) {
+        if (optional_param('confirmmove', 0, PARAM_BOOL)) {
             require_sesskey();
 
             $move = required_param('move', PARAM_ACTION);
@@ -179,7 +179,7 @@ class course_format_flexpage_controller_ajax extends mr_controller {
                 }
                 $pageoptions[$page->get_id()] = $this->output->pad_page_name($page);
             }
-            $submiturl = $this->new_url(array('sesskey' => sesskey(), 'action' => 'movepage', 'pageid' => $pageid, 'move' => 1));
+            $submiturl = $this->new_url(array('sesskey' => sesskey(), 'action' => 'movepage', 'pageid' => $pageid, 'confirmmove' => 1));
 
             echo json_encode((object) array(
                 'header' => get_string('movepage', 'format_flexpage'),
