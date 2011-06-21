@@ -98,7 +98,7 @@
 
 .format_flexpage_condition_completion,
 .format_flexpage_condition_grade,
-.format_flexpage_editpage .format_flexpage_cell {
+.format_flexpage_form .format_flexpage_cell {
     padding-bottom: 5px;
 }
 
@@ -106,7 +106,7 @@
     padding-bottom: 0;
 }
 
-.format_flexpage_cell_label {
+.format_flexpage_form .cell0 {
     text-align: right;
     padding-right: 5px;
 }

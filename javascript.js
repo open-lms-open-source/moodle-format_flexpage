@@ -9,6 +9,11 @@ M.format_flexpage = M.format_flexpage || {};
 M.format_flexpage.require_page_reload = true;
 
 /**
+ * Keeps track of opened panels
+ */
+M.format_flexpage.panel_stack = [];
+
+/**
  * Generate the action bar menu
  *
  * @param {YUI} Y
@@ -185,15 +190,11 @@ M.format_flexpage.init_managepages = function(Y, url) {
     });
 
     M.format_flexpage.populate_panel(Y, panel, url, function() {
-        // View port height minus overlay's view port padding minus fudge factor
-        var height = YAHOO.util.Dom.getViewportHeight() - (YAHOO.widget.Overlay.VIEWPORT_OFFSET * 2) - 60;
-
-        Y.one('#managepagespanel .bd').setStyle('maxHeight', height + 'px')
-                                      .setStyle('overflow', 'auto');
+        M.format_flexpage.constrain_panel_to_viewport(Y, panel);
 
         Y.all('select.format_flexpage_actions_select').each(function(node) {
             M.format_flexpage.init_action_menu(Y, node, panel, function () {
-                M.format_flexpage.init_managepages(Y, url);
+                return M.format_flexpage.init_managepages(Y, url);
             });
         });
 
@@ -433,28 +434,45 @@ M.format_flexpage.populate_panel = function(Y, panel, url, onsuccess) {
  * @param reInit A callback to re-initialize the parent dialog
  */
 M.format_flexpage.connect_dialogs = function(Y, parent, child, reInit) {
+
+    M.format_flexpage.panel_stack.push({
+        dialog: parent,
+        reInit: reInit
+    });
+    M.format_flexpage.connect_dialogs_attach_events(Y, child);
+};
+
+/**
+ * Attach event handlers to a child dialog
+ *
+ * @param Y
+ * @param child
+ */
+M.format_flexpage.connect_dialogs_attach_events = function(Y, child) {
     // When child shows, hide parent
     child.beforeShowEvent.subscribe(function(e) {
-        parent.hide();
+        var last = M.format_flexpage.panel_stack.pop();
+        last.dialog.hide();
+        M.format_flexpage.panel_stack.push(last);
     });
 
     // Re-init parent when child submits
     child.callback.success = function(o) {
-        reInit();
+        M.format_flexpage.connect_dialogs_attach_events(Y, M.format_flexpage.panel_stack.pop().reInit());
     };
 
     // Show error dialog and re-init parent when child submit fails
     child.callback.failure = function(o) {
         M.format_flexpage.init_error_dialog(Y, M.str.format_flexpage.genericasyncfail).hideEvent.subscribe(function(e) {
-            reInit();
+            M.format_flexpage.connect_dialogs_attach_events(Y, M.format_flexpage.panel_stack.pop().reInit());
         });
     };
 
     // Show parent when child has been canceled
     child.cancelEvent.subscribe(function(e) {
-        parent.show();
+        M.format_flexpage.panel_stack.pop().dialog.show();
     });
-}
+};
 
 /**
  * Init generic error dialog
@@ -600,4 +618,34 @@ M.format_flexpage.init_action_menu = function(Y, selectNode, parentDialog, reIni
         M.format_flexpage.require_page_reload = false;
         M.format_flexpage.connect_dialogs(Y, parentDialog, dialog, reInitParentDialog);
     });
+
+    return button;
 };
+
+/**
+ * When a panel has an unknown height (potentially very large) then
+ * use this to constrain its height to the view port
+ *
+ * @param Y
+ * @param panel
+ */
+M.format_flexpage.constrain_panel_to_viewport = function(Y, panel) {
+    var headerHeight = 0;
+    var footerHeight = 0;
+    var panelPadding = 20;
+
+    if (panel.footer != undefined) {
+        footerHeight = panel.footer.offsetHeight;
+    }
+    if (panel.header != undefined) {
+        headerHeight = panel.header.offsetHeight;
+    }
+
+    // We take total height minus view port offset minus footer minus header minus panel body padding
+    var height = YAHOO.util.Dom.getViewportHeight() - (YAHOO.widget.Overlay.VIEWPORT_OFFSET * 2) - footerHeight - headerHeight - panelPadding;
+
+    Y.one('#' + panel.id + ' .bd').setStyle('maxHeight', height + 'px')
+            .setStyle('overflow', 'auto');
+
+    panel.center();
+}

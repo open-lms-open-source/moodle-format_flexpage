@@ -62,4 +62,21 @@ abstract class course_format_flexpage_lib_box_abstract implements renderable {
         $this->attributes = array_merge($this->attributes, $attributes);
         return $this;
     }
+
+    /**
+     * Append an attribute to it's existing value
+     *
+     * @param string $name
+     * @param string $value
+     * @return course_format_flexpage_lib_box_abstract
+     */
+    public function append_attribute($name, $value) {
+        $attributes = $this->attributes;
+        if (!empty($attributes[$name])) {
+            $this->attributes[$name] = $attributes[$name].' '.$value;
+        } else {
+            $this->attributes[$name] = $value;
+        }
+        return $this;
+    }
 }
