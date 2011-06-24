@@ -136,6 +136,23 @@ class course_format_flexpage_lib_moodlepage {
      * @param string|bool $region The region to add the activity to
      * @return void
      */
+    public static function add_menu_block(course_format_flexpage_model_page $page, $menuid, $region = false) {
+        global $SESSION;
+
+        $SESSION->block_flexpagenav_create_menuids = array($menuid);
+
+        self::add_block($page, 'flexpagenav', $region);
+    }
+
+    /**
+     * Add an activity as a block to the current page
+     *
+     * @static
+     * @param course_format_flexpage_model_page $page
+     * @param int $cmid Add this course module
+     * @param string|bool $region The region to add the activity to
+     * @return void
+     */
     public static function add_activity_block(course_format_flexpage_model_page $page, $cmid, $region = false) {
         global $SESSION;
 
@@ -199,6 +216,11 @@ class course_format_flexpage_lib_moodlepage {
                 $block = block_instance('flexpagemod', $instance);
                 if (!empty($block->config->cmid)) {
                     self::add_activity_block($destpage, $block->config->cmid, $instance->defaultregion);
+                }
+            } else if ($instance->blockname == 'flexpagenav') {
+                $block = block_instance('flexpagenav', $instance);
+                if (!empty($block->config->menuid)) {
+                    self::add_activity_block($destpage, $block->config->menuid, $instance->defaultregion);
                 }
             } else {
                 self::add_block($destpage, $instance->blockname, $instance->defaultregion);
