@@ -21,7 +21,8 @@ class backup_format_flexpage_plugin extends backup_format_plugin {
         $plugin->add_child($pluginwrapper);
 
         // Now create the format specific structures
-        $page = new backup_nested_element('page', array('id'), array(
+        $pages = new backup_nested_element('pages');
+        $page  = new backup_nested_element('page', array('id'), array(
             'name',
             'altname',
             'display',
@@ -43,8 +44,18 @@ class backup_format_flexpage_plugin extends backup_format_plugin {
         $grades = new backup_nested_element('grades');
         $grade  = new backup_nested_element('grade', array('id'), array('gradeitemid', 'grademin', 'grademax'));
 
+        $menus = new backup_nested_element('menus');
+        $menu  = new backup_nested_element('menu', array('id'), array('name', 'render', 'displayname', 'useastab'));
+
+        $links = new backup_nested_element('links');
+        $link  = new backup_nested_element('link', array('id'), array('type', 'weight'));
+
+        $configs = new backup_nested_element('configs');
+        $config  = new backup_nested_element('config', array('id'), array('name', 'value'));
+
         // Now the format specific tree
-        $pluginwrapper->add_child($page);
+        $pluginwrapper->add_child($pages);
+        $pages->add_child($page);
 
         $page->add_child($regions);
         $regions->add_child($region);
@@ -55,11 +66,23 @@ class backup_format_flexpage_plugin extends backup_format_plugin {
         $page->add_child($grades);
         $grades->add_child($grade);
 
+        $pluginwrapper->add_child($menus);
+        $menus->add_child($menu);
+
+        $menu->add_child($links);
+        $links->add_child($link);
+
+        $link->add_child($configs);
+        $configs->add_child($config);
+
         // Set source to populate the data
         $page->set_source_table('format_flexpage_page', array('courseid' => backup::VAR_COURSEID));
         $region->set_source_table('format_flexpage_region', array('pageid' => backup::VAR_PARENTID));
         $completion->set_source_table('format_flexpage_completion', array('pageid' => backup::VAR_PARENTID));
         $grade->set_source_table('format_flexpage_grade', array('pageid' => backup::VAR_PARENTID));
+        $menu->set_source_table('block_flexpagenav_menu', array('courseid' => backup::VAR_COURSEID));
+        $link->set_source_table('block_flexpagenav_link', array('menuid' => backup::VAR_PARENTID));
+        $config->set_source_table('block_flexpagenav_config', array('linkid' => backup::VAR_PARENTID));
 
         // Annotate ids
         $grade->annotate_ids('grade_item', 'gradeitemid');
