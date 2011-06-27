@@ -93,16 +93,9 @@ class course_format_flexpage_repository_page {
         global $DB;
 
         if (!$DB->record_exists('format_flexpage_page', array('courseid' => $courseid))) {
-
-            $course = $DB->get_record('course', array('id' => $courseid), 'id, fullname, shortname', MUST_EXIST);
-
-            $a = (object) array(
-                'fullname'  => $course->fullname,
-                'shortname' => $course->shortname
-            );
             $this->save_page(new course_format_flexpage_model_page(array(
                 'courseid' => $courseid,
-                'name'     => get_string('defaultcoursepagename', 'format_flexpage', $a),
+                'name'     => get_string('defaultcoursepagename', 'format_flexpage'),
             )));
         }
         return $this;

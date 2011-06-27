@@ -5,8 +5,8 @@
  * @author Mark Nielsen
  * @package format_flexpage
  */
-$string['pluginname'] = 'Flexpage';
-$string['defaultcoursepagename'] = '{$a->fullname} ({$a->shortname})';
+$string['pluginname'] = 'Flexpage format';
+$string['defaultcoursepagename'] = 'Default Page (Change me)';
 $string['pagenotfound'] = 'The page with id = {$a} does not exist in this course.';
 $string['addmenu'] = 'Add';
 $string['managemenu'] = 'Manage';
