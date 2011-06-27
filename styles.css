@@ -111,6 +111,11 @@
     padding-right: 5px;
 }
 
+.format_flexpage_conditions .cell0 {
+    text-align: left;
+    padding-right: 0;
+}
+
 .format_flexpage_error_bg {
     background-color: #F9A0A0;
 }
