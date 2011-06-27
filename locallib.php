@@ -49,6 +49,27 @@ function format_flexpage_clear_cache($courseid = null) {
 }
 
 /**
+ * Get tabs to display in the theme
+ *
+ * @return string
+ */
+function format_flexpage_tabs() {
+    global $CFG, $PAGE, $COURSE;
+
+    require_once($CFG->dirroot.'/blocks/flexpagenav/repository/menu.php');
+    require_once($CFG->dirroot.'/blocks/flexpagenav/repository/link.php');
+
+    $menurepo = new block_flexpagenav_repository_menu();
+    $linkrepo = new block_flexpagenav_repository_link();
+    if ($menu = $menurepo->get_course_tab_menu($COURSE->id)) {
+        $menu->set_render('navhorizontal');  // Enforce tab like rendering
+        $linkrepo->set_menu_links($menu);
+        return html_writer::tag('div', $PAGE->get_renderer('block_flexpagenav')->render($menu), array('class' => 'format_flexpage_tabs'));
+    }
+    return '';
+}
+
+/**
  * Get a width for a region
  *
  * @param null|string $region Get the width for this theme region
