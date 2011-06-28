@@ -112,8 +112,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
         }
 
         $arguments = array($menus);
-
-        $renderer = $PAGE->get_renderer('block_flexpagenav');
+        $renderer  = $PAGE->get_renderer('block_flexpagenav');
 
         $PAGE->requires->js_init_call('M.format_flexpage.init_actionbar', $arguments, false, $this->get_js_module());
         $PAGE->requires->js_init_call('M.format_flexpage.init_flexpagenav_actionbar', null, false, $renderer->get_js_module());
