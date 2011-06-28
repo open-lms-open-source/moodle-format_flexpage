@@ -24,7 +24,6 @@ class backup_format_flexpage_plugin extends backup_format_plugin {
         $pages = new backup_nested_element('pages');
         $page  = new backup_nested_element('page', array('id'), array(
             'name',
-            'altname',
             'display',
             'navigation',
             'availablefrom',

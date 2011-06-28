@@ -62,7 +62,6 @@ class course_format_flexpage_repository_page {
         $record = (object) array(
             'courseid'         => $page->get_courseid(),
             'name'             => $page->get_name(),
-            'altname'          => $page->get_altname(),
             'display'          => $page->get_display(),
             'navigation'       => $page->get_navigation(),
             'availablefrom'    => $page->get_availablefrom(),

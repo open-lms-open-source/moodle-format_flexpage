@@ -166,9 +166,9 @@ class course_format_flexpage_controller_ajax extends mr_controller {
             $refpage = $repo->get_page($referencepageid);
 
             $this->notify->good('movedpage', (object) array(
-                'movepage' => format_string($movepage->get_display_name()),
+                'movepage' => format_string($movepage->get_name()),
                 'move' => $moveoptions[$move],
-                'refpage' => format_string($refpage->get_display_name()),
+                'refpage' => format_string($refpage->get_name()),
             ));
         } else {
             $pageoptions = array();
@@ -296,7 +296,6 @@ class course_format_flexpage_controller_ajax extends mr_controller {
 
             $page->set_options(array(
                 'name' => required_param('name', PARAM_MULTILANG),
-                'altname' => required_param('altname', PARAM_MULTILANG),
                 'display' => required_param('display', PARAM_INT),
                 'navigation' => required_param('navigation', PARAM_INT),
             ));

@@ -34,7 +34,7 @@ if (!course_format_flexpage_lib_moodlepage::layout_exists($PAGE, $layout)) {
 
     if (!$cache->is_page_available($page)) {
         echo $output->heading_with_help(
-            get_string('pagexnotavailable', 'format_flexpage', $page->get_display_name()),
+            get_string('pagexnotavailable', 'format_flexpage', $page->get_name()),
             'pagenotavailable',
             'format_flexpage'
         );

@@ -46,7 +46,6 @@ $string['navnext'] = 'Next page only';
 $string['navboth'] = 'Both previous and next page';
 $string['navigation'] = 'Navigation';
 $string['display'] = 'Display';
-$string['altname'] = 'Name in menus';
 $string['name'] = 'Name';
 $string['formnamerequired'] = 'The page name is a required field.';
 $string['regrionwidths'] = 'Block region widths';

@@ -65,7 +65,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
      * @return string
      */
     public function pad_page_name(course_format_flexpage_model_page $page, $amount = null, $link = false) {
-        $name = format_string($page->get_display_name(), true, $page->get_courseid());
+        $name = format_string($page->get_name(), true, $page->get_courseid());
 
         if ($link) {
             $name = html_writer::link($page->get_url(), $name);
@@ -135,14 +135,14 @@ class format_flexpage_renderer extends plugin_renderer_base {
         }
 
         if ($prevpage = format_flexpage_cache()->get_previous_page($currentpage)) {
-            $previcon = new pix_icon('t/moveleft', get_string('gotoa', 'format_flexpage', format_string($prevpage->get_display_name())));
+            $previcon = new pix_icon('t/moveleft', get_string('gotoa', 'format_flexpage', format_string($prevpage->get_name())));
             $prevpage = $this->output->action_icon($prevpage->get_url(), $previcon);
             $prevpage = html_writer::tag('span', $prevpage, array('id' => 'format_flexpage_prevpage'));
         } else {
             $prevpage = '';
         }
         if ($nextpage = format_flexpage_cache()->get_next_page($currentpage)) {
-            $nexticon = new pix_icon('t/removeright', get_string('gotoa', 'format_flexpage', format_string($nextpage->get_display_name())));
+            $nexticon = new pix_icon('t/removeright', get_string('gotoa', 'format_flexpage', format_string($nextpage->get_name())));
             $nextpage = $this->output->action_icon($nextpage->get_url(), $nexticon);
             $nextpage = html_writer::tag('span', $nextpage, array('id' => 'format_flexpage_nextpage'));
         } else {
@@ -213,7 +213,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
             $info = $page->is_available();
             if (is_string($info)) {
                 $box->add_new_row()->add_new_cell(
-                    html_writer::tag('div', format_string($page->get_display_name()), array('class' => 'format_flexpage_pagename')).
+                    html_writer::tag('div', format_string($page->get_name()), array('class' => 'format_flexpage_pagename')).
                     html_writer::tag('div', $info, array('class' => 'availabilityinfo'))
                 );
             }
@@ -265,7 +265,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
      * @return string
      */
     public function move_page(course_format_flexpage_model_page $page, moodle_url $url, array $pageoptions, array $moveoptions) {
-        $output  = html_writer::tag('span', get_string('movepagea', 'format_flexpage', format_string($page->get_display_name())), array('id' => 'format_flexpage_movingtext'));
+        $output  = html_writer::tag('span', get_string('movepagea', 'format_flexpage', format_string($page->get_name())), array('id' => 'format_flexpage_movingtext'));
         $output .= html_writer::select($moveoptions, 'move', 'child', false);
         $output .= html_writer::select($pageoptions, 'referencepageid', '', false);
 
@@ -530,9 +530,6 @@ class format_flexpage_renderer extends plugin_renderer_base {
         $box->add_new_row()->add_new_cell(html_writer::label(get_string('name', 'format_flexpage'), 'id_name'))
                            ->add_new_cell(html_writer::empty_tag('input', array('id' => 'id_name', 'name' => 'name', 'type' => 'text', 'size' => 50, 'value' => $page->get_name())));
 
-        $box->add_new_row()->add_new_cell(html_writer::label(get_string('altname', 'format_flexpage'), 'id_altname'))
-                           ->add_new_cell(html_writer::empty_tag('input', array('id' => 'id_altname', 'name' => 'altname', 'type' => 'text', 'size' => 50, 'value' => $page->get_altname())));
-
         $regioncell = new course_format_flexpage_lib_box_cell();
         $pagewidths = $page->get_region_widths();
         foreach ($regions as $region => $name) {
@@ -747,7 +744,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
     public function navigation_link($type, course_format_flexpage_model_page $page = null, $label = null) {
         if ($page) {
             if (is_null($label)) {
-                $label = get_string("{$type}page", 'format_flexpage', format_string($page->get_display_name()));
+                $label = get_string("{$type}page", 'format_flexpage', format_string($page->get_name()));
             }
             return html_writer::link($page->get_url(), $label, array('id' => "format_flexpage_{$type}_page"));
         }

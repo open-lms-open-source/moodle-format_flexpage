@@ -242,10 +242,12 @@ function xmldb_format_flexpage_install() {
                 }
             }
 
+            if (!empty($record->nametwo)) {
+                $record->nameone = $record->nametwo;
+            }
             $page = new course_format_flexpage_model_page(array(
                 'courseid' => $record->courseid,
                 'name' => $record->nameone,
-                'altname' => $record->nametwo,
                 'display' => $display,
                 'navigation' => $record->showbuttons,
                 'showavailability' => $showavailability,

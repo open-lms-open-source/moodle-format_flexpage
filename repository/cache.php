@@ -94,4 +94,18 @@ class course_format_flexpage_repository_cache {
 
         $DB->delete_records('format_flexpage_cache', array('courseid' => $courseid));
     }
+
+    /**
+     * Clear all caches for the entire site
+     *
+     * @return void
+     */
+    public function clear_all_cache() {
+        global $DB;
+
+        $DB->execute('
+            UPDATE {format_flexpage_cache}
+               SET pages = NULL, buildcode = ?, timemodified = ?
+        ', array(course_format_flexpage_model_cache::BUILD_CODE_NOT, time()));
+    }
 }

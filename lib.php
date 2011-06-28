@@ -46,7 +46,7 @@ function callback_flexpage_load_content(global_navigation &$navigation, stdClass
         if ($parentnode->hidden) {
             continue;
         }
-        $node = $parentnode->add(format_string($page->get_display_name()), $page->get_url(), navigation_node::TYPE_CUSTOM, null, $page->get_id());
+        $node = $parentnode->add(format_string($page->get_name()), $page->get_url(), navigation_node::TYPE_CUSTOM, null, $page->get_id());
         $node->hidden = (!$cache->is_page_available($page));
         $parentnodes[$page->get_id()] = $node;
 

@@ -75,14 +75,6 @@ class course_format_flexpage_model_page extends course_format_flexpage_model_abs
     protected $name;
 
     /**
-     * The page's alternative name, generally used for display
-     * in menus.
-     *
-     * @var null|string
-     */
-    protected $altname = null;
-
-    /**
      * Set to one of the DISPLAY_XXX constants
      *
      * @var int
@@ -198,39 +190,6 @@ class course_format_flexpage_model_page extends course_format_flexpage_model_abs
     public function set_name($name) {
         $this->name = $name;
         return $this;
-    }
-
-    /**
-     * @return null|string
-     */
-    public function get_altname() {
-        return $this->altname;
-    }
-
-    /**
-     * @param string|null $name
-     * @return course_format_flexpage_model_page
-     */
-    public function set_altname($name) {
-        if (empty($name)) {
-            $this->altname = null;
-        } else {
-            $this->altname = $name;
-        }
-        return $this;
-    }
-
-    /**
-     * Gets the name to be displayed to the end user
-     *
-     * @return string
-     */
-    public function get_display_name() {
-        $name = $this->get_altname();
-        if (empty($name)) {
-            $name = $this->get_name();
-        }
-        return $name;
     }
 
     /**
