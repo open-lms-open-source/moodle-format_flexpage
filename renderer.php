@@ -452,7 +452,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
                 ));
                 $options[$navurl->out(false)] = $label;
 
-                if ($option == $page->get_display()) {
+                if ($option == $page->get_navigation()) {
                     $selected = $navurl->out(false);
                 }
             }

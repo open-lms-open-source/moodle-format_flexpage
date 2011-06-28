@@ -104,6 +104,9 @@ function xmldb_format_flexpage_install() {
                         }
                         $configs[] = new block_flexpagenav_model_link_config($name, $value);
                     }
+                    if ($link->get_type() == 'flexpage') {
+                        $configs[] = new block_flexpagenav_model_link_config('children', 1);
+                    }
                     $linkrepo->save_link_config($link, $configs);
 
                     $linkid = $linkrecord->nextid;
@@ -155,11 +158,11 @@ function xmldb_format_flexpage_install() {
             if (!empty($record->locks)) {
                 $locks = unserialize(base64_decode($record->locks));
 
-                if (empty($locks->visible)) {
+                if (empty($locks['visible'])) {
                     $showavailability = 0;
                 }
-                if (!empty($locks->locks)) {
-                    foreach ($locks->locks as $lock) {
+                if (!empty($locks['locks'])) {
+                    foreach ($locks['locks'] as $lock) {
                         if ($lock['type'] == 'post') {
                             if ($cm = get_coursemodule_from_id(false, $lock['cmid'])) {
                                 switch ($cm->modname) {
@@ -178,14 +181,6 @@ function xmldb_format_flexpage_install() {
                                             $DB->set_field('course_modules', 'completion', COMPLETION_TRACKING_AUTOMATIC, array('id' => $cm->id));
                                         }
                                         $DB->set_field('choice', 'completionsubmit', 1, array('id' => $cm->instance));
-                                        $conditions[] = new condition_completion($cm->id, COMPLETION_COMPLETE);
-                                        break;
-
-                                    case 'feedback':
-                                        if ($cm->completion == COMPLETION_TRACKING_NONE) {
-                                            $DB->set_field('course_modules', 'completion', COMPLETION_TRACKING_AUTOMATIC, array('id' => $cm->id));
-                                        }
-                                        $DB->set_field('feedback', 'completionsubmit', 1, array('id' => $cm->instance));
                                         $conditions[] = new condition_completion($cm->id, COMPLETION_COMPLETE);
                                         break;
 
@@ -229,7 +224,7 @@ function xmldb_format_flexpage_install() {
                         } else if ($lock['type'] == 'access') {
                             if ($cm = get_coursemodule_from_id(false, $lock['cmid'])) {
                                 if (plugin_supports('mod', $cm->modname, FEATURE_COMPLETION_TRACKS_VIEWS, false)) {
-                                    if ($cm->completionview != COMPLETION_VIEW_NOT_REQUIRED) {
+                                    if ($cm->completionview == COMPLETION_VIEW_NOT_REQUIRED) {
                                         if ($cm->completion == COMPLETION_TRACKING_NONE) {
                                             $cm->completion = COMPLETION_TRACKING_AUTOMATIC;
                                         }
@@ -258,6 +253,9 @@ function xmldb_format_flexpage_install() {
                 'weight' => $record->sortorder,
             ));
             $pagerepo->save_page($page);
+
+            // Save the map
+            $pageidmap[$record->id] = $page->get_id();
 
             if (!empty($conditions)) {
                 $condrepo->save_page_conditions($page, $conditions);
@@ -404,7 +402,7 @@ function xmldb_format_flexpage_install() {
                 continue;
             }
             $link = new block_flexpagenav_model_link();
-            $link->set_type('flexpagenav')
+            $link->set_type('flexpage')
                  ->set_configs(array(
                     new block_flexpagenav_model_link_config('pageid', $pageidmap[$pagerecord->id]),
                     new block_flexpagenav_model_link_config('children', 0),
