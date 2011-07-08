@@ -39,6 +39,12 @@ if (!course_format_flexpage_lib_moodlepage::layout_exists($PAGE, $layout)) {
             'format_flexpage'
         );
         echo $output->page_available_info($cache->get_page_parents($page, true));
-        echo $output->continue_button(new moodle_url('/course/view.php', array('id' => $COURSE->id, 'pageid' => $cache->get_first_available_page()->get_id())));
+
+        $gotopage = $cache->get_first_available_page();
+        if ($cache->is_page_available($gotopage)) {
+            echo $output->continue_button(new moodle_url('/course/view.php', array('id' => $COURSE->id, 'pageid' => $gotopage->get_id())));
+        } else {
+            echo $output->continue_button('/');
+        }
     }
 }
