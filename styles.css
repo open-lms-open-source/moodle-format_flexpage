@@ -38,6 +38,10 @@
     display: table-cell;
 }
 
+#flexpage_actionbar #custommenu {
+    padding: 0;
+}
+
 #format_flexpage_actionbar_nav {
     float: right;
     padding-right: 10px;

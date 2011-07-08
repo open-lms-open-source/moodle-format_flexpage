@@ -12,23 +12,18 @@ M.format_flexpage.panel_stack = [];
  * Generate the action bar menu
  *
  * @param {YUI} Y
- * @param {object} menuitems
  */
-M.format_flexpage.init_actionbar = function(Y, menuitems) {
-    Y.one('body').addClass('yui-skin-sam');
+M.format_flexpage.init_actionbar = function(Y) {
+    M.core_custom_menu.init(Y, 'format_flexpage_actionbar')
 
-    var menubar = new YAHOO.widget.MenuBar("format_flexpage_actionbar_menu", {
-        autosubmenudisplay: true,
-        hidedelay: 750
-    });
-    menubar.addItems(menuitems);
-    menubar.render();
-
-    Y.all('#format_flexpage_actionbar_menu div.bd li a').on('click', function(e) {
+    // Launch modals instead of following menu item URLs
+    Y.all('#format_flexpage_actionbar_ul ul li.yui3-menuitem a').on('click', function(e) {
         e.preventDefault();
 
-        var funcName = 'init_' + e.target.get('parentNode').get('id');
-        M.format_flexpage[funcName](Y, e.target.get('href'));
+        var params = Y.QueryString.parse(e.target.get('href').split('?')[1]);
+        if (params.action != undefined) {
+            M.format_flexpage['init_' + params.action](Y, e.target.get('href'));
+        }
     });
 };
 

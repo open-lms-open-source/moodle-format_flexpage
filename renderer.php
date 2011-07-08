@@ -28,6 +28,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
                 'node',
                 'event-custom',
                 'json-parse',
+                'querystring',
                 'yui2-yahoo',
                 'yui2-dom',
                 'yui2-event',
@@ -88,37 +89,34 @@ class format_flexpage_renderer extends plugin_renderer_base {
     public function render_course_format_flexpage_lib_actionbar(course_format_flexpage_lib_actionbar $actionbar) {
         global $PAGE;
 
-        $menus = array();
+        /** @var $renderer block_flexpagenav_renderer */
+        $renderer = $PAGE->get_renderer('block_flexpagenav');
+
+        $PAGE->requires->js_init_call('M.format_flexpage.init_actionbar', null, false, $this->get_js_module());
+        $PAGE->requires->js_init_call('M.format_flexpage.init_flexpagenav_actionbar', null, false, $renderer->get_js_module());
+
+        $content  = html_writer::start_tag('div', array('id' => 'custommenu', 'class' => 'format_flexpage_actionbar'));
+        $content .= html_writer::start_tag('div', array('id' => 'format_flexpage_actionbar', 'class' => 'yui3-menu yui3-menu-horizontal javascript-disabled'));
+        $content .= html_writer::start_tag('div', array('class'=>'yui3-menu-content'));
+        $content .= $this->actionbar_navigation();
+        $content .= html_writer::start_tag('ul', array('id' => 'format_flexpage_actionbar_ul'));
 
         foreach ($actionbar->get_menus() as $menu) {
-            $menuobj = (object) array(
-                'text' => $menu->get_name(),
-                'submenu' => (object) array(
-                    'id' => html_writer::random_id(),
-                    'itemdata' => array(),
-                )
-            );
+            $menuitem = new custom_menu_item($menu->get_name());
             foreach ($menu->get_actions() as $action) {
                 if (!$action->get_visible()) {
                     continue;
                 }
-                $menuobj->submenu->itemdata[] = (object) array(
-                    'text' => $action->get_name(),
-                    'id' => $action->get_action(),
-                    'url' => $action->get_url()->out(false),
-                );
+                $menuitem->add($action->get_name(), $action->get_url());
             }
-            $menus[] = $menuobj;
+            $content .= $this->render($menuitem);
         }
+        $content .= html_writer::end_tag('ul');
+        $content .= html_writer::end_tag('div');
+        $content .= html_writer::end_tag('div');
+        $content .= html_writer::end_tag('div');
 
-        $arguments = array($menus);
-        $renderer  = $PAGE->get_renderer('block_flexpagenav');
-
-        $PAGE->requires->js_init_call('M.format_flexpage.init_actionbar', $arguments, false, $this->get_js_module());
-        $PAGE->requires->js_init_call('M.format_flexpage.init_flexpagenav_actionbar', null, false, $renderer->get_js_module());
-
-        $menudiv = html_writer::tag('div', $this->actionbar_navigation(), array('id' => 'format_flexpage_actionbar_menu'));
-        return html_writer::tag('div', $menudiv, array('id' => 'format_flexpage_actionbar'));
+        return $content;
     }
 
     /**
