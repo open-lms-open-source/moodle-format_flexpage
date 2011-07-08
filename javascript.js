@@ -79,6 +79,7 @@ M.format_flexpage.init_addpages = function(Y, url) {
 
     // Customize buttons
     dialog.cfg.queueProperty("buttons", [
+        { text: M.str.moodle.cancel, handler: dialog.cancel },
         { text: M.str.format_flexpage.addpages, handler: dialog.submit, isDefault: true }
     ]);
 
@@ -157,6 +158,7 @@ M.format_flexpage.init_deletepage = function(Y, url) {
 
     // Customize buttons
     dialog.cfg.queueProperty("buttons", [
+        { text: M.str.moodle.cancel, handler: dialog.cancel },
         { text: M.str.format_flexpage.deletepage, handler: dialog.submit, isDefault: true }
     ]);
 
@@ -174,7 +176,7 @@ M.format_flexpage.init_deletepage = function(Y, url) {
 M.format_flexpage.init_managepages = function(Y, url) {
     var dialog = M.format_flexpage.init_default_dialog(Y, "managepagespanel");
 
-    // Customize buttons
+    // Remove buttons
     dialog.cfg.queueProperty("buttons", []);
 
     // When the user finally hides the dialog, we reload the page
@@ -276,6 +278,7 @@ M.format_flexpage.init_addexistingactivity = function(Y, url) {
 
     // Customize buttons
     dialog.cfg.queueProperty("buttons", [
+        { text: M.str.moodle.cancel, handler: dialog.cancel },
         { text: M.str.format_flexpage.addactivities, isDefault: true, handler: function() {
             M.format_flexpage.set_region_input(Y, buttonGroup, 'region');
             dialog.submit();
@@ -298,7 +301,7 @@ M.format_flexpage.init_addexistingactivity = function(Y, url) {
 M.format_flexpage.init_addblock = function(Y, url) {
     var dialog = M.format_flexpage.init_default_dialog(Y, "addblockpanel");
 
-    // Customize buttons
+    // Remove buttons
     dialog.cfg.queueProperty("buttons", []);
 
     M.format_flexpage.populate_panel(Y, dialog, url, function(buttons) {
@@ -331,6 +334,7 @@ M.format_flexpage.init_movepage = function(Y, url) {
 
     // Customize buttons
     dialog.cfg.queueProperty("buttons", [
+        { text: M.str.moodle.cancel, handler: dialog.cancel },
         { text: M.str.format_flexpage.movepage, handler: dialog.submit, isDefault: true }
     ]);
 
@@ -353,6 +357,7 @@ M.format_flexpage.init_default_dialog = function(Y, id) {
         underlay: "none",
         close: true,
         buttons: [
+            { text: M.str.moodle.cancel, handler: function() { this.cancel() } },
             { text: M.str.moodle.savechanges, handler: function() { this.submit() }, isDefault: true }
         ]
     });
