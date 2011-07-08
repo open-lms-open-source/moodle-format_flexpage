@@ -172,20 +172,23 @@ M.format_flexpage.init_deletepage = function(Y, url) {
  * @param url
  */
 M.format_flexpage.init_managepages = function(Y, url) {
-    var panel = M.format_flexpage.init_default_panel(Y, "managepagespanel");
+    var dialog = M.format_flexpage.init_default_dialog(Y, "managepagespanel");
 
-    // When the user finally hides the panel, we reload the page
-    panel.hideEvent.subscribe(function(e) {
+    // Customize buttons
+    dialog.cfg.queueProperty("buttons", []);
+
+    // When the user finally hides the dialog, we reload the page
+    dialog.hideEvent.subscribe(function(e) {
         if (M.format_flexpage.panel_stack.length == 0) {
             window.location.reload();
         }
     });
 
-    M.format_flexpage.populate_panel(Y, panel, url, function() {
-        M.format_flexpage.constrain_panel_to_viewport(Y, panel);
+    M.format_flexpage.populate_panel(Y, dialog, url, function() {
+        M.format_flexpage.constrain_panel_to_viewport(Y, dialog);
 
         Y.all('select.format_flexpage_actions_select').each(function(node) {
-            M.format_flexpage.init_action_menu(Y, node, panel, function () {
+            M.format_flexpage.init_action_menu(Y, node, dialog, function () {
                 return M.format_flexpage.init_managepages(Y, url);
             });
         });
@@ -221,7 +224,7 @@ M.format_flexpage.init_managepages = function(Y, url) {
         });
     });
 
-    return panel;
+    return dialog;
 };
 
 /**
@@ -360,21 +363,6 @@ M.format_flexpage.init_default_dialog = function(Y, id) {
         M.format_flexpage.init_error_dialog(Y, M.str.format_flexpage.genericasyncfail);
     };
     return dialog;
-};
-
-/**
- * Init default panel
- *
- * @param Y
- * @param url
- */
-M.format_flexpage.init_default_panel = function(Y, id) {
-    return new YAHOO.widget.Panel(id, {
-        constraintoviewport: true,
-        modal: true,
-        underlay: "none",
-        close: true
-    });
 };
 
 /**
