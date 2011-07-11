@@ -78,11 +78,8 @@
 #format_flexpage_region_radios {
     margin-top: 5px;
     margin-bottom: 10px;
-}
-
-.format_flexpage_existing_activity_list {
-    max-height: 600px;
-    overflow: auto;
+    margin-right: 20px;
+    white-space: nowrap;
 }
 
 .format_flexpage_existing_activity_list li {

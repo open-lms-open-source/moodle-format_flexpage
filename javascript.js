@@ -281,6 +281,7 @@ M.format_flexpage.init_addexistingactivity = function(Y, url) {
     ]);
 
     M.format_flexpage.populate_panel(Y, dialog, url, function(buttons) {
+        M.format_flexpage.constrain_panel_to_viewport(Y, dialog);
         buttonGroup = M.format_flexpage.init_region_buttons(Y, buttons);
     });
 
@@ -349,6 +350,7 @@ M.format_flexpage.init_default_dialog = function(Y, id) {
         // postmethod: 'form', // Very handy for debugging
         constraintoviewport: true,
         modal: true,
+        zIndex: 100,
         underlay: "none",
         close: true,
         buttons: [
@@ -462,6 +464,7 @@ M.format_flexpage.init_error_dialog = function(Y, errorMessage) {
     var dialog = new YAHOO.widget.SimpleDialog("errorDialog", {
         constraintoviewport: true,
         modal: true,
+        zIndex: 200,
         underlay: "none",
         close: true,
         text: errorMessage,
