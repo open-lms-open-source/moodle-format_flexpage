@@ -156,6 +156,15 @@ EOT;
 }
 
 /**
+ * Determine if there is a next/previous page to show
+ *
+ * @return boolean
+ */
+function format_flexpage_has_next_or_previous() {
+    return (format_flexpage_previous_page() or format_flexpage_next_page());
+}
+
+/**
  * Get the previous page
  *
  * @return null|course_format_flexpage_model_page
