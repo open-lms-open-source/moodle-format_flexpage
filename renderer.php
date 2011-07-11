@@ -29,6 +29,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
                 'event-custom',
                 'json-parse',
                 'querystring',
+                'lang',
                 'yui2-yahoo',
                 'yui2-dom',
                 'yui2-event',

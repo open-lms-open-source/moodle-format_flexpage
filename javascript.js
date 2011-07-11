@@ -101,7 +101,7 @@ M.format_flexpage.init_editpage = function(Y, url) {
 
     dialog.validate = function() {
         var data = this.getData();
-        if (data.name == "" || data.name == undefined) {
+        if (data.name == undefined || Y.Lang.trim(data.name) == "") {
             Y.one('input[name="name"]').addClass('format_flexpage_error_bg');
             M.format_flexpage.init_error_dialog(Y, M.str.format_flexpage.formnamerequired);
             return false;

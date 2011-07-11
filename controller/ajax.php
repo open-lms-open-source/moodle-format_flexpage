@@ -92,6 +92,8 @@ class course_format_flexpage_controller_ajax extends mr_controller {
             $condrepo   = new course_format_flexpage_repository_condition();
             $addedpages = array();
             foreach ($names as $key => $name) {
+                $name = trim($name);
+
                 // Required values...
                 if (empty($name) or empty($moves[$key]) or empty($referencepageids[$key])) {
                     continue;
@@ -294,8 +296,14 @@ class course_format_flexpage_controller_ajax extends mr_controller {
         if (optional_param('edit', 0, PARAM_BOOL)) {
             require_sesskey();
 
+            $name = required_param('name', PARAM_MULTILANG);
+            $name = trim($name);
+
+            if (empty($name)) {
+                throw new coding_exception('Name cannot be blank');
+            }
             $page->set_options(array(
-                'name' => required_param('name', PARAM_MULTILANG),
+                'name' => $name,
                 'display' => required_param('display', PARAM_INT),
                 'navigation' => required_param('navigation', PARAM_INT),
             ));
