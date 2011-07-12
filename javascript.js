@@ -21,6 +21,11 @@ M.format_flexpage.init_actionbar = function(Y) {
         node.removeClass('hiddenifjs');
 
         node.on('click', function(e) {
+            // Make sure it's not some other menu item
+            if (e.target.ancestor('#format_flexpage_actionbar_nav')) {
+                return;
+            }
+
             // This trickery hides the menu after an item has been chosen
             var menuBarItem = Y.one('a.yui3-menu-label-menuvisible');
             if (menuBarItem) {
