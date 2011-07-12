@@ -14,16 +14,24 @@ M.format_flexpage.panel_stack = [];
  * @param {YUI} Y
  */
 M.format_flexpage.init_actionbar = function(Y) {
-    M.core_custom_menu.init(Y, 'format_flexpage_actionbar');
+    Y.use('node-menunav', function(Y) {
+        var node = Y.one('#format_flexpage_actionbar');
+        node.removeClass('javascript-disabled');
+        node.plug(Y.Plugin.NodeMenuNav);
+        node.on('click', function(e) {
+            // This trickery hides the menu after an item has been chosen
+            var menuBarItem = Y.one('a.yui3-menu-label-menuvisible');
+            if (menuBarItem) {
+                menuBarItem.removeClass('yui3-menu-label-menuvisible');
+            }
+            e.target.ancestor('div.yui3-menu').addClass('yui3-menu-hidden');
+            // End trickery :(
 
-    // Launch modals instead of following menu item URLs
-    Y.all('#format_flexpage_actionbar_ul ul li.yui3-menuitem a').on('click', function(e) {
-        e.preventDefault();
-
-        var params = Y.QueryString.parse(e.target.get('href').split('?')[1]);
-        if (params.action != undefined) {
-            M.format_flexpage['init_' + params.action](Y, e.target.get('href'));
-        }
+            var params = Y.QueryString.parse(e.target.get('href').split('?')[1]);
+            if (params.action != undefined) {
+                M.format_flexpage['init_' + params.action](Y, e.target.get('href'));
+            }
+        });
     });
 
     Y.one('#format_flexpage_actionbar_help').on('click', function(e) {
