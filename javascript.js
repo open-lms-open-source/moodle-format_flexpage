@@ -27,6 +27,8 @@ M.format_flexpage.init_actionbar = function(Y) {
             e.target.ancestor('div.yui3-menu').addClass('yui3-menu-hidden');
             // End trickery :(
 
+            e.preventDefault();
+
             var params = Y.QueryString.parse(e.target.get('href').split('?')[1]);
             if (params.action != undefined) {
                 M.format_flexpage['init_' + params.action](Y, e.target.get('href'));
