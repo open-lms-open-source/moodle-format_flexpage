@@ -14,7 +14,7 @@ M.format_flexpage.panel_stack = [];
  * @param {YUI} Y
  */
 M.format_flexpage.init_actionbar = function(Y) {
-    M.core_custom_menu.init(Y, 'format_flexpage_actionbar')
+    M.core_custom_menu.init(Y, 'format_flexpage_actionbar');
 
     // Launch modals instead of following menu item URLs
     Y.all('#format_flexpage_actionbar_ul ul li.yui3-menuitem a').on('click', function(e) {
@@ -24,6 +24,10 @@ M.format_flexpage.init_actionbar = function(Y) {
         if (params.action != undefined) {
             M.format_flexpage['init_' + params.action](Y, e.target.get('href'));
         }
+    });
+
+    Y.one('#format_flexpage_actionbar_help').on('click', function(e) {
+        M.format_flexpage.init_actionbar_help_icon(Y);
     });
 };
 
@@ -340,10 +344,25 @@ M.format_flexpage.init_movepage = function(Y, url) {
 };
 
 /**
+ * Init default panel
+ *
+ * @param Y
+ * @param id
+ */
+M.format_flexpage.init_default_panel = function(Y, id) {
+    return new YAHOO.widget.Panel(id, {
+        constraintoviewport: true,
+        modal: true,
+        underlay: "none",
+        close: true
+    });
+};
+
+/**
  * Init default dialog
  *
  * @param Y
- * @param url
+ * @param id
  */
 M.format_flexpage.init_default_dialog = function(Y, id) {
     var dialog = new YAHOO.widget.Dialog(id, {
@@ -391,6 +410,8 @@ M.format_flexpage.populate_panel = function(Y, panel, url, onsuccess) {
                 panel.render(document.body);
                 panel.show();
                 panel.center();
+
+                M.format_flexpage.init_help_icons(Y);
 
                 if (typeof onsuccess == 'function') {
                     if (response.args != undefined) {
@@ -600,6 +621,48 @@ M.format_flexpage.init_action_menu = function(Y, selectNode, parentDialog, reIni
     });
 
     return button;
+};
+
+/**
+ * Handler for when the help icon is pushed in the action bar
+ *
+ * @param Y
+ */
+M.format_flexpage.init_actionbar_help_icon = function(Y) {
+    var panel = M.format_flexpage.init_default_panel(Y, 'actionhelpbuttonpanel');
+
+    panel.cfg.queueProperty('width', '500px');
+
+    panel.setHeader(M.str.format_flexpage.actionbar);
+    panel.setBody(M.str.format_flexpage.actionbar_help);
+    panel.render(document.body);
+    panel.show();
+    panel.center();
+
+    M.format_flexpage.constrain_panel_to_viewport(Y, panel);
+
+    return panel;
+};
+
+/**
+ * Make Moodle help icons active that come back through JSON response
+ *
+ * @param Y
+ */
+M.format_flexpage.init_help_icons = function(Y) {
+    Y.all('span.format_flexpage_helpicon').each(function(node) {
+        // Prevent re-processing help icons
+        if (!node.hasClass('format_flexpage_helpicon_processed')) {
+            node.addClass('format_flexpage_helpicon_processed');
+
+            var atag = node.one('a');
+
+            M.util.help_icon.add(Y, {
+                id: atag.get('id'),
+                url: atag.get('href')
+            })
+        }
+    });
 };
 
 /**

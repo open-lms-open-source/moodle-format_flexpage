@@ -59,6 +59,16 @@
     padding-left: 5px;
 }
 
+#format_flexpage_actionbar_help {
+    cursor: pointer;
+    vertical-align: middle;
+    margin-left: 10px;
+}
+
+#actionhelpbuttonpanel ul li {
+    margin-bottom: 10px;
+}
+
 #format_flexpage_movingtext {
     padding-right: 5px;
 }

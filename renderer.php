@@ -54,6 +54,8 @@ class format_flexpage_renderer extends plugin_renderer_base {
                 array('deletemodwarn', 'format_flexpage'),
                 array('continuedotdotdot', 'format_flexpage'),
                 array('warning', 'format_flexpage'),
+                array('actionbar', 'format_flexpage'),
+                array('actionbar_help', 'format_flexpage'),
             )
         );
     }
@@ -79,6 +81,17 @@ class format_flexpage_renderer extends plugin_renderer_base {
             return $name;
         }
         return str_repeat('&nbsp;&nbsp;', $amount).'-&nbsp;'.$name;
+    }
+
+    /**
+     * Generates a help icon with specific class wrapped around it
+     *
+     * @param string $identifier
+     * @param string $component
+     * @return string
+     */
+    public function flexpage_help_icon($identifier, $component = 'format_flexpage') {
+        return html_writer::tag('span', $this->help_icon($identifier, $component), array('class' => 'format_flexpage_helpicon'));
     }
 
     /**
@@ -151,8 +164,10 @@ class format_flexpage_renderer extends plugin_renderer_base {
             'pageid', $options, $currentpage->get_id(), array(), 'jumptopageid'
         );
         $jumptopage = html_writer::tag('span', $jumptopage, array('id' => 'format_flexpage_jumptopage'));
+        $helpicon   = $this->pix_icon('help', get_string('help'), 'moodle', array('id' => 'format_flexpage_actionbar_help'));
+        $helpicon   = html_writer::tag('span', $helpicon);
 
-        return html_writer::tag('div', $prevpage.$jumptopage.$nextpage, array('id' => 'format_flexpage_actionbar_nav'));
+        return html_writer::tag('div', $prevpage.$jumptopage.$nextpage.$helpicon, array('id' => 'format_flexpage_actionbar_nav'));
     }
 
     /**
