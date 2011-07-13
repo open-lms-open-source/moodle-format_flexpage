@@ -174,8 +174,8 @@ M.format_flexpage.init_deletepage = function(Y, url) {
 
     // Customize buttons
     dialog.cfg.queueProperty("buttons", [
-        { text: M.str.moodle.cancel, handler: dialog.cancel },
-        { text: M.str.format_flexpage.deletepage, handler: dialog.submit, isDefault: true }
+        { text: M.str.moodle.cancel, handler: dialog.cancel, isDefault: true },
+        { text: M.str.format_flexpage.deletepage, handler: dialog.submit }
     ]);
 
     M.format_flexpage.populate_panel(Y, dialog, url);
