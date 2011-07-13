@@ -457,7 +457,9 @@ function xmldb_format_flexpage_install() {
     events_uninstall('block/page_module');
 
 /// Cleanup mod/pagemenu
-    uninstall_plugin('mod', 'pagemenu');
+    if ($DB->record_exists('modules', array('name' => 'pagemenu'))) {
+        uninstall_plugin('mod', 'pagemenu');
+    }
 
 /// Cleanup course/format/page
     foreach (array('format_page', 'format_page_items') as $table) {
