@@ -381,65 +381,67 @@ function xmldb_format_flexpage_install() {
     }
 
 /// Migration of top tabs (we build a new menu that's designated as the top tabs)
-    $records = $DB->get_recordset('course', array('format' => 'flexpage'), '', 'id');
-    foreach ($records as $record) {
-        $links = array();
+    if ($DB->get_manager()->table_exists('pagemenu') and $DB->get_manager()->table_exists('format_page')) {
+        $records = $DB->get_recordset('course', array('format' => 'flexpage'), '', 'id');
+        foreach ($records as $record) {
+            $links = array();
 
-        $menurecords = $DB->get_recordset('pagemenu', array('course' => $record->id, 'useastab' => 1), 'taborder, name', 'id');
-        foreach ($menurecords as $menurecord) {
-            if (!array_key_exists($menurecord->id, $menuidmap)) {
-                continue;
+            $menurecords = $DB->get_recordset('pagemenu', array('course' => $record->id, 'useastab' => 1), 'taborder, name', 'id');
+            foreach ($menurecords as $menurecord) {
+                if (!array_key_exists($menurecord->id, $menuidmap)) {
+                    continue;
+                }
+                $link = new block_flexpagenav_model_link();
+                $link->set_type('flexpagenav')
+                     ->set_configs(array(new block_flexpagenav_model_link_config('menuid', $menuidmap[$menurecord->id])));
+                $links[] = $link;
             }
-            $link = new block_flexpagenav_model_link();
-            $link->set_type('flexpagenav')
-                 ->set_configs(array(new block_flexpagenav_model_link_config('menuid', $menuidmap[$menurecord->id])));
-            $links[] = $link;
-        }
-        $menurecords->close();
+            $menurecords->close();
 
-        // (2 | 1) means DISP_THEME and DISP_PUBLISH
-        $pagerecords = $DB->get_recordset_select('format_page', 'courseid = ? AND ((display & ?) = ?) AND parent = 0', array($record->id, (2 | 1), (2 | 1)), 'sortorder');
-        foreach ($pagerecords as $pagerecord) {
-            if (!array_key_exists($pagerecord->id, $pageidmap)) {
-                continue;
+            // (2 | 1) means DISP_THEME and DISP_PUBLISH
+            $pagerecords = $DB->get_recordset_select('format_page', 'courseid = ? AND ((display & ?) = ?) AND parent = 0', array($record->id, (2 | 1), (2 | 1)), 'sortorder');
+            foreach ($pagerecords as $pagerecord) {
+                if (!array_key_exists($pagerecord->id, $pageidmap)) {
+                    continue;
+                }
+                $link = new block_flexpagenav_model_link();
+                $link->set_type('flexpage')
+                     ->set_configs(array(
+                        new block_flexpagenav_model_link_config('pageid', $pageidmap[$pagerecord->id]),
+                        new block_flexpagenav_model_link_config('children', 0),
+                        new block_flexpagenav_model_link_config('exclude', ''),
+                     )
+                );
+                $links[] = $link;
             }
-            $link = new block_flexpagenav_model_link();
-            $link->set_type('flexpage')
-                 ->set_configs(array(
-                    new block_flexpagenav_model_link_config('pageid', $pageidmap[$pagerecord->id]),
-                    new block_flexpagenav_model_link_config('children', 0),
-                    new block_flexpagenav_model_link_config('exclude', ''),
-                 )
-            );
-            $links[] = $link;
-        }
-        $pagerecords->close();
+            $pagerecords->close();
 
-        if (!empty($links)) {
-            $menurepo = new block_flexpagenav_repository_menu();
-            $linkrepo = new block_flexpagenav_repository_link();
+            if (!empty($links)) {
+                $menurepo = new block_flexpagenav_repository_menu();
+                $linkrepo = new block_flexpagenav_repository_link();
 
-            $menu = new block_flexpagenav_model_menu();
-            $menu->set_couseid($record->id)
-                 ->set_name(get_string('migrationtoptabs', 'block_flexpagenav'))
-                 ->set_render('navhorizontal')
-                 ->set_displayname(0)
-                 ->set_useastab(1);
-            $menurepo->save_menu($menu);
+                $menu = new block_flexpagenav_model_menu();
+                $menu->set_couseid($record->id)
+                     ->set_name(get_string('migrationtoptabs', 'block_flexpagenav'))
+                     ->set_render('navhorizontal')
+                     ->set_displayname(0)
+                     ->set_useastab(1);
+                $menurepo->save_menu($menu);
 
-            $weight = 0;
-            foreach ($links as $link) {
-                $link->set_menuid($menu->get_id())
-                     ->set_weight($weight);
+                $weight = 0;
+                foreach ($links as $link) {
+                    $link->set_menuid($menu->get_id())
+                         ->set_weight($weight);
 
-                $linkrepo->save_link($link)
-                         ->save_link_config($link, $link->get_configs());
+                    $linkrepo->save_link($link)
+                             ->save_link_config($link, $link->get_configs());
 
-                $weight++;
+                    $weight++;
+                }
             }
         }
+        $records->close();
     }
-    $records->close();
 
 /// Cleanup block/page_module
     $instances = $DB->get_records('block_instances', array('blockname' => 'page_module'));
