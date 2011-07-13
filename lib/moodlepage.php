@@ -114,7 +114,7 @@ class course_format_flexpage_lib_moodlepage {
 
         if (!empty($blocks)) {
             foreach ($blocks as $block) {
-                if ($block->name == 'flexpagemod') {
+                if (in_array($block->name, array('flexpagemod', 'flexpagenav'))) {
                     continue;
                 }
                 $blockobject = block_instance($block->name);
@@ -220,7 +220,7 @@ class course_format_flexpage_lib_moodlepage {
             } else if ($instance->blockname == 'flexpagenav') {
                 $block = block_instance('flexpagenav', $instance);
                 if (!empty($block->config->menuid)) {
-                    self::add_activity_block($destpage, $block->config->menuid, $instance->defaultregion);
+                    self::add_menu_block($destpage, $block->config->menuid, $instance->defaultregion);
                 }
             } else {
                 self::add_block($destpage, $instance->blockname, $instance->defaultregion);
