@@ -30,11 +30,14 @@ $string['movepage'] = 'Move page';
 $string['movepagea'] = 'Move page <strong>{$a}</strong>';
 $string['movedpage'] = 'Moved page "{$a->movepage}" {$a->move} page "{$a->refpage}"';
 $string['addactivity'] = 'Add activity';
+$string['addactivity_help'] = 'Choose where you would like to place the new activity on the page by selecting one of the buttons on the top of the <strong>Add activity</strong> window. Next, choose the activity or resource that you would like to add to the course and page.';
 $string['addto'] = 'Add to:';
 $string['addexistingactivity'] = 'Add existing activity';
+$string['addexistingactivity_help'] = 'Choose where you would like to place the existing activity on the page by selecting one of the buttons on the top of the <strong>Add existing activity</strong> window. Next, place a checkmark next to the activities that you would like to add to this page. Finally, click the "Add activities" button at the bottom of the window to complete the action.';
 $string['addexistingactivityaction'] = 'Add existing activity';
 $string['addactivities'] = 'Add activities';
 $string['addblock'] = 'Add block';
+$string['addblock_help'] = 'Choose where you would like to place the block on the page by selecting one of the buttons on the top of the <strong>Add block</strong> window. Next, click on the name of the block that you would like to add to the course.';
 $string['addblockaction'] = 'Add block';
 $string['block'] = 'Block';
 $string['displayhidden'] = 'Hidden';
@@ -45,11 +48,15 @@ $string['navprev'] = 'Previous page only';
 $string['navnext'] = 'Next page only';
 $string['navboth'] = 'Both previous and next page';
 $string['navigation'] = 'Navigation';
+$string['navigation_help'] = 'Used to display next and/or previous buttons on this page.  The buttons take the user to the next/previous available page.';
 $string['display'] = 'Display';
 $string['name'] = 'Name';
+$string['name_help'] = 'This is the name of your page and it will appear to course users in menus and the like.';
 $string['formnamerequired'] = 'The page name is a required field.';
-$string['regrionwidths'] = 'Block region widths';
+$string['regionwidths'] = 'Block region widths';
+$string['regionwidths_help'] = 'One can specify how wide each region of blocks can be in pixels.  An example would be to set left to 200, main to 500 and right to 200.  Please note though that available regions and their names can change from theme to theme.';
 $string['managepages'] = 'Manage pages';
+$string['managepages_help'] = 'From this window, you can view the index of all pages, and quickly manage, move or delete individual pages; as well as alter display settings; as well as control navigation settings.';
 $string['pagename'] = 'Page name';
 $string['deletepage'] = 'Delete page';
 $string['deletepageaction'] = 'Delete page';
@@ -69,7 +76,28 @@ $string['deletemodwarn'] = 'If this activity is deleted, then it will be removed
 $string['continuedotdotdot'] = 'Continue...';
 $string['warning'] = 'Warning';
 $string['actionbar'] = 'Edit bar';
+$string['availablefrom'] = 'Allow access from';
+$string['availablefrom_help'] = 'This page will be available to course users after this date.';
+$string['availableuntil'] = 'Allow access until';
+$string['availableuntil_help'] = 'This page will be available to course users before this date.';
+$string['showavailability'] = 'Before this can be accessed';
+$string['showavailability_help'] = 'If the page is unavailable to the user, this setting determines if this page\'s restriction information is displayed or nothing at all.';
 
+
+$string['display_help'] = 'Configure if this page is:
+<ol>
+    <li>Hidden completely to non-editors.</li>
+    <li>Visible to course users, but does not appear in Flexpage Menus and course navigation.</li>
+    <li>Visible to course users and appears in Flexpage Menus and course navigation.</li>
+</ol>';
+
+$string['addpages_help'] = 'From here you can new pages to your course.  Going from left to right on the form:
+ <ol>
+    <li>Enter the name of your page (blank names are not added).</li>
+    <li>The next <em>two</em> drop-downs determine where in the index of pages your new page will be added.  So, you can add your new page before, after or as a child (sub-page) of another page.</li>
+    <li>(Optional) In the last drop-down, one can choose an existing page to copy into your newly created page.</li>
+</ol>
+To add more than one page at a time, click on the "+" icon and fill out the new row.  If you click on the "+" icon too many times, just blank out the page names and they will not be added.';
 
 $string['actionbar_help'] = '
 <p>With Flexpage, course designers can create multiple pages within the course. Each page can have unique or shared content on them.</p>

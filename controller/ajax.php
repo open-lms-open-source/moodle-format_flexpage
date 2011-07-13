@@ -138,7 +138,7 @@ class course_format_flexpage_controller_ajax extends mr_controller {
             $submiturl = $this->new_url(array('sesskey' => sesskey(), 'action' => 'addpages', 'add' => 1));
 
             echo json_encode((object) array(
-                'header' => get_string('addpages', 'format_flexpage'),
+                'header' => $this->output->flexpage_help_icon('addpages'),
                 'body' => $this->output->add_pages($submiturl, $pageoptions, $moveoptions, $copyoptions),
             ));
         }
@@ -209,7 +209,7 @@ class course_format_flexpage_controller_ajax extends mr_controller {
 
         echo json_encode((object) array(
             'args' => course_format_flexpage_lib_moodlepage::get_region_json_options(),
-            'header' => get_string('addactivity', 'format_flexpage'),
+            'header' => $this->output->flexpage_help_icon('addactivity'),
             'body' => $this->output->add_activity(
                 $this->new_url(array('sesskey' => sesskey(), 'action' => 'addactivity', 'add' => 1)),
                 course_format_flexpage_lib_mod::get_add_options()
@@ -241,7 +241,7 @@ class course_format_flexpage_controller_ajax extends mr_controller {
         } else {
             echo json_encode((object) array(
                 'args' => course_format_flexpage_lib_moodlepage::get_region_json_options(),
-                'header' => get_string('addexistingactivity', 'format_flexpage'),
+                'header' => $this->output->flexpage_help_icon('addexistingactivity'),
                 'body' => $this->output->add_existing_activity(
                     $this->new_url(array('sesskey' => sesskey(), 'action' => 'addexistingactivity', 'pageid' => $page->get_id(), 'add' => 1)),
                     course_format_flexpage_lib_mod::get_existing_options()
@@ -271,7 +271,7 @@ class course_format_flexpage_controller_ajax extends mr_controller {
         } else {
             echo json_encode((object) array(
                 'args' => course_format_flexpage_lib_moodlepage::get_region_json_options(),
-                'header' => get_string('addblock', 'format_flexpage'),
+                'header' => $this->output->flexpage_help_icon('addblock'),
                 'body' => $this->output->add_block(
                     $this->new_url(array('sesskey' => sesskey(), 'action' => 'addblock', 'pageid' => $page->get_id(), 'add' => 1)),
                     course_format_flexpage_lib_moodlepage::get_add_block_options($page)
@@ -409,7 +409,7 @@ class course_format_flexpage_controller_ajax extends mr_controller {
             }
         }
         echo json_encode((object) array(
-            'header' => get_string('managepages', 'format_flexpage'),
+            'header' => $this->output->flexpage_help_icon('managepages'),
             'body'   => $this->output->manage_pages(
                 $this->new_url(),
                 format_flexpage_cache()->get_pages(),

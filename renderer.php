@@ -87,10 +87,16 @@ class format_flexpage_renderer extends plugin_renderer_base {
      *
      * @param string $identifier
      * @param string $component
+     * @param bool $showlabel
      * @return string
      */
-    public function flexpage_help_icon($identifier, $component = 'format_flexpage') {
-        return html_writer::tag('span', $this->help_icon($identifier, $component), array('class' => 'format_flexpage_helpicon'));
+    public function flexpage_help_icon($identifier, $component = 'format_flexpage', $showlabel = true) {
+        $help = html_writer::tag('span', $this->help_icon($identifier, $component), array('class' => 'format_flexpage_helpicon'));
+
+        if ($showlabel) {
+            $help = get_string($identifier, $component)."&nbsp;$help";
+        }
+        return $help;
     }
 
     /**
@@ -426,8 +432,8 @@ class format_flexpage_renderer extends plugin_renderer_base {
         $row = $box->add_new_row(array('class' => 'format_flexpage_box_headers'));
         $row->add_new_cell(get_string('pagename', 'format_flexpage'))
             ->add_new_cell(get_string('managemenu', 'format_flexpage'))
-            ->add_new_cell(get_string('display', 'format_flexpage'))
-            ->add_new_cell(get_string('navigation', 'format_flexpage'));
+            ->add_new_cell($this->flexpage_help_icon('display'))
+            ->add_new_cell($this->flexpage_help_icon('navigation'));
 
         foreach ($pages as $page) {
             $options = array();
@@ -539,7 +545,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
         $templates      = '';
 
         $box = new course_format_flexpage_lib_box(array('class' => 'format_flexpage_form'));
-        $box->add_new_row()->add_new_cell(html_writer::label(get_string('name', 'format_flexpage'), 'id_name'))
+        $box->add_new_row()->add_new_cell(html_writer::label($this->flexpage_help_icon('name'), 'id_name'))
                            ->add_new_cell(html_writer::empty_tag('input', array('id' => 'id_name', 'name' => 'name', 'type' => 'text', 'size' => 50, 'value' => $page->get_name())));
 
         $regioncell = new course_format_flexpage_lib_box_cell();
@@ -552,37 +558,37 @@ class format_flexpage_renderer extends plugin_renderer_base {
             $regioncell->append_contents(
                 html_writer::tag('span',
                     html_writer::empty_tag('input', array('id' => "id_region_$region", 'name' => "regions[$region]", 'type' => 'text', 'size' => 4, 'value' => $value)).
-                    html_writer::label("&nbsp;$name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "id_region_$region")
+                    html_writer::label("&nbsp;px&nbsp;$name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "id_region_$region")
                 )
             );
         }
-        $box->add_new_row()->add_new_cell(get_string('regrionwidths', 'format_flexpage'))
+        $box->add_new_row()->add_new_cell($this->flexpage_help_icon('regionwidths'))
                            ->add_cell($regioncell);
 
-        $box->add_new_row()->add_new_cell(html_writer::label(get_string('display', 'format_flexpage'), 'id_display'))
+        $box->add_new_row()->add_new_cell(html_writer::label($this->flexpage_help_icon('display'), 'id_display'))
                            ->add_new_cell(html_writer::select($displayopts, 'display', $page->get_display(), false, array('id' => 'id_display')));
 
-        $box->add_new_row()->add_new_cell(html_writer::label(get_string('navigation', 'format_flexpage'), 'id_navigation'))
+        $box->add_new_row()->add_new_cell(html_writer::label($this->flexpage_help_icon('navigation'), 'id_navigation'))
                            ->add_new_cell(html_writer::select($navigationopts, 'navigation', $page->get_navigation(), false, array('id' => 'id_navigation')));
 
         if (!empty($CFG->enableavailability)) {
-            $box->add_new_row()->add_new_cell(get_string('availablefrom', 'condition'))
+            $box->add_new_row()->add_new_cell($this->flexpage_help_icon('availablefrom'))
                                ->add_new_cell($this->calendar('availablefrom', $page->get_availablefrom()));
 
-            $box->add_new_row()->add_new_cell(get_string('availableuntil', 'condition'))
+            $box->add_new_row()->add_new_cell($this->flexpage_help_icon('availableuntil'))
                                ->add_new_cell($this->calendar('availableuntil', $page->get_availableuntil()));
 
-            $box->add_new_row()->add_new_cell(html_writer::label(get_string('releasecode', 'local_mrooms'), 'id_releasecode'))
+            $box->add_new_row()->add_new_cell(html_writer::label($this->flexpage_help_icon('releasecode', 'local_mrooms'), 'id_releasecode'))
                                ->add_new_cell(html_writer::empty_tag('input', array('id' => 'id_releasecode', 'type' => 'text', 'name' => 'releasecode', 'maxlength' => 50, 'size' => 50, 'value' => $page->get_releasecode())));
 
-            $box->add_new_row()->add_new_cell(get_string('gradecondition', 'condition'))
+            $box->add_new_row()->add_new_cell($this->flexpage_help_icon('gradecondition', 'condition'))
                                ->add_new_cell($this->page_conditions($page, 'condition_grade'));
 
             $templates = $this->condition_grade();
 
             $completion = new completion_info($COURSE);
             if ($completion->is_enabled()) {
-                $box->add_new_row()->add_new_cell(get_string('completioncondition', 'condition'))
+                $box->add_new_row()->add_new_cell($this->flexpage_help_icon('completioncondition', 'condition'))
                                    ->add_new_cell($this->page_conditions($page, 'condition_completion'));
 
                 $templates .= $this->condition_completion();
@@ -591,7 +597,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
                 CONDITION_STUDENTVIEW_SHOW => get_string('showavailability_show', 'condition'),
                 CONDITION_STUDENTVIEW_HIDE => get_string('showavailability_hide', 'condition')
             );
-            $box->add_new_row()->add_new_cell(html_writer::label(get_string('showavailability', 'condition'), 'id_showavailability'))
+            $box->add_new_row()->add_new_cell(html_writer::label($this->flexpage_help_icon('showavailability'), 'id_showavailability'))
                                ->add_new_cell(html_writer::select($showopts, 'showavailability', $page->get_showavailability(), false, array('id' => 'id_showavailability')));
         }
 
