@@ -28,6 +28,7 @@ function callback_flexpage_load_content(global_navigation &$navigation, stdClass
     $activepageids = $cache->get_page_parents($current);
     $activepageids = array_keys($activepageids);
     $parentnodes   = array(0 => $coursenode);
+    $modinfo       = get_fast_modinfo($course);
 
     foreach ($cache->get_pages() as $page) {
         /**
@@ -46,8 +47,13 @@ function callback_flexpage_load_content(global_navigation &$navigation, stdClass
         if ($parentnode->hidden) {
             continue;
         }
+        $availability = $page->is_available($modinfo);
+
+        if ($availability === false) {
+            continue;
+        }
         $node = $parentnode->add(format_string($page->get_name()), $page->get_url(), navigation_node::TYPE_CUSTOM, null, $page->get_id());
-        $node->hidden = (!$cache->is_page_available($page));
+        $node->hidden = is_string($availability);
         $parentnodes[$page->get_id()] = $node;
 
         if (in_array($page->get_id(), $activepageids)) {
