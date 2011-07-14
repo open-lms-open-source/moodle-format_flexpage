@@ -130,7 +130,7 @@ class course_format_flexpage_controller_ajax extends mr_controller {
         } else {
             $pageoptions = array();
             foreach (format_flexpage_cache()->get_pages() as $page) {
-                $pageoptions[$page->get_id()] = $this->output->pad_page_name($page);
+                $pageoptions[$page->get_id()] = $this->output->pad_page_name($page, true);
             }
             $copyoptions = array(0 => get_string('copydotdotdot', 'format_flexpage')) + $pageoptions;
             $moveoptions = course_format_flexpage_model_page::get_move_options();
@@ -179,7 +179,7 @@ class course_format_flexpage_controller_ajax extends mr_controller {
                 if ($page->get_id() == $movepage->get_id() or format_flexpage_cache()->is_child_page($movepage, $page)) {
                     continue;
                 }
-                $pageoptions[$page->get_id()] = $this->output->pad_page_name($page);
+                $pageoptions[$page->get_id()] = $this->output->pad_page_name($page, true);
             }
             $submiturl = $this->new_url(array('sesskey' => sesskey(), 'action' => 'movepage', 'pageid' => $pageid, 'confirmmove' => 1));
 

@@ -63,13 +63,20 @@ class format_flexpage_renderer extends plugin_renderer_base {
      * Pads a page's name with spaces and a hyphen based on hierarchy depth or passed amount
      *
      * @param course_format_flexpage_model_page $page
-     * @param null|int $amount Amount of padding
+     * @param null|int|true $length Shorten page name to this length (Pass true to use default length)
      * @param bool $link To link the page name or not
+     * @param null|int $amount Amount of padding
      * @return string
      */
-    public function pad_page_name(course_format_flexpage_model_page $page, $amount = null, $link = false) {
+    public function pad_page_name(course_format_flexpage_model_page $page, $length = null, $link = false, $amount = null) {
         $name = format_string($page->get_name(), true, $page->get_courseid());
 
+        if (!is_null($length)) {
+            if ($length === true) {
+                $length = 30;
+            }
+            $name = shorten_text($name, $length);
+        }
         if ($link) {
             $name = html_writer::link($page->get_url(), $name);
         }
@@ -147,7 +154,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
         $currentpage = format_flexpage_cache()->get_current_page();
         $options = array();
         foreach (format_flexpage_cache()->get_pages() as $page) {
-            $options[$page->get_id()] = $this->pad_page_name($page);
+            $options[$page->get_id()] = $this->pad_page_name($page, true);
         }
 
         if ($prevpage = format_flexpage_cache()->get_previous_page($currentpage)) {
