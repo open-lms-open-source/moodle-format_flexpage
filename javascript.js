@@ -25,6 +25,12 @@ M.format_flexpage.init_actionbar = function(Y) {
             if (e.target.ancestor('#format_flexpage_actionbar_nav')) {
                 return;
             }
+            if (e.target.hasClass('yui3-menu-label')) {
+                return;
+            }
+            if (e.target.get('tagName').toUpperCase() != 'A') {
+                return;
+            }
 
             // This trickery hides the menu after an item has been chosen
             var menuBarItem = Y.one('a.yui3-menu-label-menuvisible');
