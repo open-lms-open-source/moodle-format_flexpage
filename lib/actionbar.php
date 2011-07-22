@@ -58,6 +58,7 @@ class course_format_flexpage_lib_actionbar implements renderable {
     public static function factory() {
         global $COURSE;
 
+        $cache       = format_flexpage_cache($COURSE->id);
         $context     = get_context_instance(CONTEXT_COURSE, $COURSE->id);
         $haspagecap  = has_capability('format/flexpage:managepages', $context);
         $hasblockcap = (has_capability('moodle/site:manageblocks', $context) and $haspagecap);
@@ -78,7 +79,7 @@ class course_format_flexpage_lib_actionbar implements renderable {
 
         $managemenu = new course_format_flexpage_lib_menu('manage');
         $managemenu->add_action(new course_format_flexpage_lib_menu_action('editpage', $haspagecap))
-                   ->add_action(new course_format_flexpage_lib_menu_action('movepage', $haspagecap))
+                   ->add_action(new course_format_flexpage_lib_menu_action('movepage', ($haspagecap and count($cache->get_pages()) > 1)))
                    ->add_action(new course_format_flexpage_lib_menu_action('deletepage', $haspagecap))
                    ->add_action(new course_format_flexpage_lib_menu_action('managepages', $haspagecap))
                    ->add_action(new course_format_flexpage_lib_menu_action('managemenus', $hasnavcap, $navmanageurl, get_string('managemenusaction', 'block_flexpagenav')));
