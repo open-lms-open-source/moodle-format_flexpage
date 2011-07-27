@@ -49,6 +49,25 @@ function format_flexpage_clear_cache($courseid = null) {
 }
 
 /**
+ * Determine if flexpage has been installed yet
+ *
+ * @return bool
+ */
+function format_flexpage_is_installed() {
+    global $SESSION;
+
+    if (!property_exists($SESSION, 'format_flexpage_is_installed')) {
+        $version = get_config('format_flexpage', 'version');
+        if (!empty($version)) {
+            $SESSION->format_flexpage_is_installed = true;
+        } else {
+            $SESSION->format_flexpage_is_installed = false;
+        }
+    }
+    return $SESSION->format_flexpage_is_installed;
+}
+
+/**
  * Get tabs to display in the theme
  *
  * @return string
@@ -59,12 +78,14 @@ function format_flexpage_tabs() {
     require_once($CFG->dirroot.'/blocks/flexpagenav/repository/menu.php');
     require_once($CFG->dirroot.'/blocks/flexpagenav/repository/link.php');
 
-    $menurepo = new block_flexpagenav_repository_menu();
-    $linkrepo = new block_flexpagenav_repository_link();
-    if ($menu = $menurepo->get_course_tab_menu($COURSE->id)) {
-        $menu->set_render('navhorizontal');  // Enforce tab like rendering
-        $linkrepo->set_menu_links($menu);
-        return html_writer::tag('div', $PAGE->get_renderer('block_flexpagenav')->render($menu), array('class' => 'format_flexpage_tabs'));
+    if (format_flexpage_is_installed()) {
+        $menurepo = new block_flexpagenav_repository_menu();
+        $linkrepo = new block_flexpagenav_repository_link();
+        if ($menu = $menurepo->get_course_tab_menu($COURSE->id)) {
+            $menu->set_render('navhorizontal');  // Enforce tab like rendering
+            $linkrepo->set_menu_links($menu);
+            return html_writer::tag('div', $PAGE->get_renderer('block_flexpagenav')->render($menu), array('class' => 'format_flexpage_tabs'));
+        }
     }
     return '';
 }
@@ -172,6 +193,9 @@ function format_flexpage_has_next_or_previous() {
 function format_flexpage_previous_page() {
     static $return = true;
 
+    if (format_flexpage_is_installed()) {
+        $return = null;
+    }
     if ($return === true) {
         $return = null;
         $cache  = format_flexpage_cache();
@@ -192,6 +216,9 @@ function format_flexpage_previous_page() {
 function format_flexpage_next_page() {
     static $return = true;
 
+    if (format_flexpage_is_installed()) {
+        $return = null;
+    }
     if ($return === true) {
         $return = null;
         $cache  = format_flexpage_cache();
