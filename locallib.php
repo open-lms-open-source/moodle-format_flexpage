@@ -193,7 +193,7 @@ function format_flexpage_has_next_or_previous() {
 function format_flexpage_previous_page() {
     static $return = true;
 
-    if (format_flexpage_is_installed()) {
+    if (!format_flexpage_is_installed()) {
         $return = null;
     }
     if ($return === true) {
@@ -216,7 +216,7 @@ function format_flexpage_previous_page() {
 function format_flexpage_next_page() {
     static $return = true;
 
-    if (format_flexpage_is_installed()) {
+    if (!format_flexpage_is_installed()) {
         $return = null;
     }
     if ($return === true) {
