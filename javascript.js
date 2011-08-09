@@ -391,6 +391,7 @@ M.format_flexpage.init_default_dialog = function(Y, id) {
     var dialog = new YAHOO.widget.Dialog(id, {
         // postmethod: 'form', // Very handy for debugging
         constraintoviewport: true,
+        // fixedcenter: true, // @todo It's actually kind of nice
         modal: true,
         zIndex: 100,
         underlay: "none",
@@ -711,7 +712,9 @@ M.format_flexpage.constrain_panel_to_viewport = function(Y, panel) {
     var height = YAHOO.util.Dom.getViewportHeight() - (YAHOO.widget.Overlay.VIEWPORT_OFFSET * 2) - footerHeight - headerHeight - panelPadding;
 
     Y.one('#' + panel.id + ' .bd').setStyle('maxHeight', height + 'px')
-            .setStyle('overflow', 'auto');
+                                  .setStyle('overflow', 'auto');
 
+    // Odd bug where panels that are larger than view port, make the view port scroll down
+    window.scrollTo(0, 0);
     panel.center();
 }
