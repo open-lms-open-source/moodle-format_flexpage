@@ -131,154 +131,162 @@ function xmldb_format_flexpage_install() {
     if ($DB->get_manager()->table_exists('format_page')) {
         $pagerepo = new course_format_flexpage_repository_page();
         $condrepo = new course_format_flexpage_repository_condition();
-        $records  = $DB->get_recordset('format_page', null, 'courseid, parent, sortorder');
-        foreach ($records as $record) {
-            // Migrate display value
-            if (($record->display & 4) == 4) {
-                $display = course_format_flexpage_model_page::DISPLAY_VISIBLE_MENU;
-            } else if (($record->display & 1) == 1) {
-                $display = course_format_flexpage_model_page::DISPLAY_VISIBLE;
-            } else {
-                $display = course_format_flexpage_model_page::DISPLAY_HIDDEN;
+        $courses  = $DB->get_recordset('course', array('format' => 'flexpage'), '', 'id');
+        foreach ($courses as $course) {
+            $records = $DB->get_records('format_page', array('courseid' => $course->id), 'courseid, parent, sortorder');
+            if (empty($records)) {
+                continue;
             }
-            // Re-map parent
-            if (!empty($record->parent)) {
-                if (!array_key_exists($record->parent, $pageidmap)) {
-                    // This shouldn't happen...
-                    throw new coding_exception("Could not find parent ID $record->parent for format_page.id = $record->id");
+            $records = xmldb_format_flexpage_install_sort_pages($records);
+
+            foreach ($records as $record) {
+                // Migrate display value
+                if (($record->display & 4) == 4) {
+                    $display = course_format_flexpage_model_page::DISPLAY_VISIBLE_MENU;
+                } else if (($record->display & 1) == 1) {
+                    $display = course_format_flexpage_model_page::DISPLAY_VISIBLE;
+                } else {
+                    $display = course_format_flexpage_model_page::DISPLAY_HIDDEN;
                 }
-                $parentid = $pageidmap[$record->parent];
-            } else {
-                $parentid = 0;
-            }
-
-            // Migrate page locking to conditional release
-            $showavailability = 1;
-            $conditions       = array();
-            if (!empty($record->locks)) {
-                $locks = unserialize(base64_decode($record->locks));
-
-                if (empty($locks['visible'])) {
-                    $showavailability = 0;
+                // Re-map parent
+                if (!empty($record->parent)) {
+                    if (!array_key_exists($record->parent, $pageidmap)) {
+                        // This shouldn't happen...
+                        throw new coding_exception("Could not find parent ID $record->parent for format_page.id = $record->id");
+                    }
+                    $parentid = $pageidmap[$record->parent];
+                } else {
+                    $parentid = 0;
                 }
-                if (!empty($locks['locks'])) {
-                    foreach ($locks['locks'] as $lock) {
-                        if ($lock['type'] == 'post') {
-                            if ($cm = get_coursemodule_from_id(false, $lock['cmid'])) {
-                                switch ($cm->modname) {
-                                    case 'forum':
-                                        if ($cm->completion == COMPLETION_TRACKING_NONE) {
-                                            $DB->set_field('course_modules', 'completion', COMPLETION_TRACKING_AUTOMATIC, array('id' => $cm->id));
-                                        }
-                                        if ($DB->record_exists('forum', array('id' => $cm->instance, 'completionposts' => 0))) {
-                                            $DB->set_field('forum', 'completionposts', 1, array('id' => $cm->instance));
-                                        }
-                                        $conditions[] = new condition_completion($cm->id, COMPLETION_COMPLETE);
-                                        break;
 
-                                    case 'choice':
-                                        if ($cm->completion == COMPLETION_TRACKING_NONE) {
-                                            $DB->set_field('course_modules', 'completion', COMPLETION_TRACKING_AUTOMATIC, array('id' => $cm->id));
-                                        }
-                                        $DB->set_field('choice', 'completionsubmit', 1, array('id' => $cm->instance));
-                                        $conditions[] = new condition_completion($cm->id, COMPLETION_COMPLETE);
-                                        break;
+                // Migrate page locking to conditional release
+                $showavailability = 1;
+                $conditions       = array();
+                if (!empty($record->locks)) {
+                    $locks = unserialize(base64_decode($record->locks));
 
-                                    case 'glossary':
-                                        if ($cm->completion == COMPLETION_TRACKING_NONE) {
-                                            $DB->set_field('course_modules', 'completion', COMPLETION_TRACKING_AUTOMATIC, array('id' => $cm->id));
-                                        }
-                                        if ($DB->record_exists('glossary', array('id' => $cm->instance, 'completionentries' => 0))) {
-                                            $DB->set_field('glossary', 'completionentries', 1, array('id' => $cm->instance));
-                                        }
-                                        $conditions[] = new condition_completion($cm->id, COMPLETION_COMPLETE);
-                                        break;
+                    if (empty($locks['visible'])) {
+                        $showavailability = 0;
+                    }
+                    if (!empty($locks['locks'])) {
+                        foreach ($locks['locks'] as $lock) {
+                            if ($lock['type'] == 'post') {
+                                if ($cm = get_coursemodule_from_id(false, $lock['cmid'])) {
+                                    switch ($cm->modname) {
+                                        case 'forum':
+                                            if ($cm->completion == COMPLETION_TRACKING_NONE) {
+                                                $DB->set_field('course_modules', 'completion', COMPLETION_TRACKING_AUTOMATIC, array('id' => $cm->id));
+                                            }
+                                            if ($DB->record_exists('forum', array('id' => $cm->instance, 'completionposts' => 0))) {
+                                                $DB->set_field('forum', 'completionposts', 1, array('id' => $cm->instance));
+                                            }
+                                            $conditions[] = new condition_completion($cm->id, COMPLETION_COMPLETE);
+                                            break;
 
-                                    default:
-                                        if (plugin_supports('mod', $cm->modname, FEATURE_GRADE_HAS_GRADE, false)) {
-                                            if (is_null($cm->completiongradeitemnumber)) {
-                                                if ($cm->completion == COMPLETION_TRACKING_NONE) {
-                                                    $cm->completion = COMPLETION_TRACKING_AUTOMATIC;
+                                        case 'choice':
+                                            if ($cm->completion == COMPLETION_TRACKING_NONE) {
+                                                $DB->set_field('course_modules', 'completion', COMPLETION_TRACKING_AUTOMATIC, array('id' => $cm->id));
+                                            }
+                                            $DB->set_field('choice', 'completionsubmit', 1, array('id' => $cm->instance));
+                                            $conditions[] = new condition_completion($cm->id, COMPLETION_COMPLETE);
+                                            break;
+
+                                        case 'glossary':
+                                            if ($cm->completion == COMPLETION_TRACKING_NONE) {
+                                                $DB->set_field('course_modules', 'completion', COMPLETION_TRACKING_AUTOMATIC, array('id' => $cm->id));
+                                            }
+                                            if ($DB->record_exists('glossary', array('id' => $cm->instance, 'completionentries' => 0))) {
+                                                $DB->set_field('glossary', 'completionentries', 1, array('id' => $cm->instance));
+                                            }
+                                            $conditions[] = new condition_completion($cm->id, COMPLETION_COMPLETE);
+                                            break;
+
+                                        default:
+                                            if (plugin_supports('mod', $cm->modname, FEATURE_GRADE_HAS_GRADE, false)) {
+                                                if (is_null($cm->completiongradeitemnumber)) {
+                                                    if ($cm->completion == COMPLETION_TRACKING_NONE) {
+                                                        $cm->completion = COMPLETION_TRACKING_AUTOMATIC;
+                                                    }
+                                                    $DB->update_record('course_modules', (object) array(
+                                                        'id' => $cm->id,
+                                                        'completion' => $cm->completion,
+                                                        'completiongradeitemnumber' => 0,
+                                                    ));
                                                 }
-                                                $DB->update_record('course_modules', (object) array(
-                                                    'id' => $cm->id,
-                                                    'completion' => $cm->completion,
-                                                    'completiongradeitemnumber' => 0,
-                                                ));
+                                                if (is_null($cm->completiongradeitemnumber) or $cm->completiongradeitemnumber == 0) {
+                                                    $conditions[] = new condition_completion($cm->id, COMPLETION_COMPLETE);
+                                                }
                                             }
-                                            if (is_null($cm->completiongradeitemnumber) or $cm->completiongradeitemnumber == 0) {
-                                                $conditions[] = new condition_completion($cm->id, COMPLETION_COMPLETE);
-                                            }
-                                        }
-                                }
-                            }
-                        } else if ($lock['type'] == 'grade') {
-                            $lockgrades = explode(':', $lock['grade']);
-
-                            if (count($lockgrades) == 2) {
-                                $max = $lockgrades[1];
-                            } else {
-                                $max = 100;
-                            }
-                            $conditions[] = new condition_grade($lock['id'], $lockgrades[0], $max);
-                        } else if ($lock['type'] == 'access') {
-                            if ($cm = get_coursemodule_from_id(false, $lock['cmid'])) {
-                                if (plugin_supports('mod', $cm->modname, FEATURE_COMPLETION_TRACKS_VIEWS, false)) {
-                                    if ($cm->completionview == COMPLETION_VIEW_NOT_REQUIRED) {
-                                        if ($cm->completion == COMPLETION_TRACKING_NONE) {
-                                            $cm->completion = COMPLETION_TRACKING_AUTOMATIC;
-                                        }
-                                        $DB->update_record('course_modules', (object) array(
-                                            'id' => $cm->id,
-                                            'completion' => $cm->completion,
-                                            'completionview' => COMPLETION_VIEW_REQUIRED,
-                                        ));
                                     }
-                                    $conditions[] = new condition_completion($cm->id, COMPLETION_COMPLETE);
+                                }
+                            } else if ($lock['type'] == 'grade') {
+                                $lockgrades = explode(':', $lock['grade']);
+
+                                if (count($lockgrades) == 2) {
+                                    $max = $lockgrades[1];
+                                } else {
+                                    $max = 100;
+                                }
+                                $conditions[] = new condition_grade($lock['id'], $lockgrades[0], $max);
+                            } else if ($lock['type'] == 'access') {
+                                if ($cm = get_coursemodule_from_id(false, $lock['cmid'])) {
+                                    if (plugin_supports('mod', $cm->modname, FEATURE_COMPLETION_TRACKS_VIEWS, false)) {
+                                        if ($cm->completionview == COMPLETION_VIEW_NOT_REQUIRED) {
+                                            if ($cm->completion == COMPLETION_TRACKING_NONE) {
+                                                $cm->completion = COMPLETION_TRACKING_AUTOMATIC;
+                                            }
+                                            $DB->update_record('course_modules', (object) array(
+                                                'id' => $cm->id,
+                                                'completion' => $cm->completion,
+                                                'completionview' => COMPLETION_VIEW_REQUIRED,
+                                            ));
+                                        }
+                                        $conditions[] = new condition_completion($cm->id, COMPLETION_COMPLETE);
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
 
-            if (!empty($record->nametwo)) {
-                $record->nameone = $record->nametwo;
-            }
-            $page = new course_format_flexpage_model_page(array(
-                'courseid' => $record->courseid,
-                'name' => $record->nameone,
-                'display' => $display,
-                'navigation' => $record->showbuttons,
-                'showavailability' => $showavailability,
-                'parentid' => $parentid,
-                'weight' => $record->sortorder,
-            ));
-            $pagerepo->save_page($page);
+                if (!empty($record->nametwo)) {
+                    $record->nameone = $record->nametwo;
+                }
+                $page = new course_format_flexpage_model_page(array(
+                    'courseid' => $record->courseid,
+                    'name' => $record->nameone,
+                    'display' => $display,
+                    'navigation' => $record->showbuttons,
+                    'showavailability' => $showavailability,
+                    'parentid' => $parentid,
+                    'weight' => $record->sortorder,
+                ));
+                $pagerepo->save_page($page);
 
-            // Save the map
-            $pageidmap[$record->id] = $page->get_id();
+                // Save the map
+                $pageidmap[$record->id] = $page->get_id();
 
-            if (!empty($conditions)) {
-                $condrepo->save_page_conditions($page, $conditions);
-            }
+                if (!empty($conditions)) {
+                    $condrepo->save_page_conditions($page, $conditions);
+                }
 
-            // Migrate page widths
-            $widths = array();
-            if (is_number($record->prefleftwidth) and !empty($record->prefleftwidth)) {
-                $widths['side-pre'] = $record->prefleftwidth;
-            }
-            if (is_number($record->prefcenterwidth) and !empty($record->prefcenterwidth)) {
-                $widths['main'] = $record->prefcenterwidth;
-            }
-            if (is_number($record->prefrightwidth) and !empty($record->prefrightwidth)) {
-                $widths['side-post'] = $record->prefrightwidth;
-            }
-            if (!empty($widths)) {
-                $pagerepo->save_page_region_widths($page, $widths);
+                // Migrate page widths
+                $widths = array();
+                if (is_number($record->prefleftwidth) and !empty($record->prefleftwidth)) {
+                    $widths['side-pre'] = $record->prefleftwidth;
+                }
+                if (is_number($record->prefcenterwidth) and !empty($record->prefcenterwidth)) {
+                    $widths['main'] = $record->prefcenterwidth;
+                }
+                if (is_number($record->prefrightwidth) and !empty($record->prefrightwidth)) {
+                    $widths['side-post'] = $record->prefrightwidth;
+                }
+                if (!empty($widths)) {
+                    $pagerepo->save_page_region_widths($page, $widths);
+                }
             }
         }
-        $records->close();
+        $courses->close();
 
         // Migrate Page Items
         $pagemenucmidmap = array();
@@ -444,12 +452,12 @@ function xmldb_format_flexpage_install() {
     }
 
 /// Cleanup block/page_module
-    $instances = $DB->get_records('block_instances', array('blockname' => 'page_module'));
-    if(!empty($instances)) {
-        foreach($instances as $instance) {
-            blocks_delete_instance($instance);
-        }
+    $instances = $DB->get_recordset('block_instances', array('blockname' => 'page_module'));
+    foreach ($instances as $instance) {
+        blocks_delete_instance($instance);
     }
+    $instances->close();
+
     $DB->delete_records('block', array('name' => 'page_module'));
     drop_plugin_tables('page_module', "$CFG->dirroot/blocks/page_module/db/install.xml", false);
     drop_plugin_tables('block_page_module', "$CFG->dirroot/blocks/page_module/db/install.xml", false);
@@ -462,9 +470,52 @@ function xmldb_format_flexpage_install() {
     }
 
 /// Cleanup course/format/page
-    foreach (array('format_page', 'format_page_items') as $table) {
-        if ($DB->get_manager()->table_exists($table)) {
-            $DB->get_manager()->drop_table(new xmldb_table($table));
+    if ($DB->get_manager()->table_exists('format_page')) {
+        uninstall_plugin('format', 'page');
+    }
+}
+
+/**
+ * Sorts pages
+ *
+ * @param stdClass[] $parentpages Parent pages to process
+ * @param int $parentid The parent ID of the children to sort
+ * @return stdClass[]
+ */
+function xmldb_format_flexpage_install_sort_pages($pages, $parentid = 0) {
+    $return     = array();
+    $childpages = xmldb_format_flexpage_install_filter_children($parentid, $pages);
+    foreach ($childpages as $page) {
+        $return[$page->id] = $page;
+        $return  += xmldb_format_flexpage_install_sort_pages($pages, $page->id);
+    }
+    return $return;
+}
+
+/**
+ * Assists with sorting, find child pages of a parent ID
+ *
+ * @param int $parentid The parent page ID to find the children of
+ * @param stdClass[] $childpages Potential child pages
+ * @return stdClass[]
+ */
+function xmldb_format_flexpage_install_filter_children($parentid, array &$childpages) {
+    $collected = false;
+    $return    = array();
+    foreach ($childpages as $page) {
+        if ($page->parent == $parentid) {
+            $return[$page->id] = $page;
+
+            // Remove from all pages to improve seek times later
+            unset($childpages[$page->id]);
+
+            // This will halt seeking after we get all the children
+            $collected = true;
+        } else if ($collected) {
+            // Since $pages is organized by parent,
+            // then once we find one, we get them all in a row
+            break;
         }
     }
+    return $return;
 }
