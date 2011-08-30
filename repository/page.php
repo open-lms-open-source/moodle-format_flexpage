@@ -94,6 +94,7 @@ class course_format_flexpage_repository_page {
         if (!$DB->record_exists('format_flexpage_page', array('courseid' => $courseid))) {
             $this->save_page(new course_format_flexpage_model_page(array(
                 'courseid' => $courseid,
+                'display'  => course_format_flexpage_model_page::DISPLAY_VISIBLE_MENU,
                 'name'     => get_string('defaultcoursepagename', 'format_flexpage'),
             )));
         }
