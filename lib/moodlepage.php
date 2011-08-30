@@ -128,20 +128,21 @@ class course_format_flexpage_lib_moodlepage {
     }
 
     /**
-     * Add an activity as a block to the current page
+     * Add a flexpagenav menu as a block to the current page
      *
      * @static
      * @param course_format_flexpage_model_page $page
-     * @param int $cmid Add this course module
+     * @param int $menuid Add this flexpagenav menu
      * @param string|bool $region The region to add the activity to
+     * @param int $visible If the block is visible or not
      * @return void
      */
-    public static function add_menu_block(course_format_flexpage_model_page $page, $menuid, $region = false) {
+    public static function add_menu_block(course_format_flexpage_model_page $page, $menuid, $region = false, $visible = 1) {
         global $SESSION;
 
         $SESSION->block_flexpagenav_create_menuids = array($menuid);
 
-        self::add_block($page, 'flexpagenav', $region);
+        self::add_block($page, 'flexpagenav', $region, $visible);
     }
 
     /**
@@ -151,14 +152,15 @@ class course_format_flexpage_lib_moodlepage {
      * @param course_format_flexpage_model_page $page
      * @param int $cmid Add this course module
      * @param string|bool $region The region to add the activity to
+     * @param int $visible If the block is visible or not
      * @return void
      */
-    public static function add_activity_block(course_format_flexpage_model_page $page, $cmid, $region = false) {
+    public static function add_activity_block(course_format_flexpage_model_page $page, $cmid, $region = false, $visible = 1) {
         global $SESSION;
 
         $SESSION->block_flexpagemod_create_cmids = array($cmid);
 
-        self::add_block($page, 'flexpagemod', $region);
+        self::add_block($page, 'flexpagemod', $region, $visible);
     }
 
     /**
@@ -168,30 +170,41 @@ class course_format_flexpage_lib_moodlepage {
      * @param course_format_flexpage_model_page $page
      * @param string $blockname The block's name
      * @param string|bool $region The region to add the block to
+     * @param int $visible If the block is visible or not
      * @return void
      */
-    public static function add_block(course_format_flexpage_model_page $page, $blockname, $region = false) {
+    public static function add_block(course_format_flexpage_model_page $page, $blockname, $region = false, $visible = 1) {
+        global $DB;
+
         $moodlepage = self::new_moodle_page($page);
-        $moodlepage->blocks->load_blocks(true);
+
+        /** @var $bm block_manager */
+        $bm = $moodlepage->blocks;
+        $bm->load_blocks(true);
 
         if (!$moodlepage->user_can_edit_blocks()) {
             throw new moodle_exception('nopermissions', '', $moodlepage->url->out(), get_string('addblock'));
         }
-        if (!array_key_exists($blockname, $moodlepage->blocks->get_addable_blocks())) {
+        if (!array_key_exists($blockname, $bm->get_addable_blocks())) {
             throw new moodle_exception('cannotaddthisblocktype', '', $moodlepage->url->out(), $blockname);
         }
-        if (!empty($region) and $region != $moodlepage->blocks->get_default_region() and $moodlepage->blocks->is_known_region($region)) {
+        if (!empty($region) and $region != $bm->get_default_region() and $bm->is_known_region($region)) {
             // Determine weight...
-            $blocks = $moodlepage->blocks->get_blocks_for_region($region);
+            $blocks = $bm->get_blocks_for_region($region);
             if (empty($blocks)) {
                 $weight = 0;
             } else {
                 $block  = end($blocks);
                 $weight = $block->instance->weight + 1;
             }
-            $moodlepage->blocks->add_block($blockname, $region, $weight, false, 'course-view-*', $moodlepage->subpage);
+            $bm->add_block($blockname, $region, $weight, false, 'course-view-*', $moodlepage->subpage);
         } else {
-            $moodlepage->blocks->add_block_at_end_of_default_region($blockname);
+            $bm->add_block_at_end_of_default_region($blockname);
+        }
+        if (!$visible) {
+            if ($instances = $DB->get_records('block_instances', array('blockname' => $blockname, 'subpagepattern' => $moodlepage->subpage), 'id DESC', '*', 0, 1)) {
+                blocks_set_visibility(current($instances), $moodlepage, 0);
+            }
         }
     }
 
@@ -204,29 +217,35 @@ class course_format_flexpage_lib_moodlepage {
      * @return void
      */
     public static function copy_page_blocks(course_format_flexpage_model_page $frompage, course_format_flexpage_model_page $destpage) {
-        global $DB;
 
-        $context   = get_context_instance(CONTEXT_COURSE, $frompage->get_courseid());
-        $instances = $DB->get_recordset('block_instances', array(
-            'parentcontextid' => $context->id,
-            'subpagepattern'  => $frompage->get_id(),
-        ), 'defaultweight');
-        foreach ($instances as $instance) {
-            if ($instance->blockname == 'flexpagemod') {
-                $block = block_instance('flexpagemod', $instance);
-                if (!empty($block->config->cmid)) {
-                    self::add_activity_block($destpage, $block->config->cmid, $instance->defaultregion);
+        $context    = get_context_instance(CONTEXT_COURSE, $frompage->get_courseid());
+        $moodlepage = self::new_moodle_page($frompage);
+
+        /** @var $bm block_manager */
+        $bm = $moodlepage->blocks;
+        $bm->load_blocks(true);
+
+        foreach ($bm->get_regions() as $region) {
+            foreach ($bm->get_blocks_for_region($region) as $block) {
+                /** @var $block block_base  */
+                $instance = $block->instance;
+
+                if ($instance->parentcontextid != $context->id or $instance->subpagepattern != $frompage->get_id()) {
+                    continue;  // Not a block specific to our page
                 }
-            } else if ($instance->blockname == 'flexpagenav') {
-                $block = block_instance('flexpagenav', $instance);
-                if (!empty($block->config->menuid)) {
-                    self::add_menu_block($destpage, $block->config->menuid, $instance->defaultregion);
+                if ($instance->blockname == 'flexpagemod') {
+                    if (!empty($block->config->cmid)) {
+                        self::add_activity_block($destpage, $block->config->cmid, $instance->region, $instance->visible);
+                    }
+                } else if ($instance->blockname == 'flexpagenav') {
+                    if (!empty($block->config->menuid)) {
+                        self::add_menu_block($destpage, $block->config->menuid, $instance->region, $instance->visible);
+                    }
+                } else {
+                    self::add_block($destpage, $instance->blockname, $instance->region, $instance->visible);
                 }
-            } else {
-                self::add_block($destpage, $instance->blockname, $instance->defaultregion);
             }
         }
-        $instances->close();
     }
 
     /**
