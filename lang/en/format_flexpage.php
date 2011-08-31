@@ -75,7 +75,7 @@ $string['themelayoutmissing'] = 'Your current theme does not support Flexpage.  
 $string['deletemodwarn'] = 'If this activity is deleted, then it will be removed from all flexpages.';
 $string['continuedotdotdot'] = 'Continue...';
 $string['warning'] = 'Warning';
-$string['actionbar'] = 'Edit bar';
+$string['actionbar'] = 'Action bar';
 $string['availablefrom'] = 'Allow access from';
 $string['availablefrom_help'] = 'This flexpage will be available to course users after this date.';
 $string['availableuntil'] = 'Allow access until';
@@ -102,9 +102,9 @@ To add more than one flexpage at a time, click on the "+" icon and fill out the 
 $string['actionbar_help'] = '
 <p>With Flexpage, course designers can create multiple flexpages within the course. Each flexpage can have unique or shared content on them.</p>
 
-<p>With the Edit bar, on can jump to different flexpages within this course by clicking the name of the flexpage in the drop-down menu.</p>
+<p>With the Action bar, on can jump to different flexpages within this course by clicking the name of the flexpage in the drop-down menu.</p>
 
-<p>Available actions under the <strong>Add</strong> Edit bar menu item:
+<p>Available actions under the <strong>Add</strong> Action bar menu item:
     <ul>
         <li>To add a flexpage, select the <strong>Add flexpages</strong> link from the drop-down menu. When you add new flexpages, you will want to determine where they are located in the index of flexpages. Flexpages can be children of other flexpages (sub-flexpages). Or they can simply be placed before or after other flexpages. New flexpages can also be blank, or a copy of an existing flexpage. To add multiple flexpages to a course, press the "+" icon on the right side of the <strong>Add flexpages</strong> window.</li>
         <li>To add a new activity to this flexpage, select <strong>Add activity</strong> link from the drop-down menu. Choose where you would like to place the new activity on the flexpage by selecting one of the buttons on the top of the <strong>Add activity</strong> window. Next, choose the activity or resource that you would like to add to the course and flexpage.</li>
@@ -114,7 +114,7 @@ $string['actionbar_help'] = '
     </ul>
 </p>
 
-<p>Available actions under the <strong>Manage</strong> Edit bar menu item:
+<p>Available actions under the <strong>Manage</strong> Action bar menu item:
     <ul>
         <li>To configure the settings for this flexpage, click the <strong>Manage flexpage settings</strong> link from the drop-down menu. From this window, you can edit the flexpage name; change the widths of the flexpage regions; indicate whether the flexpage should be hidden, visible, or visible in menus; as well as determine whether the flexpages should have "previous and next" navigation buttons.</li>
         <li>To move a flexpage, click the <strong>Move flexpage</strong> link from the drop-down menu. From this window, you can choose whether the flexpage is a child to another flexpage, or whether it is before or after another flexpage in the index.</li>
