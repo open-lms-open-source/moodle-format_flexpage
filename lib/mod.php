@@ -14,7 +14,7 @@ class course_format_flexpage_lib_mod {
      * @return array
      */
     public static function get_add_options($course = null) {
-        global $CFG, $DB, $COURSE;
+        global $CFG, $COURSE;
 
         require_once($CFG->dirroot.'/course/lib.php');
 
@@ -29,14 +29,15 @@ class course_format_flexpage_lib_mod {
             $strresources  => array(),
         );
 
-        $mods = $DB->get_records('modules');
-        foreach ($mods as $mod) {
-            if (!course_allowed_module($course, $mod->name)) {
+        get_all_mods($course->id, $mods, $modnames, $modnamesplural, $modnamesused);
+
+        foreach($modnames as $modname => $modnamestr) {
+            if (!course_allowed_module($course, $modname)) {
                 continue;
             }
 
             try {
-                if ($types = self::callback($mod->name, 'get_types')) {
+                if ($types = self::callback($modname, 'get_types')) {
                     $menu = array();
                     $atype = null;
                     $groupname = null;
@@ -53,7 +54,7 @@ class course_format_flexpage_lib_mod {
                             $atype = MOD_CLASS_RESOURCE;
                         }
                         $menu[$urlbase.$type->type] = array(
-                            'module' => $mod->name,
+                            'module' => $modname,
                             'label'  => $type->typestr
                         );
                     }
@@ -71,15 +72,15 @@ class course_format_flexpage_lib_mod {
                     }
                 }
             } catch (coding_exception $e) {
-                $archetype = plugin_supports('mod', $mod->name, FEATURE_MOD_ARCHETYPE, MOD_ARCHETYPE_OTHER);
+                $archetype = plugin_supports('mod', $modname, FEATURE_MOD_ARCHETYPE, MOD_ARCHETYPE_OTHER);
                 if ($archetype == MOD_ARCHETYPE_RESOURCE) {
                     $groupname = $strresources;
                 } else {
                     $groupname = $stractivities;
                 }
-                $options[$groupname][$urlbase.$mod->name] = array(
-                    'module' => $mod->name,
-                    'label'  => get_string('modulename', $mod->name)
+                $options[$groupname][$urlbase.$modname] = array(
+                    'module' => $modname,
+                    'label'  => $modnamestr,
                 );
             }
         }
