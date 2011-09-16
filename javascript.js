@@ -361,7 +361,14 @@ M.format_flexpage.init_movepage = function(Y, url) {
         { text: M.str.format_flexpage.movepage, handler: dialog.submit, isDefault: true }
     ]);
 
-    M.format_flexpage.populate_panel(Y, dialog, url);
+    M.format_flexpage.populate_panel(Y, dialog, url, function() {
+        if (Y.one('.format_flexpage_movepage_nooptions')) {
+            dialog.cfg.queueProperty("buttons", [
+                { text: M.str.format_flexpage.close, handler: dialog.cancel, isDefault: true }
+            ]);
+            dialog.render();  // Must re-render due to button change
+        }
+    });
 
     return dialog;
 };

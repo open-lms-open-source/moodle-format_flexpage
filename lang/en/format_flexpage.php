@@ -82,6 +82,7 @@ $string['availableuntil'] = 'Allow access until';
 $string['availableuntil_help'] = 'This flexpage will be available to course users before this date.';
 $string['showavailability'] = 'Before this can be accessed';
 $string['showavailability_help'] = 'If the flexpage is unavailable to the user, this setting determines if this flexpage\'s restriction information is displayed or nothing at all.';
+$string['nomoveoptionserror'] = 'You cannot move this flexpage because there are no available positions to place this flexpage.  Try adding new flexpages before or after this flexpage.';
 
 
 $string['display_help'] = 'Configure if this flexpage is:

@@ -290,6 +290,9 @@ class format_flexpage_renderer extends plugin_renderer_base {
      * @return string
      */
     public function move_page(course_format_flexpage_model_page $page, moodle_url $url, array $pageoptions, array $moveoptions) {
+        if (empty($pageoptions)) {
+            return html_writer::tag('div', get_string('nomoveoptionserror', 'format_flexpage'), array('class' => 'format_flexpage_movepage_nooptions'));
+        }
         $output  = html_writer::tag('span', get_string('movepagea', 'format_flexpage', format_string($page->get_name())), array('id' => 'format_flexpage_movingtext'));
         $output .= html_writer::select($moveoptions, 'move', 'child', false);
         $output .= html_writer::select($pageoptions, 'referencepageid', '', false);
