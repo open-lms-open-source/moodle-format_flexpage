@@ -270,6 +270,7 @@ M.format_flexpage.init_addactivity = function(Y, url) {
 
     M.format_flexpage.populate_panel(Y, dialog, url, function(buttons) {
         var buttonGroup = M.format_flexpage.init_region_buttons(Y, buttons);
+        M.format_flexpage.constrain_panel_to_viewport(Y, dialog);
 
         Y.all('a.format_flexpage_addactivity_link').on('click', function(e) {
             e.preventDefault();
@@ -329,6 +330,7 @@ M.format_flexpage.init_addblock = function(Y, url) {
 
     M.format_flexpage.populate_panel(Y, dialog, url, function(buttons) {
         var buttonGroup = M.format_flexpage.init_region_buttons(Y, buttons);
+        M.format_flexpage.constrain_panel_to_viewport(Y, dialog);
 
         Y.all('#format_flexpage_addblock_links a').on('click', function(e) {
             e.preventDefault();
