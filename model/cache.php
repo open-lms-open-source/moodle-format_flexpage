@@ -282,6 +282,18 @@ class course_format_flexpage_model_cache extends course_format_flexpage_model_ab
         return $this->get_first_available_page();
     }
 
+
+    /**
+     * Get the first page
+     *
+     * @return course_format_flexpage_model_page
+     */
+    public function get_first_page() {
+        foreach ($this->get_pages() as $page) {
+            return $page;
+        }
+    }
+
     /**
      * Find the first available page - if no pages are
      * available, then the first page in the hierarchy is returned
@@ -299,9 +311,7 @@ class course_format_flexpage_model_cache extends course_format_flexpage_model_ab
         }
 
         // OK, weird, just return first
-        foreach ($this->get_pages() as $page) {
-            return $page;
-        }
+        return $this->get_first_page();
     }
 
     /**

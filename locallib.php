@@ -68,6 +68,62 @@ function format_flexpage_is_installed() {
 }
 
 /**
+ * Determine if flexpage should be displayed on the front page
+ *
+ * @return bool
+ */
+function format_flexpage_is_frontpage() {
+    global $DB, $SITE;
+
+    static $isfrontpage = null;
+
+    if (is_null($isfrontpage)) {
+        $isfrontpage = false;
+        if ((!is_callable('mr_on') or mr_on('flexpage', 'format')) and $SITE->format == 'flexpage') {
+            $isfrontpage = true;
+        }
+        if (!$isfrontpage and $SITE->format == 'flexpage') {
+            if ($DB->set_field('course', 'format', 'site', array('id' => $SITE->id))) {
+                $SITE->format = 'site';
+            }
+        }
+    }
+    return $isfrontpage;
+}
+
+/**
+ * Determine if we should run the front page code (Default content)
+ *
+ * @return bool
+ */
+function format_flexpage_run_frontpage() {
+    global $PAGE;
+
+    if (!format_flexpage_is_frontpage()) {
+        return true;
+    }
+    if (format_flexpage_cache()->get_first_page() == format_flexpage_cache()->get_current_page() and $PAGE->pagelayout != 'frontpage') {
+        return true;
+    }
+    return false;
+}
+
+/**
+ * Adds front page content as a fake block
+ *
+ * @param $content
+ * @return void
+ */
+function format_flexpage_add_frontpage_block($content) {
+    global $PAGE;
+
+    $fake = new block_contents(array('class' => 'site-index-content'));
+    $fake->content = $content;
+
+    $PAGE->blocks->add_fake_block($fake, 'main');
+}
+
+/**
  * Get tabs to display in the theme
  *
  * @return string
