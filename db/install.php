@@ -19,6 +19,11 @@ require_once($CFG->dirroot.'/blocks/flexpagenav/repository/menu.php');
  */
 require_once($CFG->dirroot.'/blocks/flexpagenav/repository/link.php');
 
+/**
+ * @see course_format_flexpage_lib_moodlepage
+ */
+require_once($CFG->dirroot.'/course/format/flexpage/lib/moodlepage.php');
+
 function xmldb_format_flexpage_install() {
     global $DB, $CFG;
 
@@ -301,7 +306,7 @@ function xmldb_format_flexpage_install() {
 
         $context = false;
         $records = $DB->get_recordset_sql('
-            SELECT i.*, c.id AS courseid
+            SELECT i.*, c.id AS courseid, c.category AS coursecat
               FROM {format_page_items} i
         INNER JOIN {format_page} p ON p.id = i.pageid
         INNER JOIN {course} c ON c.id = p.courseid
@@ -331,6 +336,8 @@ function xmldb_format_flexpage_install() {
                 if (!$context or $context->instanceid != $record->courseid) {
                     $context = get_context_instance(CONTEXT_COURSE, $record->courseid);
                 }
+                list($pagepattern, $bppagepattern) = course_format_flexpage_lib_moodlepage::get_page_patterns(($record->coursecat == 0));
+
                 if (array_key_exists($record->cmid, $pagemenucmidmap)) {
                     $instanceid = $pagemenucmidmap[$record->cmid];
                     if (array_key_exists($instanceid, $menuidmap)) {
@@ -342,7 +349,7 @@ function xmldb_format_flexpage_install() {
                         'blockname' => 'flexpagenav',
                         'parentcontextid' => $context->id,
                         'showinsubcontexts' => 0,
-                        'pagetypepattern' => 'course-view-*',
+                        'pagetypepattern' => $pagepattern,
                         'subpagepattern' => $pageidmap[$record->pageid],
                         'defaultregion' => $region,
                         'defaultweight' => $record->sortorder,
@@ -353,7 +360,7 @@ function xmldb_format_flexpage_install() {
                         'blockname' => 'flexpagemod',
                         'parentcontextid' => $context->id,
                         'showinsubcontexts' => 0,
-                        'pagetypepattern' => 'course-view-*',
+                        'pagetypepattern' => $pagepattern,
                         'subpagepattern' => $pageidmap[$record->pageid],
                         'defaultregion' => $region,
                         'defaultweight' => $record->sortorder,
@@ -375,7 +382,7 @@ function xmldb_format_flexpage_install() {
                     $bp = new stdClass;
                     $bp->blockinstanceid = $instance->id;
                     $bp->contextid = $context->id;
-                    $bp->pagetype = 'course-view-flexpage';
+                    $bp->pagetype = $bppagepattern;
                     $bp->subpage = $pageidmap[$record->pageid];
                     $bp->visible = 0;
                     $bp->region = $instance->defaultregion;

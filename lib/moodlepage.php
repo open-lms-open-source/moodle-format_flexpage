@@ -197,7 +197,11 @@ class course_format_flexpage_lib_moodlepage {
                 $block  = end($blocks);
                 $weight = $block->instance->weight + 1;
             }
-            $bm->add_block($blockname, $region, $weight, false, 'course-view-*', $moodlepage->subpage);
+            $pagetypepattern = $moodlepage->page->pagetype;
+            if (strpos($pagetypepattern, 'course-view') === 0) {
+                $pagetypepattern = 'course-view-*';
+            }
+            $bm->add_block($blockname, $region, $weight, false, $pagetypepattern, $moodlepage->subpage);
         } else {
             $bm->add_block_at_end_of_default_region($blockname);
         }
@@ -311,9 +315,32 @@ class course_format_flexpage_lib_moodlepage {
         $moodlepage->set_url('/course/view.php', array('id' => $course->id));
         $moodlepage->set_pagelayout(self::LAYOUT);
         $moodlepage->set_subpage($page->get_id());
-        $moodlepage->set_pagetype('course-view-flexpage');
         $moodlepage->set_other_editing_capability('moodle/course:manageactivities');
 
+        if ($course->id == SITEID) {
+            $moodlepage->set_pagetype('site-index');
+        } else {
+            $moodlepage->set_pagetype('course-view-flexpage');
+        }
+
         return $moodlepage;
+    }
+
+    /**
+     * Get page patterns
+     *
+     * @static
+     * @param bool $frontpage If we are on the front page or not
+     * @return array
+     */
+    public static function get_page_patterns($frontpage = false) {
+        if ($frontpage) {
+            $pagepattern   = 'site-index';
+            $bppagepattern = 'site-index';
+        } else {
+            $pagepattern   = 'course-view-*';
+            $bppagepattern = 'course-view-flexpage';
+        }
+        return array($pagepattern, $bppagepattern);
     }
 }

@@ -1,10 +1,10 @@
 
-#condition_templates,
-#page-course-view-flexpage #addpagetemplate {
+#format_flexpage_condition_templates,
+#format_flexpage_addpages_template {
     display: none;
 }
 
-#page-course-view-flexpage .format_flexpage_addpages_wrapper {
+.format_flexpage_addpages_wrapper {
     margin-bottom: 20px;
 }
 
@@ -19,7 +19,7 @@
     font-weight: bold;
 }
 
-#page-course-view-flexpage .format_flexpage_addpages_elements {
+.format_flexpage_addpages_elements {
     white-space: nowrap;
     padding-top: 3px;
     padding-bottom: 2px;
@@ -131,8 +131,10 @@
 }
 
 /* Fixes bleeding of completion check boxes when modals are up */
-.path-course-view.yui-skin-sam li.activity span.autocompletion,
-.path-course-view.yui-skin-sam li.activity form.togglecompletion {
+.site-index-flexpage.yui-skin-sam li.activity span.autocompletion,
+.site-index-flexpage.yui-skin-sam li.activity form.togglecompletion,
+#page-course-view-flexpage.yui-skin-sam li.activity span.autocompletion,
+#page-course-view-flexpage.yui-skin-sam li.activity form.togglecompletion {
     z-index: 2;
 }
 

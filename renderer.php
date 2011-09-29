@@ -267,7 +267,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
 
         $elements     = html_writer::tag('div', implode('&nbsp;&nbsp;', $elements), array('class' => 'format_flexpage_addpages_elements'));
         $addbutton    = html_writer::tag('button', '+', array('type' => 'button', 'value' => '+', 'id' => 'addpagebutton'));
-        $copyelements = html_writer::tag('div', $elements, array('id' => 'addpagetemplate'));
+        $copyelements = html_writer::tag('div', $elements, array('id' => 'format_flexpage_addpages_template'));
 
         $box = new course_format_flexpage_lib_box();
         $box->add_new_row()->add_new_cell($elements, array('class' => 'format_flexpage_addpages_elements_row'))
@@ -615,7 +615,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
                html_writer::input_hidden_params($url).
                $this->render($box).
                html_writer::end_tag('form').
-               html_writer::tag('div', $templates, array('id' => 'condition_templates'));
+               html_writer::tag('div', $templates, array('id' => 'format_flexpage_condition_templates'));
     }
 
     /**

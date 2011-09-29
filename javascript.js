@@ -109,7 +109,7 @@ M.format_flexpage.init_addpages = function(Y, url) {
         var button = new YAHOO.widget.Button('addpagebutton');
         button.on("click", function () {
             Y.one('div.format_flexpage_addpages_elements_row').appendChild(
-                Y.one('#addpagetemplate div.format_flexpage_addpages_elements').cloneNode(true)
+                Y.one('#format_flexpage_addpages_template div.format_flexpage_addpages_elements').cloneNode(true)
             );
         });
     });
@@ -147,7 +147,7 @@ M.format_flexpage.init_editpage = function(Y, url) {
             var buttonGrade = new YAHOO.widget.Button('condition_grade_add_button');
             buttonGrade.on("click", function () {
                 Y.one('#condition_grades').appendChild(
-                    Y.one('#condition_templates .format_flexpage_condition_grade').cloneNode(true)
+                    Y.one('#format_flexpage_condition_templates .format_flexpage_condition_grade').cloneNode(true)
                 );
             });
         }
@@ -155,7 +155,7 @@ M.format_flexpage.init_editpage = function(Y, url) {
             var buttonCompletion = new YAHOO.widget.Button('condition_completion_add_button');
             buttonCompletion.on("click", function () {
                 Y.one('#condition_completions').appendChild(
-                    Y.one('#condition_templates .format_flexpage_condition_completion').cloneNode(true)
+                    Y.one('#format_flexpage_condition_templates .format_flexpage_condition_completion').cloneNode(true)
                 );
             });
         }

@@ -120,9 +120,12 @@ class restore_format_flexpage_plugin extends restore_format_plugin {
      * ID remapping done here
      */
     public function after_restore_course() {
-        global $DB;
+        global $CFG, $DB;
+
+        require_once($CFG->dirroot.'/course/format/flexpage/lib/moodlepage.php');
 
         $context = get_context_instance(CONTEXT_COURSE, $this->task->get_courseid());
+        $course  = $DB->get_record('course', array('id' => $context->instanceid), 'id, category', MUST_EXIST);
 
         // Remap parentids
         $pages = $DB->get_recordset_select('format_flexpage_page', 'parentid != 0 AND courseid = ?', array($this->task->get_courseid()), '', 'id, parentid');
@@ -168,8 +171,10 @@ class restore_format_flexpage_plugin extends restore_format_plugin {
         }
         $grades->close();
 
+        list($pagepattern, $bppagepattern) = course_format_flexpage_lib_moodlepage::get_page_patterns(($course->category == 0));
+
         // Remap block subpagepattern and subpage
-        $instances = $DB->get_recordset_select('block_instances', 'parentcontextid = ? AND pagetypepattern = ? AND subpagepattern IS NOT NULL', array($context->id, 'course-view-*'), '', 'id, subpagepattern');
+        $instances = $DB->get_recordset_select('block_instances', 'parentcontextid = ? AND pagetypepattern = ? AND subpagepattern IS NOT NULL', array($context->id, $pagepattern), '', 'id, subpagepattern');
         foreach ($instances as $instance) {
             if ($newid = $this->get_mappingid('flexpage_page', $instance->subpagepattern)) {
                 $DB->set_field('block_instances', 'subpagepattern', $newid, array('id' => $instance->id));
@@ -177,7 +182,7 @@ class restore_format_flexpage_plugin extends restore_format_plugin {
                 $DB->set_field('block_instances', 'subpagepattern', null, array('id' => $instance->id));
             }
         }
-        $positions = $DB->get_recordset_select('block_positions', 'contextid = ? AND pagetype = ? AND subpage != \'\'', array($context->id, 'course-view-flexpage'), '', 'id, subpage');
+        $positions = $DB->get_recordset_select('block_positions', 'contextid = ? AND pagetype = ? AND subpage != \'\'', array($context->id, $bppagepattern), '', 'id, subpage');
         foreach ($positions as $position) {
             if ($newid = $this->get_mappingid('flexpage_page', $position->subpage)) {
                 $DB->set_field('block_positions', 'subpage', $newid, array('id' => $position->id));
