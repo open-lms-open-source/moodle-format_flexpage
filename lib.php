@@ -179,6 +179,15 @@ function callback_flexpage_set_pagelayout($page) {
 }
 
 /**
+ * Don't show the add block UI
+ *
+ * @return bool
+ */
+function callback_flexpage_add_block_ui() {
+    return false;
+}
+
+/**
  * Cleanup all things flexpage on course deletion
  *
  * @param int $courseid
