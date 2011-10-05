@@ -1,4 +1,5 @@
-
+.site-index-flexpage .block_adminblock,
+#page-course-view-flexpage .block_adminblock,
 #format_flexpage_condition_templates,
 #format_flexpage_addpages_template {
     display: none;

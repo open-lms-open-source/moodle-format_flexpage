@@ -197,7 +197,7 @@ class course_format_flexpage_lib_moodlepage {
                 $block  = end($blocks);
                 $weight = $block->instance->weight + 1;
             }
-            $pagetypepattern = $moodlepage->page->pagetype;
+            $pagetypepattern = $moodlepage->pagetype;
             if (strpos($pagetypepattern, 'course-view') === 0) {
                 $pagetypepattern = 'course-view-*';
             }
