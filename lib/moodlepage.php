@@ -237,16 +237,20 @@ class course_format_flexpage_lib_moodlepage {
                 if ($instance->parentcontextid != $context->id or $instance->subpagepattern != $frompage->get_id()) {
                     continue;  // Not a block specific to our page
                 }
-                if ($instance->blockname == 'flexpagemod') {
-                    if (!empty($block->config->cmid)) {
-                        self::add_activity_block($destpage, $block->config->cmid, $instance->region, $instance->visible);
+                try {
+                    if ($instance->blockname == 'flexpagemod') {
+                        if (!empty($block->config->cmid)) {
+                            self::add_activity_block($destpage, $block->config->cmid, $instance->region, $instance->visible);
+                        }
+                    } else if ($instance->blockname == 'flexpagenav') {
+                        if (!empty($block->config->menuid)) {
+                            self::add_menu_block($destpage, $block->config->menuid, $instance->region, $instance->visible);
+                        }
+                    } else {
+                        self::add_block($destpage, $instance->blockname, $instance->region, $instance->visible);
                     }
-                } else if ($instance->blockname == 'flexpagenav') {
-                    if (!empty($block->config->menuid)) {
-                        self::add_menu_block($destpage, $block->config->menuid, $instance->region, $instance->visible);
-                    }
-                } else {
-                    self::add_block($destpage, $instance->blockname, $instance->region, $instance->visible);
+                } catch (moodle_exception $e) {
+                    // Skip adding blocks that fail - usual cause, block cannot be added to page
                 }
             }
         }
