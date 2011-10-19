@@ -384,6 +384,12 @@ class course_format_flexpage_model_page extends course_format_flexpage_model_abs
      * @return moodle_url
      */
     public function get_url($extraparams = array()) {
+        if ($this->get_courseid() == SITEID) {
+            return new moodle_url('/', array_merge(
+                array('pageid' => $this->get_id()),
+                $extraparams
+            ));
+        }
         return new moodle_url('/course/view.php', array_merge(
             array('id' => $this->get_courseid(), 'pageid' => $this->get_id()),
             $extraparams
