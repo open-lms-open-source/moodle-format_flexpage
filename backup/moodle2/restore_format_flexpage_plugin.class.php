@@ -122,6 +122,7 @@ class restore_format_flexpage_plugin extends restore_format_plugin {
     public function after_restore_course() {
         global $CFG, $DB;
 
+        require_once($CFG->dirroot.'/course/format/flexpage/locallib.php');
         require_once($CFG->dirroot.'/course/format/flexpage/lib/moodlepage.php');
 
         $context = get_context_instance(CONTEXT_COURSE, $this->task->get_courseid());
@@ -233,5 +234,10 @@ class restore_format_flexpage_plugin extends restore_format_plugin {
             }
         }
         $configs->close();
+
+        $repo = new course_format_flexpage_repository_cache();
+        if ($repo->cache_exists($this->task->get_courseid())) {
+            format_flexpage_clear_cache($this->task->get_courseid());
+        }
     }
 }

@@ -87,6 +87,16 @@ class course_format_flexpage_repository_cache {
 
     /**
      * @param int $courseid
+     * @return bool
+     */
+    public function cache_exists($courseid) {
+        global $DB;
+
+        return $DB->record_exists('format_flexpage_cache', array('courseid' => $courseid));
+    }
+
+    /**
+     * @param int $courseid
      * @return void
      */
     public function delete_course_cache($courseid) {
