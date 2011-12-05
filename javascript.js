@@ -18,7 +18,6 @@ M.format_flexpage.init_actionbar = function(Y) {
         var node = Y.one('#format_flexpage_actionbar');
         node.removeClass('javascript-disabled');
         node.plug(Y.Plugin.NodeMenuNav);
-        node.removeClass('hiddenifjs');
 
         node.on('click', function(e) {
             // Make sure it's not some other menu item

@@ -122,7 +122,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
         $PAGE->requires->js_init_call('M.format_flexpage.init_flexpagenav_actionbar', null, false, $renderer->get_js_module());
 
         $content  = html_writer::start_tag('div', array('id' => 'custommenu', 'class' => 'format_flexpage_actionbar'));
-        $content .= html_writer::start_tag('div', array('id' => 'format_flexpage_actionbar', 'class' => 'yui3-menu yui3-menu-horizontal javascript-disabled hiddenifjs'));
+        $content .= html_writer::start_tag('div', array('id' => 'format_flexpage_actionbar', 'class' => 'yui3-menu yui3-menu-horizontal javascript-disabled'));
         $content .= html_writer::start_tag('div', array('class'=>'yui3-menu-content'));
         $content .= $this->actionbar_navigation();
         $content .= html_writer::start_tag('ul', array('id' => 'format_flexpage_actionbar_ul'));
