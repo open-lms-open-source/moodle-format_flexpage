@@ -19,7 +19,7 @@ function callback_flexpage_uses_sections() {
  * @param navigation_node $coursenode The course node
  */
 function callback_flexpage_load_content(global_navigation &$navigation, stdClass $course, navigation_node $coursenode) {
-    global $CFG;
+    global $CFG, $COURSE;
 
     require_once($CFG->dirroot.'/course/format/flexpage/locallib.php');
 
@@ -56,10 +56,13 @@ function callback_flexpage_load_content(global_navigation &$navigation, stdClass
         $node->hidden = is_string($availability);
         $parentnodes[$page->get_id()] = $node;
 
-        if (in_array($page->get_id(), $activepageids)) {
-            $node->force_open();
-        } else if ($page->get_id() == $current->get_id()) {
-            $node->make_active();
+        // Only force open or make active when it's the current course
+        if ($COURSE->id == $course->id) {
+            if (in_array($page->get_id(), $activepageids)) {
+                $node->force_open();
+            } else if ($page->get_id() == $current->get_id()) {
+                $node->make_active();
+            }
         }
     }
     unset($activepageids, $parentnodes);
