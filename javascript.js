@@ -9,6 +9,11 @@ M.format_flexpage = M.format_flexpage || {};
 M.format_flexpage.panel_stack = [];
 
 /**
+ * Keeps track of any panel ever created
+ */
+M.format_flexpage.panels = [];
+
+/**
  * Generate the action bar menu
  *
  * @param {YUI} Y
@@ -381,12 +386,17 @@ M.format_flexpage.init_movepage = function(Y, url) {
  * @param id
  */
 M.format_flexpage.init_default_panel = function(Y, id) {
-    return new YAHOO.widget.Panel(id, {
+    if (M.format_flexpage.panels[id] != undefined) {
+        M.format_flexpage.panels[id].destroy();
+        delete M.format_flexpage.panels[id];
+    }
+    M.format_flexpage.panels[id] = new YAHOO.widget.Panel(id, {
         constraintoviewport: true,
         modal: true,
         underlay: "none",
         close: true
     });
+    return M.format_flexpage.panels[id];
 };
 
 /**
@@ -396,6 +406,12 @@ M.format_flexpage.init_default_panel = function(Y, id) {
  * @param id
  */
 M.format_flexpage.init_default_dialog = function(Y, id) {
+    // Due to odd bugs (which I think has to do with events) we
+    // must destroy any panel that we have previously created
+    if (M.format_flexpage.panels[id] != undefined) {
+        M.format_flexpage.panels[id].destroy();
+        delete M.format_flexpage.panels[id];
+    }
     var dialog = new YAHOO.widget.Dialog(id, {
         // postmethod: 'form', // Very handy for debugging
         constraintoviewport: true,
@@ -415,6 +431,9 @@ M.format_flexpage.init_default_dialog = function(Y, id) {
     dialog.callback.failure = function(o) {
         M.format_flexpage.init_error_dialog(Y, M.str.format_flexpage.genericasyncfail);
     };
+
+    M.format_flexpage.panels[id] = dialog;
+
     return dialog;
 };
 
