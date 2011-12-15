@@ -5,6 +5,11 @@
     display: none;
 }
 
+/* Prevents actionbar sub-menus from displaying until the menu is ready */
+.format_flexpage_actionbar .javascript-disabled .yui3-menu {
+    display: none;
+}
+
 .format_flexpage_addpages_wrapper {
     margin-bottom: 20px;
 }
