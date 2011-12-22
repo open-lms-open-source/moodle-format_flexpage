@@ -245,7 +245,7 @@ class course_format_flexpage_model_cache extends course_format_flexpage_model_ab
      * @return course_format_flexpage_model_page
      */
     public function get_current_page() {
-        global $COURSE, $USER;
+        global $USER;
 
         $this->require_built();
 
@@ -267,16 +267,16 @@ class course_format_flexpage_model_cache extends course_format_flexpage_model_ab
         }
 
         // See if we know the last page the user was on
-        if (!empty($USER->format_flexpage_display[$COURSE->id])) {
+        if (!empty($USER->format_flexpage_display[$this->get_courseid()])) {
             try {
-                return $this->get_page($USER->format_flexpage_display[$COURSE->id]);
+                return $this->get_page($USER->format_flexpage_display[$this->get_courseid()]);
             } catch (Exception $e) {
                 // Continue looking for a page
             }
         }
 
         // Unset, AKA default page
-        unset($USER->format_flexpage_display[$COURSE->id]);
+        unset($USER->format_flexpage_display[$this->get_courseid()]);
 
         // Everything failed, so return first page
         return $this->get_first_available_page();

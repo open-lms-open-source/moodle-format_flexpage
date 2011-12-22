@@ -108,6 +108,7 @@ class course_format_flexpage_lib_moodlepage {
     public static function get_add_block_options(course_format_flexpage_model_page $page) {
         $moodlepage = self::new_moodle_page($page);
         $moodlepage->blocks->load_blocks(true);
+        $moodlepage->blocks->create_all_block_instances();
 
         $options = array();
         $blocks  = $moodlepage->blocks->get_addable_blocks();
@@ -181,6 +182,7 @@ class course_format_flexpage_lib_moodlepage {
         /** @var $bm block_manager */
         $bm = $moodlepage->blocks;
         $bm->load_blocks(true);
+        $bm->create_all_block_instances();
 
         if (!$moodlepage->user_can_edit_blocks()) {
             throw new moodle_exception('nopermissions', '', $moodlepage->url->out(), get_string('addblock'));
@@ -228,6 +230,7 @@ class course_format_flexpage_lib_moodlepage {
         /** @var $bm block_manager */
         $bm = $moodlepage->blocks;
         $bm->load_blocks(true);
+        $bm->create_all_block_instances();
 
         foreach ($bm->get_regions() as $region) {
             foreach ($bm->get_blocks_for_region($region) as $block) {
