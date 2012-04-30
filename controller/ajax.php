@@ -78,10 +78,10 @@ class course_format_flexpage_controller_ajax extends mr_controller {
         if (optional_param('add', 0, PARAM_BOOL)) {
             require_sesskey();
 
-            $names = optional_param('name', array(), PARAM_MULTILANG);
-            $moves = optional_param('move', array(), PARAM_ACTION);
-            $copypageids = optional_param('copypageid', array(), PARAM_INT);
-            $referencepageids = optional_param('referencepageid', array(), PARAM_INT);
+            $names = optional_param_array('name', array(), PARAM_MULTILANG);
+            $moves = optional_param_array('move', array(), PARAM_ACTION);
+            $copypageids = optional_param_array('copypageid', array(), PARAM_INT);
+            $referencepageids = optional_param_array('referencepageid', array(), PARAM_INT);
 
             // Add pages in reverse order, will match user expectations better
             $names = array_reverse($names, true);
@@ -229,7 +229,7 @@ class course_format_flexpage_controller_ajax extends mr_controller {
         if (optional_param('add', 0, PARAM_BOOL)) {
             require_sesskey();
 
-            $cmids  = optional_param('cmids', array(), PARAM_INT);
+            $cmids  = optional_param_array('cmids', array(), PARAM_INT);
             $region = optional_param('region', false, PARAM_ACTION);
 
             if (!is_array($cmids)) {
@@ -308,7 +308,7 @@ class course_format_flexpage_controller_ajax extends mr_controller {
                 'navigation' => required_param('navigation', PARAM_INT),
             ));
 
-            $regions = optional_param('regions', array(), PARAM_INT);
+            $regions = optional_param_array('regions', array(), PARAM_INT);
             $pagerepo->save_page_region_widths($page, $regions);
 
             if (!empty($CFG->enableavailability)) {
@@ -321,7 +321,7 @@ class course_format_flexpage_controller_ajax extends mr_controller {
                 if (optional_param('enableavailablefrom', 0, PARAM_BOOL)) {
                     $availablefrom = required_param('availablefrom', PARAM_SAFEPATH);
                     $parts = explode('/', $availablefrom);
-                    $parts = clean_param($parts, PARAM_INT);
+                    $parts = clean_param_array($parts, PARAM_INT);
                     $page->set_availablefrom(
                         make_timestamp($parts[2], $parts[0], $parts[1])
                     );
@@ -331,7 +331,7 @@ class course_format_flexpage_controller_ajax extends mr_controller {
                 if (optional_param('enableavailableuntil', 0, PARAM_BOOL)) {
                     $availableuntil = required_param('availableuntil', PARAM_SAFEPATH);
                     $parts = explode('/', $availableuntil);
-                    $parts = clean_param($parts, PARAM_INT);
+                    $parts = clean_param_array($parts, PARAM_INT);
                     $page->set_availableuntil(
                         make_timestamp($parts[2], $parts[0], $parts[1], 23, 59, 59)
                     );
@@ -340,9 +340,9 @@ class course_format_flexpage_controller_ajax extends mr_controller {
                 }
 
                 $conditions   = array();
-                $gradeitemids = optional_param('gradeitemids', array(), PARAM_INT);
-                $mins         = optional_param('mins', array(), PARAM_FLOAT);
-                $maxes        = optional_param('maxes', array(), PARAM_FLOAT);
+                $gradeitemids = optional_param_array('gradeitemids', array(), PARAM_INT);
+                $mins         = optional_param_array('mins', array(), PARAM_FLOAT);
+                $maxes        = optional_param_array('maxes', array(), PARAM_FLOAT);
 
                 foreach ($gradeitemids as $key => $gradeitemid) {
                     if (empty($gradeitemid)) {
@@ -362,8 +362,8 @@ class course_format_flexpage_controller_ajax extends mr_controller {
                 $completion = new completion_info($COURSE);
                 if ($completion->is_enabled()) {
                     $conditions = array();
-                    $cmids = optional_param('cmids', array(), PARAM_INT);
-                    $requiredcompletions = optional_param('requiredcompletions', array(), PARAM_INT);
+                    $cmids = optional_param_array('cmids', array(), PARAM_INT);
+                    $requiredcompletions = optional_param_array('requiredcompletions', array(), PARAM_INT);
 
                     foreach ($cmids as $key => $cmid) {
                         if (empty($cmid)) {
