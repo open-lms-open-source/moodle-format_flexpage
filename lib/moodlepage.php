@@ -123,7 +123,7 @@ class course_format_flexpage_lib_moodlepage {
                     $options[$block->name] = $blockobject->get_title();
                 }
             }
-            textlib_get_instance()->asort($options);
+            collatorlib::asort($options);
         }
         return $options;
     }
