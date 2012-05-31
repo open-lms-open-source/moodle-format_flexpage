@@ -332,22 +332,4 @@ class course_format_flexpage_lib_moodlepage {
 
         return $moodlepage;
     }
-
-    /**
-     * Get page patterns
-     *
-     * @static
-     * @param bool $frontpage If we are on the front page or not
-     * @return array
-     */
-    public static function get_page_patterns($frontpage = false) {
-        if ($frontpage) {
-            $pagepattern   = 'site-index';
-            $bppagepattern = 'site-index';
-        } else {
-            $pagepattern   = 'course-view-*';
-            $bppagepattern = 'course-view-flexpage';
-        }
-        return array($pagepattern, $bppagepattern);
-    }
 }
