@@ -279,8 +279,12 @@ M.format_flexpage.init_addactivity = function(Y, url) {
         Y.all('a.format_flexpage_addactivity_link').on('click', function(e) {
             e.preventDefault();
 
+            var node = e.target;
+            if (e.target.test('img')) {
+                node = e.target.ancestor('a');
+            }
             // Update our form so we know what the user selected
-            Y.one('input[name="addurl"]').set('value', e.target.get('href'));
+            Y.one('input[name="addurl"]').set('value', node.get('href'));
 
             // Update our form so we know what region was selected
             M.format_flexpage.set_region_input(Y, buttonGroup, 'region');
