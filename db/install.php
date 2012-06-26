@@ -97,6 +97,23 @@ class xmldb_format_flexpage_install_migration {
     }
 
     /**
+     * Get page patterns
+     *
+     * @param bool $frontpage If we are on the front page or not
+     * @return array
+     */
+    public function get_page_patterns($frontpage = false) {
+        if ($frontpage) {
+            $pagepattern   = 'site-index';
+            $bppagepattern = 'site-index';
+        } else {
+            $pagepattern   = 'course-view-*';
+            $bppagepattern = 'course-view-flexpage';
+        }
+        return array($pagepattern, $bppagepattern);
+    }
+
+    /**
      * Sorts pages
      *
      * @param stdClass[] $pages Parent pages to process
@@ -379,7 +396,7 @@ class xmldb_format_flexpage_install_migration {
                         /** @var $context stdClass */
                         $context = get_context_instance(CONTEXT_COURSE, $record->courseid);
                     }
-                    list($pagepattern, $bppagepattern) = course_format_flexpage_lib_moodlepage::get_page_patterns(($record->coursecat == 0));
+                    list($pagepattern, $bppagepattern) = $this->get_page_patterns(($record->coursecat == 0));
 
                     if (array_key_exists($record->cmid, $pagemenucmidmap)) {
                         $record->blockinstance = $DB->insert_record('block_instances', (object) array(
@@ -415,7 +432,7 @@ class xmldb_format_flexpage_install_migration {
                     /** @var $instance stdClass */
                     if ($instance = $DB->get_record('block_instances', array('id' => $record->blockinstance))) {
 
-                        list($pagepattern, $bppagepattern) = course_format_flexpage_lib_moodlepage::get_page_patterns(($record->coursecat == 0));
+                        list($pagepattern, $bppagepattern) = $this->get_page_patterns(($record->coursecat == 0));
 
                         if (!$context or $context->instanceid != $record->courseid) {
                             $context = get_context_instance(CONTEXT_COURSE, $record->courseid);
