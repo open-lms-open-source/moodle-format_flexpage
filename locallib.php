@@ -25,6 +25,7 @@
  * @see course_format_flexpage_repository_cache
  */
 require_once($CFG->dirroot.'/course/format/flexpage/repository/cache.php');
+require($CFG->dirroot.'/local/mr/bootstrap.php');
 
 /**
  * @param int|null $courseid

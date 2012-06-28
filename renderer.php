@@ -21,6 +21,7 @@
  * @author Mark Nielsen
  */
 
+require($CFG->dirroot.'/local/mr/bootstrap.php');
 require_once($CFG->dirroot.'/course/format/flexpage/locallib.php');
 
 /**
@@ -449,7 +450,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
      * @param moodle_url $url
      * @param course_format_flexpage_model_page[] $pages
      * @param course_format_flexpage_lib_menu_action[] $actions Actions to take on pages
-     * @return void
+     * @return string
      */
     public function manage_pages(moodle_url $url, array $pages, array $actions) {
         global $CFG, $PAGE;
