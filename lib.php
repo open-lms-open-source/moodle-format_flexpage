@@ -100,6 +100,10 @@ function callback_flexpage_request_key() {
  * @return stdClass
  */
 function callback_flexpage_ajax_support() {
+    if (!function_exists('course_format_set_pagelayout')) {
+        global $PAGE;
+        callback_flexpage_set_pagelayout($PAGE);
+    }
     $ajaxsupport = new stdClass();
     $ajaxsupport->capable = true;
     $ajaxsupport->testedbrowsers = array('MSIE' => 6.0, 'Gecko' => 20061111, 'Safari' => 531, 'Chrome' => 6.0);
