@@ -603,7 +603,7 @@ M.format_flexpage.init_calendar = function(Y, name) {
             var date = args[0][0];
             var year = date[0], month = date[1], day = date[2];
             input.set('value', month + "/" + day + "/" + year);
-        }, calendar, true)
+        }, calendar, true);
 
         calendar.render();
 
@@ -770,4 +770,4 @@ M.format_flexpage.constrain_panel_to_viewport = function(Y, panel) {
     // Odd bug where panels that are larger than view port, make the view port scroll down
     window.scrollTo(0, 0);
     panel.center();
-}
+};

@@ -194,6 +194,7 @@ class course_format_flexpage_lib_moodlepage {
      * @param string $blockname The block's name
      * @param string|bool $region The region to add the block to
      * @param int $visible If the block is visible or not
+     * @throws moodle_exception
      * @return void
      */
     public static function add_block(course_format_flexpage_model_page $page, $blockname, $region = false, $visible = 1) {

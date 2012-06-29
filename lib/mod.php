@@ -163,6 +163,7 @@ class course_format_flexpage_lib_mod {
      * @param string $module Module dir name
      * @param string $function The function name to call
      * @param array $arguments Args to pass to the function
+     * @throws coding_exception
      * @return mixed
      */
     public static function callback($module, $function, $arguments = array()) {

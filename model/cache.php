@@ -528,7 +528,7 @@ class course_format_flexpage_model_cache extends course_format_flexpage_model_ab
     /**
      * Sorts pages
      *
-     * @param course_format_flexpage_model_page[] $parentpages Parent pages to process
+     * @param course_format_flexpage_model_page[] $pages Parent pages to process
      * @param int $parentid The parent ID of the children to sort
      * @return course_format_flexpage_model_page[]
      */

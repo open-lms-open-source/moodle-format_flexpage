@@ -39,6 +39,7 @@ function callback_flexpage_uses_sections() {
  * @param global_navigation $navigation Navigation
  * @param stdClass $course The course we are loading the section for
  * @param navigation_node $coursenode The course node
+ * @return array
  */
 function callback_flexpage_load_content(global_navigation &$navigation, stdClass $course, navigation_node $coursenode) {
     global $CFG, $COURSE;

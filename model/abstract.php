@@ -44,6 +44,7 @@ abstract class course_format_flexpage_model_abstract {
 
     /**
      * @param int $id
+     * @throws coding_exception
      * @return course_format_flexpage_model_abstract
      */
     public function set_id($id) {

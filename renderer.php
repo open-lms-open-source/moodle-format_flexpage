@@ -86,7 +86,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
      * Pads a page's name with spaces and a hyphen based on hierarchy depth or passed amount
      *
      * @param course_format_flexpage_model_page $page
-     * @param null|int|true $length Shorten page name to this length (Pass true to use default length)
+     * @param null|int|boolean $length Shorten page name to this length (Pass true to use default length)
      * @param bool $link To link the page name or not
      * @param null|int $amount Amount of padding
      * @return string

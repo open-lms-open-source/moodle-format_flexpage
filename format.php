@@ -28,11 +28,11 @@
  * @package format_flexpage
  */
 
+global $CFG, $PAGE, $COURSE;
+
 require_once($CFG->dirroot.'/course/format/flexpage/locallib.php');
 
-/**
- * @var format_flexpage_renderer $output
- */
+/** @var $output format_flexpage_renderer|core_renderer */
 $output = $PAGE->get_renderer('format_flexpage');
 $layout = course_format_flexpage_lib_moodlepage::LAYOUT;
 

@@ -448,6 +448,7 @@ class course_format_flexpage_model_page extends course_format_flexpage_model_abs
      *
      * WARNING: does not take into account parent pages or menu display
      *
+     * @param course_modinfo|null $modinfo
      * @return bool|string
      */
     public function is_available(course_modinfo $modinfo = null) {
