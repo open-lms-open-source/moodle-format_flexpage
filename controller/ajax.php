@@ -336,7 +336,7 @@ class course_format_flexpage_controller_ajax extends mr_controller {
             if (!empty($CFG->enableavailability)) {
 
                 $page->set_options(array(
-                    'releasecode' => required_param('releasecode', PARAM_ALPHANUM),
+                    'releasecode' => optional_param('releasecode', null, PARAM_ALPHANUM),
                     'showavailability' => required_param('showavailability', PARAM_INT),
                 ));
 

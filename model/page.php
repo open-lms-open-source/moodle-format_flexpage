@@ -22,6 +22,7 @@
  */
 
 require_once($CFG->libdir.'/conditionlib.php');
+require_once($CFG->dirroot.'/local/mr/conditionlib.php');
 
 /**
  * @see course_format_flexpage_model_abstract
@@ -424,7 +425,7 @@ class course_format_flexpage_model_page extends course_format_flexpage_model_abs
      * @return void
      */
     public function set_conditions(array $conditions) {
-        if (!is_null($this->releasecode)) {
+        if (!is_null($this->releasecode) and class_exists('condition_releasecode')) {
             $conditions[] = new condition_releasecode($this->releasecode);
         }
         if (!empty($this->availablefrom) or !empty($this->availableuntil)) {
