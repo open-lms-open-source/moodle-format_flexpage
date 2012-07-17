@@ -188,7 +188,7 @@ class course_format_flexpage_repository_condition {
      * Save an array of conditions
      *
      * @param course_format_flexpage_model_page $page
-     * @param condition_base[] $conditions
+     * @param local_mrooms_lib_condition_abstract[] $conditions
      * @return course_format_flexpage_repository_condition
      */
     public function save_page_conditions(course_format_flexpage_model_page $page, array $conditions) {
