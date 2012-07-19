@@ -23,6 +23,7 @@
 
 require_once($CFG->libdir.'/completionlib.php');
 require_once($CFG->libdir.'/conditionlib.php');
+require_once($CFG->libdir.'/gradelib.php');
 
 /**
  * @see course_format_flexpage_model_page
@@ -137,8 +138,9 @@ class course_format_flexpage_repository_condition {
 
         $conditions = array();
         foreach ($rs as $record) {
-            $conditions[$record->pageid][] = new condition_grade(
-                $record, $record->conditiongrademin, $record->conditiongrademax
+            $item = new grade_item($record, false);
+            $conditions[$record->pageid][] = new course_format_flexpage_model_condition_grade(
+                $record, $record->conditiongrademin, $record->conditiongrademax, $item->get_name()
             );
         }
         return $conditions;
@@ -177,7 +179,7 @@ class course_format_flexpage_repository_condition {
 
         $conditions = array();
         foreach ($rs as $record) {
-            $conditions[$record->pageid][] = new condition_completion(
+            $conditions[$record->pageid][] = new course_format_flexpage_model_condition_completion(
                 $record->cmid, $record->requiredcompletion
             );
         }
@@ -194,9 +196,9 @@ class course_format_flexpage_repository_condition {
     public function save_page_conditions(course_format_flexpage_model_page $page, array $conditions) {
         $grade = $completion = array();
         foreach ($conditions as $condition) {
-            if ($condition instanceof condition_grade) {
+            if ($condition instanceof course_format_flexpage_model_condition_grade) {
                 $grade[] = $condition;
-            } else if ($condition instanceof condition_completion) {
+            } else if ($condition instanceof course_format_flexpage_model_condition_completion) {
                 $completion[] = $condition;
             }
         }
@@ -210,7 +212,7 @@ class course_format_flexpage_repository_condition {
      * Save grade conditions
      *
      * @param course_format_flexpage_model_page $page
-     * @param condition_grade[] $conditions
+     * @param course_format_flexpage_model_condition_grade[] $conditions
      * @return course_format_flexpage_repository_condition
      */
     public function save_page_grade_conditions(course_format_flexpage_model_page $page, array $conditions) {
@@ -252,7 +254,7 @@ class course_format_flexpage_repository_condition {
      * Save completion conditions
      *
      * @param course_format_flexpage_model_page $page
-     * @param condition_completion[] $conditions
+     * @param course_format_flexpage_model_condition_completion[] $conditions
      * @return course_format_flexpage_repository_condition
      */
     public function save_page_completion_conditions(course_format_flexpage_model_page $page, array $conditions) {

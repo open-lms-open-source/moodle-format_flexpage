@@ -26,7 +26,13 @@ require_once($CFG->libdir.'/conditionlib.php');
 /**
  * @see course_format_flexpage_model_abstract
  */
-require_once($CFG->dirroot.'/course/format/flexpage/model/abstract.php');
+require_once(__DIR__.'/abstract.php');
+
+/**
+ * @see course_format_flexpage_model_condition_completion
+ */
+require_once(__DIR__.'/condition/grade.php');
+require_once(__DIR__.'/condition/completion.php');
 
 /**
  * Flexpage Model Page
@@ -159,9 +165,9 @@ class course_format_flexpage_model_page extends course_format_flexpage_model_abs
     protected $regionwidths = array();
 
     /**
-     * @var condition_info_controller
+     * @var course_format_flexpage_model_condition_completion[]|course_format_flexpage_model_condition_grade[]
      */
-    protected $conditions = null;
+    protected $conditions = array();
 
     public function __construct($options = array()) {
         $this->showavailability = CONDITION_STUDENTVIEW_SHOW;
@@ -374,12 +380,23 @@ class course_format_flexpage_model_page extends course_format_flexpage_model_abs
     }
 
     /**
-     * Get condition information
+     * Get grade and completion conditions
      *
-     * @return condition_info_controller|null
+     * @return course_format_flexpage_model_condition_completion[]|course_format_flexpage_model_condition_grade[]
      */
     public function get_conditions() {
         return $this->conditions;
+    }
+
+    /**
+     * Set grade and completion conditions
+     *
+     * @param course_format_flexpage_model_condition_completion[]|course_format_flexpage_model_condition_grade[] $conditions
+     * @return course_format_flexpage_model_page
+     */
+    public function set_conditions(array $conditions) {
+        $this->conditions = $conditions;
+        return $this;
     }
 
     /**
@@ -415,104 +432,6 @@ class course_format_flexpage_model_page extends course_format_flexpage_model_abs
             array('id' => $this->get_courseid(), 'pageid' => $this->get_id()),
             $extraparams
         ));
-    }
-
-    /**
-     * Set page conditions
-     *
-     * @param array $conditions
-     * @return void
-     */
-    public function set_conditions(array $conditions) {
-        if (!is_null($this->releasecode) and class_exists('local_mrooms_lib_condition_releasecode')) {
-            $conditions[] = new local_mrooms_lib_condition_releasecode($this->releasecode);
-        }
-        if (!empty($this->availablefrom) or !empty($this->availableuntil)) {
-            $conditions[] = new condition_daterange(
-                $this->availablefrom,
-                $this->availableuntil
-            );
-        }
-        if (!empty($conditions)) {
-            $this->conditions = new condition_info_controller($conditions);
-        } else {
-            $this->conditions = null;
-        }
-    }
-
-    /**
-     * This method determines if the page is available to the user or not.
-     * If the page should be shown with availability information, that information
-     * string will be returned.  Otherwise, boolean.
-     *
-     * WARNING: does not take into account parent pages or menu display
-     *
-     * @param course_modinfo|null $modinfo
-     * @return bool|string
-     */
-    public function is_available(course_modinfo $modinfo = null) {
-        // #1: If the user has manage pages cap, then it's available to them
-        if (has_capability('format/flexpage:managepages', get_context_instance(CONTEXT_COURSE, $this->get_courseid()))) {
-            return true;
-        }
-
-        // #2: If the page is hidden, then not available
-        if ($this->get_display() == self::DISPLAY_HIDDEN) {
-            return false;
-        }
-        if (!is_null($this->get_conditions())) {
-            $this->process_conditions($modinfo);
-
-            // #3: Based on conditions, it is available to the user?  If not, see if we still show it...
-            if (!$this->conditions->get_user_available()) {
-                $info = $this->conditions->get_user_available_info();
-
-                // #4: Not available, but if we have info and we are to show it, return it
-                if (!empty($info) and $this->get_showavailability() > 0) {
-                    return $info;
-                }
-                // #5: Not available and no info to show
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Get available info
-     *
-     * @param course_modinfo|null $modinfo
-     * @return string
-     */
-    public function get_available_info(course_modinfo $modinfo = null) {
-        if (is_null($this->get_conditions())) {
-            return '';
-        }
-        $this->process_conditions($modinfo);
-        return $this->conditions->get_user_available_info();
-    }
-
-    /**
-     * Process conditions
-     *
-     * @param course_modinfo|null $modinfo
-     * @return course_format_flexpage_model_page
-     */
-    public function process_conditions(course_modinfo $modinfo = null) {
-        global $DB, $COURSE;
-
-        if (!is_null($this->get_conditions()) and !$this->conditions->get_processed()) {
-            if (!$modinfo instanceof course_modinfo) {
-                if ($COURSE->id != $this->get_courseid()) {
-                    $course = $DB->get_record('course', array('id' => $this->get_courseid()), '*', MUST_EXIST);
-                } else {
-                    $course = $COURSE;
-                }
-                $modinfo = get_fast_modinfo($course);
-            }
-            $this->conditions->process_conditions($modinfo, true);
-        }
-        return $this;
     }
 
     /**

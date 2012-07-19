@@ -56,11 +56,11 @@ function xmldb_format_flexpage_upgrade($oldversion = 0) {
         upgrade_plugin_savepoint(true, 2011062800, 'format', 'flexpage');
     }
 
-    if ($oldversion < 2011062802) {
+    if ($oldversion < 2012071900) {
         $cacherepo->clear_all_cache();
 
         // flexpage savepoint reached
-        upgrade_plugin_savepoint(true, 2011062802, 'format', 'flexpage');
+        upgrade_plugin_savepoint(true, 2012071900, 'format', 'flexpage');
     }
 
     return true;

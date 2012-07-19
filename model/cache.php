@@ -24,17 +24,22 @@
 /**
  * @see course_format_flexpage_repository_page
  */
-require_once($CFG->dirroot.'/course/format/flexpage/repository/page.php');
+require_once(dirname(__DIR__).'/repository/page.php');
 
 /**
  * @see course_format_flexpage_repository_condition
  */
-require_once($CFG->dirroot.'/course/format/flexpage/repository/condition.php');
+require_once(dirname(__DIR__).'/repository/condition.php');
 
 /**
  * @see course_format_flexpage_model_abstract
  */
-require_once($CFG->dirroot.'/course/format/flexpage/model/abstract.php');
+require_once(dirname(__DIR__).'/model/abstract.php');
+
+/**
+ * @see course_format_flexpage_lib_condition
+ */
+require_once(dirname(__DIR__).'/lib/condition.php');
 
 /**
  * Flexpage Model Cache
@@ -45,6 +50,7 @@ require_once($CFG->dirroot.'/course/format/flexpage/model/abstract.php');
  *
  * @author Mark Nielsen
  * @package format_flexpage
+ * @todo Not sure if this makes sense as a model anymore, should probably be refactored to a lib class
  */
 class course_format_flexpage_model_cache extends course_format_flexpage_model_abstract {
     /**
@@ -99,10 +105,17 @@ class course_format_flexpage_model_cache extends course_format_flexpage_model_ab
      */
     protected $condrepo;
 
+    /**
+     * Page availability cache
+     *
+     * @var array
+     */
+    protected $pageavailable = array();
+
     public function __construct() {
-        $this->pagerepo = new course_format_flexpage_repository_page();
-        $this->condrepo = new course_format_flexpage_repository_condition();
-        $this->set_timemodified();
+        $this->set_repository_page(new course_format_flexpage_repository_page())
+             ->set_repository_condition(new course_format_flexpage_repository_condition())
+             ->set_timemodified();
     }
 
     /**
@@ -327,7 +340,7 @@ class course_format_flexpage_model_cache extends course_format_flexpage_model_ab
 
         // First, try to find one that is actually available
         foreach ($this->get_pages() as $page) {
-            if ($this->is_page_available($page)) {
+            if ($this->is_page_available($page) === true) {
                 return $page;
             }
         }
@@ -349,7 +362,7 @@ class course_format_flexpage_model_cache extends course_format_flexpage_model_ab
             if ($nextpage->get_id() == $page->get_id()) {
                 $found = true;
             } else if ($found) {
-                if (!$this->is_page_available($nextpage)) {
+                if ($this->is_page_available($nextpage) !== true) {
                     continue;
                 }
                 if (!$ignoremenu and !$this->is_page_in_menu($nextpage)) {
@@ -374,7 +387,7 @@ class course_format_flexpage_model_cache extends course_format_flexpage_model_ab
             if ($apage->get_id() == $page->get_id()) {
                 return $previouspage;
             }
-            if (!$this->is_page_available($apage)) {
+            if ($this->is_page_available($apage) !== true) {
                 continue;
             }
             if (!$ignoremenu and !$this->is_page_in_menu($apage)) {
@@ -389,16 +402,22 @@ class course_format_flexpage_model_cache extends course_format_flexpage_model_ab
      * Determine if the page is available - checks parents!
      *
      * @param course_format_flexpage_model_page $page
-     * @return bool
+     * @param course_modinfo $modinfo
+     * @return bool|string
      */
-    public function is_page_available(course_format_flexpage_model_page $page) {
-        $parents = $this->get_page_parents($page, true);
-        foreach ($parents as $parent) {
-            if ($parent->is_available() !== true) {
-                return false;
+    public function is_page_available(course_format_flexpage_model_page $page, course_modinfo $modinfo = null) {
+        $available = $this->get_cached_page_available($page, $modinfo);
+
+        if ($available === true) {
+            // The page in question is available, now check parents
+            $parents = $this->get_page_parents($page);
+            foreach ($parents as $parent) {
+                if ($this->get_cached_page_available($parent, $modinfo) !== true) {
+                    return false;
+                }
             }
         }
-        return true;
+        return $available;
     }
 
     /**
@@ -589,5 +608,63 @@ class course_format_flexpage_model_cache extends course_format_flexpage_model_ab
             }
             $weight++;
         }
+    }
+
+    /**
+     * Get the cached page available value
+     *
+     * @param course_format_flexpage_model_page $page
+     * @param course_modinfo $modinfo
+     * @return bool|string
+     */
+    protected function get_cached_page_available(course_format_flexpage_model_page $page, course_modinfo $modinfo = null) {
+        if (!array_key_exists($page->get_id(), $this->pageavailable)) {
+            $this->pageavailable[$page->get_id()] = $this->get_page_available($page, $modinfo);
+        }
+        return $this->pageavailable[$page->get_id()];
+    }
+
+    /**
+     * Determine if a singe page is available
+     *
+     * @param course_format_flexpage_model_page $page
+     * @param course_modinfo $modinfo
+     * @return bool|string
+     */
+    protected function get_page_available(course_format_flexpage_model_page $page, course_modinfo $modinfo = null) {
+        global $CFG;
+
+        $userid = null;
+        if (!is_null($modinfo)) {
+            $userid = $modinfo->get_user_id();
+        }
+
+        // #1: If the user has manage pages cap, then it's available to them
+        if (has_capability('format/flexpage:managepages', context_course::instance($page->get_courseid()), $userid)) {
+            return true;
+        }
+
+        // #2: If the page is hidden, then not available
+        if ($page->get_display() == course_format_flexpage_model_page::DISPLAY_HIDDEN) {
+            return false;
+        }
+        if (!empty($CFG->enableavailability)) {
+            if (is_null($userid)) {
+                $userid = 0; // Different default for is_available
+            }
+            $conditionlib = new course_format_flexpage_lib_condition($page);
+            $available    = $conditionlib->is_available($info, true, $userid, $modinfo);
+
+            // #3: Based on conditions, it is available to the user?  If not, see if we still show it...
+            if (!$available) {
+                // #4: Not available, but if we have info and we are to show it, return it
+                if (!empty($info) and $conditionlib->show_availability()) {
+                    return $info;
+                }
+                // #5: Not available and no info to show
+                return false;
+            }
+        }
+        return true;
     }
 }

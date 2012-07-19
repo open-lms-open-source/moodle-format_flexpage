@@ -377,7 +377,7 @@ class course_format_flexpage_controller_ajax extends mr_controller {
                     if (array_key_exists($key, $maxes)) {
                         $max = $maxes[$key];
                     }
-                    $conditions[] = new condition_grade($gradeitemid, $min, $max);
+                    $conditions[] = new course_format_flexpage_model_condition_grade($gradeitemid, $min, $max);
                 }
                 $condrepo->save_page_grade_conditions($page, $conditions);
 
@@ -394,7 +394,7 @@ class course_format_flexpage_controller_ajax extends mr_controller {
                         if (!array_key_exists($key, $requiredcompletions)) {
                             continue;
                         }
-                        $conditions[] = new condition_completion($cmid, $requiredcompletions[$key]);
+                        $conditions[] = new course_format_flexpage_model_condition_completion($cmid, $requiredcompletions[$key]);
                     }
                     $condrepo->save_page_completion_conditions($page, $conditions);
                 }

@@ -70,7 +70,7 @@ function callback_flexpage_load_content(global_navigation &$navigation, stdClass
         if ($parentnode->hidden) {
             continue;
         }
-        $availability = $page->is_available($modinfo);
+        $availability = $cache->is_page_available($page, $modinfo);
 
         if ($availability === false) {
             continue;
@@ -172,7 +172,7 @@ function callback_flexpage_course_module_available(cm_info $cm) {
         foreach ($cmidtopages[$cm->id] as $pageid) {
             $parents = $cache->get_page_parents($cache->get_page($pageid), true);
             foreach ($parents as $parent) {
-                if ($parent->is_available($cm->get_modinfo()) !== true) {
+                if ($cache->is_page_available($parent, $cm->get_modinfo()) !== true) {
                     // If any parent not available, then go onto next page
                     continue 2;
                 }
@@ -202,7 +202,7 @@ function callback_flexpage_set_pagelayout($page) {
     $cache = format_flexpage_cache();
     $currentpage = $cache->get_current_page();
 
-    if (empty($CFG->enableavailability) or $cache->is_page_available($currentpage)) {
+    if (empty($CFG->enableavailability) or $cache->is_page_available($currentpage) === true) {
         $page->set_pagelayout(course_format_flexpage_lib_moodlepage::LAYOUT);
         $page->set_subpage($currentpage->get_id());
     }

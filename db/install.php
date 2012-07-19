@@ -253,7 +253,7 @@ class xmldb_format_flexpage_install_migration {
                                                 if ($DB->record_exists('forum', array('id' => $cm->instance, 'completionposts' => 0))) {
                                                     $DB->set_field('forum', 'completionposts', 1, array('id' => $cm->instance));
                                                 }
-                                                $conditions[] = new condition_completion($cm->id, COMPLETION_COMPLETE);
+                                                $conditions[] = new course_format_flexpage_model_condition_completion($cm->id, COMPLETION_COMPLETE);
                                                 break;
 
                                             case 'choice':
@@ -261,7 +261,7 @@ class xmldb_format_flexpage_install_migration {
                                                     $DB->set_field('course_modules', 'completion', COMPLETION_TRACKING_AUTOMATIC, array('id' => $cm->id));
                                                 }
                                                 $DB->set_field('choice', 'completionsubmit', 1, array('id' => $cm->instance));
-                                                $conditions[] = new condition_completion($cm->id, COMPLETION_COMPLETE);
+                                                $conditions[] = new course_format_flexpage_model_condition_completion($cm->id, COMPLETION_COMPLETE);
                                                 break;
 
                                             case 'glossary':
@@ -271,7 +271,7 @@ class xmldb_format_flexpage_install_migration {
                                                 if ($DB->record_exists('glossary', array('id' => $cm->instance, 'completionentries' => 0))) {
                                                     $DB->set_field('glossary', 'completionentries', 1, array('id' => $cm->instance));
                                                 }
-                                                $conditions[] = new condition_completion($cm->id, COMPLETION_COMPLETE);
+                                                $conditions[] = new course_format_flexpage_model_condition_completion($cm->id, COMPLETION_COMPLETE);
                                                 break;
 
                                             default:
@@ -287,7 +287,7 @@ class xmldb_format_flexpage_install_migration {
                                                         ));
                                                     }
                                                     if (is_null($cm->completiongradeitemnumber) or $cm->completiongradeitemnumber == 0) {
-                                                        $conditions[] = new condition_completion($cm->id, COMPLETION_COMPLETE);
+                                                        $conditions[] = new course_format_flexpage_model_condition_completion($cm->id, COMPLETION_COMPLETE);
                                                     }
                                                 }
                                         }
@@ -300,7 +300,7 @@ class xmldb_format_flexpage_install_migration {
                                     } else {
                                         $max = 100;
                                     }
-                                    $conditions[] = new condition_grade($lock['id'], $lockgrades[0], $max);
+                                    $conditions[] = new course_format_flexpage_model_condition_grade($lock['id'], $lockgrades[0], $max);
                                 } else if ($lock['type'] == 'access') {
                                     if ($cm = get_coursemodule_from_id(false, $lock['cmid'])) {
                                         if (plugin_supports('mod', $cm->modname, FEATURE_COMPLETION_TRACKS_VIEWS, false)) {
@@ -314,7 +314,7 @@ class xmldb_format_flexpage_install_migration {
                                                     'completionview' => COMPLETION_VIEW_REQUIRED,
                                                 ));
                                             }
-                                            $conditions[] = new condition_completion($cm->id, COMPLETION_COMPLETE);
+                                            $conditions[] = new course_format_flexpage_model_condition_completion($cm->id, COMPLETION_COMPLETE);
                                         }
                                     }
                                 }

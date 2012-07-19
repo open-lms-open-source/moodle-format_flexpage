@@ -107,7 +107,8 @@ $string['showavailability_help'] = 'If the flexpage is unavailable to the user, 
 $string['nomoveoptionserror'] = 'You cannot move this flexpage because there are no available positions to place this flexpage.  Try adding new flexpages before or after this flexpage.';
 $string['frontpage'] = 'Use Flexpage on front page';
 $string['frontpagedesc'] = 'This will enable the Flexpage format on the front page.';
-
+$string['hidefromothers'] = 'Hide flexpage';
+$string['showfromothers'] = 'Show flexpage';
 
 $string['display_help'] = 'Configure if this flexpage is:
 <ol>

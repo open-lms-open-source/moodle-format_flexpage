@@ -27,7 +27,12 @@ require_once($CFG->dirroot.'/course/format/flexpage/locallib.php');
 /**
  * @see course_format_flexpage_lib_box
  */
-require_once($CFG->dirroot.'/course/format/flexpage/lib/box.php');
+require_once(__DIR__.'/lib/box.php');
+
+/**
+ * @see course_format_flexpage_lib_condition
+ */
+require_once(__DIR__.'/lib/condition.php');
 
 /**
  * Format Flexpage Renderer
@@ -53,6 +58,8 @@ class format_flexpage_renderer extends plugin_renderer_base {
                 'querystring',
                 'yui2-yahoo',
                 'yui2-dom',
+                'yui2-connection',
+                'yui2-dragdrop',
                 'yui2-event',
                 'yui2-element',
                 'yui2-button',
@@ -252,12 +259,13 @@ class format_flexpage_renderer extends plugin_renderer_base {
      * Render page availability information
      *
      * @param course_format_flexpage_model_page[] $pages
+     * @param course_format_flexpage_model_cache $cache
      * @return string
      */
-    public function page_available_info(array $pages) {
+    public function page_available_info(array $pages, course_format_flexpage_model_cache $cache) {
         $box = new course_format_flexpage_lib_box(array('class' => 'format_flexpage_page_availability'));
         foreach ($pages as $page) {
-            $info = $page->is_available();
+            $info = $cache->is_page_available($page);
             if (is_string($info)) {
                 $box->add_new_row()->add_new_cell(
                     html_writer::tag('div', format_string($page->get_name()), array('class' => 'format_flexpage_pagename')).
@@ -533,7 +541,8 @@ class format_flexpage_renderer extends plugin_renderer_base {
             $pagename = html_writer::tag('div', $this->pad_page_name($page, null, true), array('id' => html_writer::random_id(), 'class' => 'format_flexpage_pagename'));
 
             if (!empty($CFG->enableavailability)) {
-                $pagename .= html_writer::tag('div', $page->get_available_info(), array('class' => 'availabilityinfo'));
+                $conditionlib = new course_format_flexpage_lib_condition($page);
+                $pagename .= html_writer::tag('div', $conditionlib->get_full_information(), array('class' => 'availabilityinfo'));
             }
             $row = $box->add_new_row(array('pageid' => $page->get_id()));
             $row->add_new_cell($pagename, array('class' => 'format_flexpage_name_cell'))
@@ -616,14 +625,14 @@ class format_flexpage_renderer extends plugin_renderer_base {
             }
 
             $box->add_new_row()->add_new_cell($this->flexpage_help_icon('gradecondition', 'condition'))
-                               ->add_new_cell($this->page_conditions($page, 'condition_grade'));
+                               ->add_new_cell($this->page_conditions($page, 'course_format_flexpage_model_condition_grade'));
 
             $templates = $this->condition_grade();
 
             $completion = new completion_info($COURSE);
             if ($completion->is_enabled()) {
                 $box->add_new_row()->add_new_cell($this->flexpage_help_icon('completioncondition', 'condition'))
-                                   ->add_new_cell($this->page_conditions($page, 'condition_completion'));
+                                   ->add_new_cell($this->page_conditions($page, 'course_format_flexpage_model_condition_completion'));
 
                 $templates .= $this->condition_completion();
             }
@@ -650,14 +659,21 @@ class format_flexpage_renderer extends plugin_renderer_base {
      * @return string
      */
     public function page_conditions(course_format_flexpage_model_page $page, $conditionclass) {
-        $conditions = $page->get_conditions();
-        if (!is_null($conditions)) {
-            $conditions = $conditions->get_conditions($conditionclass);
+        $conditions     = array();
+        $pageconditions = $page->get_conditions();
+        foreach ($pageconditions as $pagecondition) {
+            if ($pagecondition instanceof $conditionclass) {
+                $conditions[] = $pagecondition;
+            }
         }
-
         // Render a blank one if none exist
         if (empty($conditions)) {
             $conditions = array(null);
+        }
+        if ($conditionclass == 'course_format_flexpage_model_condition_grade') {
+            $rendermethod = 'condition_grade';
+        } else {
+            $rendermethod = 'condition_completion';
         }
         $condbox  = new course_format_flexpage_lib_box(array('class' => 'format_flexpage_conditions'));
         $condcell = new course_format_flexpage_lib_box_cell();
@@ -666,7 +682,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
 
         foreach ($conditions as $condition) {
             $condcell->append_contents(
-                $this->$conditionclass($condition)
+                $this->$rendermethod($condition)
             );
         }
         $condbox->add_new_row()->add_cell($condcell)
@@ -678,10 +694,10 @@ class format_flexpage_renderer extends plugin_renderer_base {
     /**
      * Grade condition specific UI
      *
-     * @param condition_grade|null $condition
+     * @param course_format_flexpage_model_condition_grade|null $condition
      * @return string
      */
-    public function condition_grade(condition_grade $condition = null) {
+    public function condition_grade(course_format_flexpage_model_condition_grade $condition = null) {
         global $CFG, $COURSE;
 
         require_once($CFG->libdir.'/gradelib.php');
@@ -721,10 +737,10 @@ class format_flexpage_renderer extends plugin_renderer_base {
     /**
      * Completion condition specific UI
      *
-     * @param condition_completion|null $condition
+     * @param course_format_flexpage_model_condition_completion|null $condition
      * @return string
      */
-    public function condition_completion(condition_completion $condition = null) {
+    public function condition_completion(course_format_flexpage_model_condition_completion $condition = null) {
         global $COURSE;
 
         static $completionoptions = null;
