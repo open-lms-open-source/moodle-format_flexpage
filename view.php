@@ -28,6 +28,8 @@
  * @package format_flexpage
  */
 
+define('NO_DEBUG_DISPLAY', true);
+
 require_once('../../../config.php');
 require($CFG->dirroot.'/local/mr/bootstrap.php');
 require_once($CFG->dirroot.'/course/format/flexpage/locallib.php');
