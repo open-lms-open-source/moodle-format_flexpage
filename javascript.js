@@ -96,9 +96,13 @@ M.format_flexpage.init_edit = function(Y) {
         if (url != undefined) {
             e.preventDefault();
 
+            // Prevent core handler
+            e.stopPropagation();
+
             var dialog = new YAHOO.widget.SimpleDialog("modDeleteDialog", {
                 constraintoviewport: true,
                 modal: true,
+                visible: false,
                 underlay: "none",
                 close: true,
                 text: M.str.format_flexpage.deletemodwarn,
@@ -110,8 +114,8 @@ M.format_flexpage.init_edit = function(Y) {
             });
             dialog.setHeader(M.str.format_flexpage.warning);
             dialog.render(document.body);
-            dialog.show();
             dialog.center();
+            dialog.show();
         }
     });
 };
@@ -419,6 +423,7 @@ M.format_flexpage.init_default_panel = function(Y, id) {
     M.format_flexpage.panels[id] = new YAHOO.widget.Panel(id, {
         constraintoviewport: true,
         modal: true,
+        visible: false,
         underlay: "none",
         close: true
     });
@@ -443,6 +448,7 @@ M.format_flexpage.init_default_dialog = function(Y, id) {
         constraintoviewport: true,
         // fixedcenter: true, // @todo It's actually kind of nice
         modal: true,
+        visible: false,
         zIndex: 100,
         underlay: "none",
         close: true,
@@ -485,8 +491,8 @@ M.format_flexpage.populate_panel = function(Y, panel, url, onsuccess) {
                     panel.setFooter(response.footer);
                 }
                 panel.render(document.body);
-                panel.show();
                 panel.center();
+                panel.show();
 
                 M.format_flexpage.init_help_icons(Y);
 
@@ -561,6 +567,7 @@ M.format_flexpage.connect_dialogs_attach_events = function(Y, child) {
 M.format_flexpage.init_error_dialog = function(Y, errorMessage) {
     var dialog = new YAHOO.widget.SimpleDialog("errorDialog", {
         constraintoviewport: true,
+        visible: false,
         modal: true,
         zIndex: 200,
         underlay: "none",
@@ -573,8 +580,8 @@ M.format_flexpage.init_error_dialog = function(Y, errorMessage) {
     });
     dialog.setHeader(M.str.format_flexpage.error);
     dialog.render(document.body);
-    dialog.show();
     dialog.center();
+    dialog.show();
 
     return dialog;
 };
@@ -713,8 +720,8 @@ M.format_flexpage.init_actionbar_help_icon = function(Y) {
     panel.setHeader(M.str.format_flexpage.actionbar);
     panel.setBody(M.str.format_flexpage.actionbar_help);
     panel.render(document.body);
-    panel.show();
     panel.center();
+    panel.show();
 
     M.format_flexpage.constrain_panel_to_viewport(Y, panel);
 
