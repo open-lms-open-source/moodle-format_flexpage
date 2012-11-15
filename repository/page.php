@@ -200,11 +200,10 @@ class course_format_flexpage_repository_page {
     public function move_page(course_format_flexpage_model_page $page, $move, $referencepageid) {
         global $DB;
 
-        $refpage = $this->get_page($referencepageid);
-
         if ($page->has_id()) {
             $this->remove_page_position($page);
         }
+        $refpage = $this->get_page($referencepageid);
 
         switch ($move) {
             case course_format_flexpage_model_page::MOVE_BEFORE:
