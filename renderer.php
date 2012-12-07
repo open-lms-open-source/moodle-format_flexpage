@@ -677,8 +677,8 @@ class format_flexpage_renderer extends plugin_renderer_base {
         }
         $condbox  = new course_format_flexpage_lib_box(array('class' => 'format_flexpage_conditions'));
         $condcell = new course_format_flexpage_lib_box_cell();
-        $condcell->set_attributes(array('id' => $conditionclass.'s'));
-        $condadd = html_writer::tag('button', '+', array('type' => 'button', 'value' => '+', 'id' => $conditionclass.'_add_button'));
+        $condcell->set_attributes(array('id' => $rendermethod.'s'));
+        $condadd = html_writer::tag('button', '+', array('type' => 'button', 'value' => '+', 'id' => $rendermethod.'_add_button'));
 
         foreach ($conditions as $condition) {
             $condcell->append_contents(
