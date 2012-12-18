@@ -278,7 +278,11 @@ class xmldb_format_flexpage_install_migration {
                                     } else {
                                         $max = 100;
                                     }
-                                    $conditions[] = new condition_grade($lock['id'], $lockgrades[0], $max);
+                                    try {
+                                        $conditions[] = new condition_grade($lock['id'], $lockgrades[0], $max);
+                                    } catch (moodle_exception $e) {
+                                        // Ignore, means gradeitemid no longer exists
+                                    }
                                 } else if ($lock['type'] == 'access') {
                                     if ($cm = get_coursemodule_from_id(false, $lock['cmid'])) {
                                         if (plugin_supports('mod', $cm->modname, FEATURE_COMPLETION_TRACKS_VIEWS, false)) {
