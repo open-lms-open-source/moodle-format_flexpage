@@ -353,7 +353,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
                 } else {
                     $title = '';
                 }
-                $icon    = $this->output->pix_icon('icon', $module['label'], $module['module']);
+                $icon    = $this->output->pix_icon('icon', '', $module['module']);
                 $items[] = html_writer::link(
                     new moodle_url($addurl),
                     $icon.' '.$module['label'],
