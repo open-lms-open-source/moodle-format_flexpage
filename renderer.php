@@ -200,11 +200,13 @@ class format_flexpage_renderer extends plugin_renderer_base {
         } else {
             $nextpage = '';
         }
-        $jumptopage = $this->output->single_select(
+        $jumpselect = new single_select(
             new moodle_url('/course/view.php', array('id' => $currentpage->get_courseid())),
             'pageid', $options, $currentpage->get_id(), array(), 'jumptopageid'
         );
-        $jumptopage = html_writer::tag('span', $jumptopage, array('id' => 'format_flexpage_jumptopage'));
+        $jumpselect->set_label(get_string('jumptoflexpage', 'format_flexpage'), array('class' => 'accesshide'));
+
+        $jumptopage = html_writer::tag('span', $this->output->render($jumpselect), array('id' => 'format_flexpage_jumptopage'));
         $helpicon   = $this->pix_icon('help', get_string('help'), 'moodle', array('id' => 'format_flexpage_actionbar_help'));
         $helpicon   = html_writer::tag('span', $helpicon);
 
