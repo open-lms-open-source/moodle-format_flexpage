@@ -43,7 +43,7 @@ class course_format_flexpage_lib_mod {
         if (is_null($course)) {
             $course = $COURSE;
         }
-        $urlbase       = "/course/mod.php?id=$course->id&section=0&sesskey=".sesskey().'&add=';
+        $sectionlink   = '&section=0';
         $stractivities = get_string('activities');
         $strresources  = get_string('resources');
         $options       = array(
@@ -51,59 +51,42 @@ class course_format_flexpage_lib_mod {
             $strresources  => array(),
         );
 
-        get_all_mods($course->id, $mods, $modnames, $modnamesplural, $modnamesused);
+        $modnames = get_module_types_names();
+        $modules = get_module_metadata($course, $modnames);
 
-        foreach($modnames as $modname => $modnamestr) {
-            if (!course_allowed_module($course, $modname)) {
-                continue;
-            }
-
-            try {
-                if ($types = self::callback($modname, 'get_types')) {
-                    $menu = array();
-                    $atype = null;
-                    $groupname = null;
-                    foreach($types as $type) {
-                        if ($type->typestr === '--') {
-                            continue;
-                        }
-                        if (strpos($type->typestr, '--') === 0) {
-                            $groupname = str_replace('--', '', $type->typestr);
-                            continue;
-                        }
-                        $type->type = str_replace('&amp;', '&', $type->type);
-                        if ($type->modclass == MOD_CLASS_RESOURCE) {
-                            $atype = MOD_CLASS_RESOURCE;
-                        }
-                        $menu[$urlbase.$type->type] = array(
-                            'module' => $modname,
-                            'label'  => $type->typestr
-                        );
-                    }
-                    if (is_null($groupname)) {
-                        if ($atype == MOD_CLASS_RESOURCE) {
-                            $groupname = $strresources;
-                        } else {
-                            $groupname = $stractivities;
-                        }
-                    }
-                    if (empty($options[$groupname])) {
-                        $options[$groupname] = $menu;
-                    } else {
-                        $options[$groupname] = array_merge($options[$groupname], $menu);
-                    }
+        foreach ($modules as $module) {
+            if (isset($module->types)) {
+                // This module has a subtype
+                // NOTE: this is legacy stuff, module subtypes are very strongly discouraged!!
+                $subtypes = array();
+                foreach ($module->types as $subtype) {
+                    $subtypes[$subtype->link.$sectionlink] = array(
+                        'module' => $module->name,
+                        'label'  => $module->title,
+                    );
                 }
-            } catch (coding_exception $e) {
-                $archetype = plugin_supports('mod', $modname, FEATURE_MOD_ARCHETYPE, MOD_ARCHETYPE_OTHER);
-                if ($archetype == MOD_ARCHETYPE_RESOURCE) {
-                    $groupname = $strresources;
+
+                // Sort module subtypes into the list
+                if (!empty($module->title)) {
+                    $options[$module->title] = $subtypes;
                 } else {
-                    $groupname = $stractivities;
+                    // This grouping does not have a name
+                    if ($module->archetype == MOD_CLASS_RESOURCE) {
+                        $options[$strresources] = array_merge($options[$strresources], $subtypes);
+                    } else {
+                        $options[$stractivities] = array_merge($options[$stractivities], $subtypes);
+                    }
                 }
-                $options[$groupname][$urlbase.$modname] = array(
-                    'module' => $modname,
-                    'label'  => $modnamestr,
-                );
+            } else {
+                // This module has no subtypes
+                $option = array('module' => $module->name, 'label'  => $module->title);
+                if ($module->archetype == MOD_ARCHETYPE_RESOURCE) {
+                    $options[$strresources][$module->link.$sectionlink] = $option;
+                } else if ($module->archetype === MOD_ARCHETYPE_SYSTEM) {
+                    // System modules cannot be added by user, do not add to dropdown
+                } else {
+                    $options[$stractivities][$module->link.$sectionlink] = $option;
+                }
             }
         }
         foreach ($options as $groupname => $activities) {
@@ -155,32 +138,5 @@ class course_format_flexpage_lib_mod {
      */
     public static function sort_options($a, $b) {
         return strnatcasecmp($a['label'], $b['label']);
-    }
-
-    /**
-     * Perform a module callback
-     *
-     * @param string $module Module dir name
-     * @param string $function The function name to call
-     * @param array $arguments Args to pass to the function
-     * @throws coding_exception
-     * @return mixed
-     */
-    public static function callback($module, $function, $arguments = array()) {
-        global $CFG;
-
-        $lib = "$CFG->dirroot/mod/$module/lib.php";
-
-        if (!file_exists($lib)) {
-            throw new coding_exception('Module lib file does not exist');
-        }
-        @require_once($lib);
-
-        $function = "{$module}_$function";
-
-        if (!function_exists($function)) {
-            throw new coding_exception("Function does not exist: $function");
-        }
-        return call_user_func_array($function, $arguments);
     }
 }
