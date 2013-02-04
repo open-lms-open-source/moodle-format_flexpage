@@ -48,6 +48,7 @@ class course_format_flexpage_lib_condition extends condition_info_base {
             'showavailability'     => $page->get_showavailability(),
             'conditionscompletion' => array(),
             'conditionsgrade'      => array(),
+            'conditionsfield'      => array(),
         );
         foreach ($page->get_conditions() as $condition) {
             if ($condition instanceof course_format_flexpage_model_condition_completion) {
