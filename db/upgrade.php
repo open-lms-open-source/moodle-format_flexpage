@@ -63,5 +63,12 @@ function xmldb_format_flexpage_upgrade($oldversion = 0) {
         upgrade_plugin_savepoint(true, 2012071900, 'format', 'flexpage');
     }
 
+    if ($oldversion < 2013020400) {
+        // Clean out automatically migrated options
+        $DB->delete_records('course_format_options', array('format' => 'flexpage'));
+
+        // flexpage savepoint reached
+        upgrade_plugin_savepoint(true, 2013020400, 'format', 'flexpage');
+    }
     return true;
 }
