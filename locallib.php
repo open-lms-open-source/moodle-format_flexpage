@@ -72,6 +72,29 @@ function format_flexpage_clear_cache($courseid = null) {
 }
 
 /**
+ * Set the flexpage page layout to the page if appropriate
+ *
+ * @param moodle_page $page
+ * @return bool True if anything was done
+ */
+function format_flexpage_set_pagelayout(moodle_page $page) {
+    global $CFG;
+
+    require_once($CFG->dirroot.'/course/format/flexpage/lib/moodlepage.php');
+
+    $cache       = format_flexpage_cache();
+    $currentpage = $cache->get_current_page();
+
+    if (empty($CFG->enableavailability) or $cache->is_page_available($currentpage) === true) {
+        $page->set_pagelayout(course_format_flexpage_lib_moodlepage::LAYOUT);
+        $page->set_subpage($currentpage->get_id());
+
+        return true;
+    }
+    return false;
+}
+
+/**
  * Determine if flexpage has been installed yet
  *
  * @return bool
