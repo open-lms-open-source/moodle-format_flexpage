@@ -845,8 +845,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
         $link = $this->navigation_link($type, $page, $label);
         if (!empty($link)) {
             // This will render the link as a button
-            $PAGE->requires->yui2_lib('button');
-            $PAGE->requires->js_init_call("(function(Y) { new YAHOO.widget.Button(\"format_flexpage_{$type}_page\"); })");
+            $PAGE->requires->js_init_call("(function(Y) { Y.use('yui2-button', function(Y) { new Y.YUI2.widget.Button(\"format_flexpage_{$type}_page\"); }) })");
         }
         return $link;
     }

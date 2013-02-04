@@ -99,14 +99,14 @@ M.format_flexpage.init_edit = function(Y) {
             // Prevent core handler
             e.stopPropagation();
 
-            var dialog = new YAHOO.widget.SimpleDialog("modDeleteDialog", {
+            var dialog = new Y.YUI2.widget.SimpleDialog("modDeleteDialog", {
                 constraintoviewport: true,
                 modal: true,
                 visible: false,
                 underlay: "none",
                 close: true,
                 text: M.str.format_flexpage.deletemodwarn,
-                icon: YAHOO.widget.SimpleDialog.ICON_WARN,
+                icon: Y.YUI2.widget.SimpleDialog.ICON_WARN,
                 buttons: [
                     { text: M.str.moodle.cancel, handler: function () { this.hide(); }, isDefault:true },
                     { text: M.str.format_flexpage.continuedotdotdot, handler: function () { this.hide(); window.location = url } }
@@ -136,7 +136,7 @@ M.format_flexpage.init_addpages = function(Y, url) {
     ]);
 
     M.format_flexpage.populate_panel(Y, dialog, url, function() {
-        var button = new YAHOO.widget.Button('addpagebutton');
+        var button = new Y.YUI2.widget.Button('addpagebutton');
         button.on("click", function () {
             Y.one('div.format_flexpage_addpages_elements_row').appendChild(
                 Y.one('#format_flexpage_addpages_template div.format_flexpage_addpages_elements').cloneNode(true)
@@ -174,7 +174,7 @@ M.format_flexpage.init_editpage = function(Y, url) {
         });
 
         if (Y.one('#condition_grade_add_button')) {
-            var buttonGrade = new YAHOO.widget.Button('condition_grade_add_button');
+            var buttonGrade = new Y.YUI2.widget.Button('condition_grade_add_button');
             buttonGrade.on("click", function () {
                 Y.one('#condition_grades').appendChild(
                     Y.one('#format_flexpage_condition_templates .format_flexpage_condition_grade').cloneNode(true)
@@ -182,7 +182,7 @@ M.format_flexpage.init_editpage = function(Y, url) {
             });
         }
         if (Y.one('#condition_completion_add_button')) {
-            var buttonCompletion = new YAHOO.widget.Button('condition_completion_add_button');
+            var buttonCompletion = new Y.YUI2.widget.Button('condition_completion_add_button');
             buttonCompletion.on("click", function () {
                 Y.one('#condition_completions').appendChild(
                     Y.one('#format_flexpage_condition_templates .format_flexpage_condition_completion').cloneNode(true)
@@ -420,7 +420,7 @@ M.format_flexpage.init_default_panel = function(Y, id) {
         M.format_flexpage.panels[id].destroy();
         delete M.format_flexpage.panels[id];
     }
-    M.format_flexpage.panels[id] = new YAHOO.widget.Panel(id, {
+    M.format_flexpage.panels[id] = new Y.YUI2.widget.Panel(id, {
         constraintoviewport: true,
         modal: true,
         visible: false,
@@ -443,7 +443,7 @@ M.format_flexpage.init_default_dialog = function(Y, id) {
         M.format_flexpage.panels[id].destroy();
         delete M.format_flexpage.panels[id];
     }
-    var dialog = new YAHOO.widget.Dialog(id, {
+    var dialog = new Y.YUI2.widget.Dialog(id, {
         // postmethod: 'form', // Very handy for debugging
         constraintoviewport: true,
         // fixedcenter: true, // @todo It's actually kind of nice
@@ -565,7 +565,7 @@ M.format_flexpage.connect_dialogs_attach_events = function(Y, child) {
  * @param url
  */
 M.format_flexpage.init_error_dialog = function(Y, errorMessage) {
-    var dialog = new YAHOO.widget.SimpleDialog("errorDialog", {
+    var dialog = new Y.YUI2.widget.SimpleDialog("errorDialog", {
         constraintoviewport: true,
         visible: false,
         modal: true,
@@ -573,7 +573,7 @@ M.format_flexpage.init_error_dialog = function(Y, errorMessage) {
         underlay: "none",
         close: true,
         text: errorMessage,
-        icon: YAHOO.widget.SimpleDialog.ICON_WARN,
+        icon: Y.YUI2.widget.SimpleDialog.ICON_WARN,
         buttons: [
             { text: M.str.format_flexpage.close, handler: function () { this.hide(); }, isDefault:true }
         ]
@@ -603,7 +603,7 @@ M.format_flexpage.init_calendar = function(Y, name) {
         var input    = Y.one('input[name="' + name + '"]');
         var checkbox = Y.one('input[name="' + checkboxName + '"]');
 
-        var calendar = new YAHOO.widget.Calendar(calendarId, renderingId, {
+        var calendar = new Y.YUI2.widget.Calendar(calendarId, renderingId, {
             selected: input.get('value')
         });
         calendar.selectEvent.subscribe(function(type, args, obj) {
@@ -634,7 +634,7 @@ M.format_flexpage.init_calendar = function(Y, name) {
  * @param url
  */
 M.format_flexpage.init_region_buttons = function(Y, buttons) {
-    var buttonGroup = new YAHOO.widget.ButtonGroup({
+    var buttonGroup = new Y.YUI2.widget.ButtonGroup({
         id: "format_flexpage_region_radios_id",
         name: "region",
         container: "format_flexpage_region_radios"
@@ -672,7 +672,7 @@ M.format_flexpage.init_button_menu = function(Y, select) {
     var index  = select.get('selectedIndex');
     var label  = select.get("options").item(index).get('innerHTML');
 
-    return new YAHOO.widget.Button({
+    return new Y.YUI2.widget.Button({
         id: select.get('id') + '_menuid',
         name: select.get('id') + '_menuname',
         label: label,
@@ -769,7 +769,7 @@ M.format_flexpage.constrain_panel_to_viewport = function(Y, panel) {
     }
 
     // We take total height minus view port offset minus footer minus header minus panel body padding
-    var height = YAHOO.util.Dom.getViewportHeight() - (YAHOO.widget.Overlay.VIEWPORT_OFFSET * 2) - footerHeight - headerHeight - panelPadding;
+    var height = Y.YUI2.util.Dom.getViewportHeight() - (Y.YUI2.widget.Overlay.VIEWPORT_OFFSET * 2) - footerHeight - headerHeight - panelPadding;
 
     Y.one('#' + panel.id + ' .bd').setStyle('maxHeight', height + 'px')
                                   .setStyle('overflow', 'auto');
