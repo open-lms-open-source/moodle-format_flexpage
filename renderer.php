@@ -43,15 +43,18 @@ require_once(__DIR__.'/lib/condition.php');
 class format_flexpage_renderer extends plugin_renderer_base {
 
     public function __construct(moodle_page $page, $target) {
-        global $SCRIPT;
+        global $CFG, $SCRIPT;
+
+        require_once($CFG->dirroot.'/course/format/flexpage/lib/moodlepage.php');
 
         parent::__construct($page, $target);
 
         // 2nd part of hack, re-set page layout as it is overridden in course/view.php
         // See first part in format_flexpage::page_set_course
         $subpage = $page->subpage; // Due to magic methods...
-        if ($SCRIPT == '/course/view.php' and !empty($subpage)) {
-            $page->set_pagelayout('format_flexpage');
+        $layout  = course_format_flexpage_lib_moodlepage::LAYOUT;
+        if ($SCRIPT == '/course/view.php' and !empty($subpage) and $page->pagelayout != $layout) {
+            $page->set_pagelayout($layout);
         }
     }
 
