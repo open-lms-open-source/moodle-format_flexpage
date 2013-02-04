@@ -22,189 +22,175 @@
  */
 
 /**
- * Indicates this format uses sections or not
+ * Main class for the Flexpage course format
  *
- * @return bool
+ * @package format_flexpage
+ * @author Mark Nielsen
  */
-function callback_flexpage_uses_sections() {
-    return false;
-}
+class format_flexpage extends format_base {
+    /**
+     * Load the navigation with all of the course's flexpages
+     *
+     * @param global_navigation $navigation
+     * @param navigation_node $node
+     * @return array
+     */
+    public function extend_course_navigation($navigation, navigation_node $node) {
+        global $CFG, $COURSE;
 
-/**
- * Used to display the course structure for a course
- *
- * This is called automatically by {@link load_course()} if the current course
- * format = flexpage.
- *
- * @param global_navigation $navigation Navigation
- * @param stdClass $course The course we are loading the section for
- * @param navigation_node $coursenode The course node
- * @return array
- */
-function callback_flexpage_load_content(global_navigation &$navigation, stdClass $course, navigation_node $coursenode) {
-    global $CFG, $COURSE;
-
-    require_once($CFG->dirroot.'/course/format/flexpage/locallib.php');
-
-    $cache         = format_flexpage_cache($course->id);
-    $current       = $cache->get_current_page();
-    $activepageids = $cache->get_page_parents($current);
-    $activepageids = array_keys($activepageids);
-    $parentnodes   = array(0 => $coursenode);
-    $modinfo       = get_fast_modinfo($course);
-
-    foreach ($cache->get_pages() as $page) {
-        /**
-         * @var navigation_node $node
-         * @var navigation_node $parentnode
-         */
-
-        if (!$cache->is_page_in_menu($page)) {
-            continue;
+        if (!$course = $this->get_course()) {
+            return array();
         }
-        if (!array_key_exists($page->get_parentid(), $parentnodes)) {
-            continue;
-        }
-        $parentnode = $parentnodes[$page->get_parentid()];
+        require_once($CFG->dirroot.'/course/format/flexpage/locallib.php');
 
-        if ($parentnode->hidden) {
-            continue;
-        }
-        $availability = $cache->is_page_available($page, $modinfo);
+        $cache         = format_flexpage_cache($course->id);
+        $current       = $cache->get_current_page();
+        $activepageids = $cache->get_page_parents($current);
+        $activepageids = array_keys($activepageids);
+        $parentnodes   = array(0 => $node);
+        $modinfo       = get_fast_modinfo($course);
 
-        if ($availability === false) {
-            continue;
-        }
-        $node = $parentnode->add(format_string($page->get_name()), $page->get_url());
-        $node->hidden = is_string($availability);
-        $parentnodes[$page->get_id()] = $node;
+        foreach ($cache->get_pages() as $page) {
+            /**
+             * @var navigation_node $childnode
+             * @var navigation_node $parentnode
+             */
 
-        // Only force open or make active when it's the current course
-        if ($COURSE->id == $course->id) {
-            if (in_array($page->get_id(), $activepageids)) {
-                $node->force_open();
-            } else if ($page->get_id() == $current->get_id()) {
-                $node->make_active();
+            if (!$cache->is_page_in_menu($page)) {
+                continue;
             }
-        }
-    }
-    unset($activepageids, $parentnodes);
-
-    // @todo Would be neat to return section zero with the name of "Activities" and it had every activity underneath it.
-    // @todo This would require though that every activity was stored in section zero and had proper ordering
-
-    return array();
-}
-
-/**
- * The string that is used to describe a section of the course
- * e.g. Topic, Week...
- *
- * @return string
- */
-function callback_flexpage_definition() {
-    return get_string('section');
-}
-
-/**
- * The GET argument variable that is used to identify the section being
- * viewed by the user (if there is one)
- *
- * @return string
- */
-function callback_flexpage_request_key() {
-    return 'section';
-}
-
-/**
- * Declares support for course AJAX features
- *
- * @see course_format_ajax_support()
- * @return stdClass
- */
-function callback_flexpage_ajax_support() {
-    if (!function_exists('course_format_set_pagelayout')) {
-        global $PAGE;
-        callback_flexpage_set_pagelayout($PAGE);
-    }
-    $ajaxsupport = new stdClass();
-    $ajaxsupport->capable = true;
-    $ajaxsupport->testedbrowsers = array('MSIE' => 6.0, 'Gecko' => 20061111, 'Safari' => 531, 'Chrome' => 6.0);
-    return $ajaxsupport;
-}
-
-/**
- * Determines cm availability based on the pages that the cm is
- * displayed on and their availability
- *
- * @param cm_info $cm
- * @return bool
- */
-function callback_flexpage_course_module_available(cm_info $cm) {
-    global $DB, $CFG;
-
-    require_once($CFG->dirroot.'/course/format/flexpage/locallib.php');
-
-    static $cmidtopages = null;
-
-    if (is_null($cmidtopages)) {
-        $context = get_context_instance(CONTEXT_COURSE, $cm->course);
-
-        $records = $DB->get_recordset_sql(
-            'SELECT i.subpagepattern AS pageid, f.cmid
-               FROM {block_instances} i
-         INNER JOIN {block_flexpagemod} f ON i.id = f.instanceid
-              WHERE i.parentcontextid = ?
-                AND i.subpagepattern IS NOT NULL',
-        array($context->id));
-
-        $cmidtopages = array();
-        foreach ($records as $record) {
-            if (!array_key_exists($record->cmid, $cmidtopages)) {
-                $cmidtopages[$record->cmid] = array();
+            if (!array_key_exists($page->get_parentid(), $parentnodes)) {
+                continue;
             }
-            $cmidtopages[$record->cmid][$record->pageid] = $record->pageid;
-        }
-        $records->close();
-    }
-    if (array_key_exists($cm->id, $cmidtopages)) {
-        $cache = format_flexpage_cache($cm->course);
-        foreach ($cmidtopages[$cm->id] as $pageid) {
-            $parents = $cache->get_page_parents($cache->get_page($pageid), true);
-            foreach ($parents as $parent) {
-                if ($cache->is_page_available($parent, $cm->get_modinfo()) !== true) {
-                    // If any parent not available, then go onto next page
-                    continue 2;
+            $parentnode = $parentnodes[$page->get_parentid()];
+
+            if ($parentnode->hidden) {
+                continue;
+            }
+            $availability = $cache->is_page_available($page, $modinfo);
+
+            if ($availability === false) {
+                continue;
+            }
+            $childnode = $parentnode->add(format_string($page->get_name()), $page->get_url());
+            $childnode->hidden = is_string($availability);
+            $parentnodes[$page->get_id()] = $childnode;
+
+            // Only force open or make active when it's the current course
+            if ($COURSE->id == $course->id) {
+                if (in_array($page->get_id(), $activepageids)) {
+                    $childnode->force_open();
+                } else if ($page->get_id() == $current->get_id()) {
+                    $childnode->make_active();
                 }
             }
-            // Means the page is visible (because itself and parents are visible),
-            // If one page is visible then cm is available
-            return true;
         }
-        // Means no pages were visible, cm is not available
-        return false;
+        unset($activepageids, $parentnodes);
+
+        // @todo Would be neat to return section zero with the name of "Activities" and it had every activity underneath it.
+        // @todo This would require though that every activity was stored in section zero and had proper ordering
+
+        return array();
     }
-    return true;
-}
 
-/**
- * Setup the page layout and other properties
- *
- * @param moodle_page $page
- * @return void
- */
-function callback_flexpage_set_pagelayout($page) {
-    global $CFG;
+    public function supports_ajax() {
+        return (object) array(
+            'capable'        => true,
+            'testedbrowsers' => array(
+                'MSIE'   => 6.0,
+                'Gecko'  => 20061111,
+                'Safari' => 531,
+                'Chrome' => 6.0
+            )
+        );
+    }
 
-    require_once($CFG->dirroot.'/course/format/flexpage/locallib.php');
-    require_once($CFG->dirroot.'/course/format/flexpage/lib/moodlepage.php');
+    public function get_view_url($section, $options = array()) {
+        return new moodle_url('/course/view.php', array('id' => $this->get_courseid()));
+    }
 
-    $cache = format_flexpage_cache();
-    $currentpage = $cache->get_current_page();
+    public function get_default_blocks() {
+        return array(
+            BLOCK_POS_LEFT  => array(),
+            BLOCK_POS_RIGHT => array(),
+        );
+    }
 
-    if (empty($CFG->enableavailability) or $cache->is_page_available($currentpage) === true) {
-        $page->set_pagelayout(course_format_flexpage_lib_moodlepage::LAYOUT);
-        $page->set_subpage($currentpage->get_id());
+    /**
+     * Modify the page layout if view the course page
+     *
+     * @param moodle_page $page
+     */
+    public function page_set_course(moodle_page $page) {
+        global $CFG, $SCRIPT;
+
+        // ONLY modify layout if we are going to view the course page
+        if ($SCRIPT != '/course/view.php') {
+            return;
+        }
+        require_once($CFG->dirroot.'/course/format/flexpage/locallib.php');
+        require_once($CFG->dirroot.'/course/format/flexpage/lib/moodlepage.php');
+
+        $cache       = format_flexpage_cache();
+        $currentpage = $cache->get_current_page();
+
+        if (empty($CFG->enableavailability) or $cache->is_page_available($currentpage) === true) {
+            $page->set_pagelayout(course_format_flexpage_lib_moodlepage::LAYOUT);
+            $page->set_subpage($currentpage->get_id());
+
+            // Hack alert - we call this to "freeze" the page layout et al
+            // See format_flexpage_renderer::__construct for the rest of the hack
+            $page->theme;
+        }
+    }
+
+    /**
+     * Prevent viewing of the activity if all of the
+     * flexpages it is on are not available to the user.
+     *
+     * @param moodle_page $page
+     * @throws moodle_exception
+     */
+    public function page_set_cm(moodle_page $page) {
+        global $DB, $CFG;
+
+        require_once($CFG->dirroot.'/course/format/flexpage/locallib.php');
+
+        $context = context_course::instance($page->cm->course);
+
+        $records = $DB->get_recordset_sql('
+            SELECT DISTINCT i.subpagepattern AS pageid
+              FROM {block_instances} i
+        INNER JOIN {block_flexpagemod} f ON i.id = f.instanceid
+             WHERE f.cmid = ?
+               AND i.parentcontextid = ?
+               AND i.subpagepattern IS NOT NULL
+        ', array($context->id, $page->cm->id));
+
+        if ($records->valid()) {
+            $cache   = format_flexpage_cache($page->cm->course);
+            $visible = false;
+            foreach ($records as $record) {
+                $parents = $cache->get_page_parents($cache->get_page($record->pageid), true);
+                foreach ($parents as $parent) {
+                    if ($cache->is_page_available($parent) !== true) {
+                        // If any parent not available, then go onto next page
+                        continue 2;
+                    }
+                }
+                // Means the page is visible (because itself and parents are visible),
+                // If one page is visible then cm is available
+                $visible = true;
+                break;
+            }
+            $records->close();
+
+            // Means no pages were visible, cm is not available
+            if (!$visible) {
+                throw new moodle_exception('preventactivityview', 'format_flexpage', new moodle_url('/course/view.php', array('id' => $page->cm->course)));
+            }
+        }
+        $records->close();
     }
 }
 

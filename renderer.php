@@ -41,6 +41,20 @@ require_once(__DIR__.'/lib/condition.php');
  * @package format_flexpage
  */
 class format_flexpage_renderer extends plugin_renderer_base {
+
+    public function __construct(moodle_page $page, $target) {
+        global $SCRIPT;
+
+        parent::__construct($page, $target);
+
+        // 2nd part of hack, re-set page layout as it is overridden in course/view.php
+        // See first part in format_flexpage::page_set_course
+        $subpage = $page->subpage; // Due to magic methods...
+        if ($SCRIPT == '/course/view.php' and !empty($subpage)) {
+            $page->set_pagelayout('format_flexpage');
+        }
+    }
+
     /**
      * The javascript module used by the presentation layer
      *
