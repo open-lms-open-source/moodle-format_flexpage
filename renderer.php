@@ -89,6 +89,18 @@ class format_flexpage_renderer extends plugin_renderer_base {
     }
 
     /**
+     * Markup for region selector, JS builds out the rest
+     *
+     * @return string
+     */
+    public function region_selector() {
+        $output  = html_writer::tag('legend', get_string('addto', 'format_flexpage'), array('class' => 'format_flexpage_addactivity_heading'));
+        $output .= html_writer::tag('div', '', array('id' => 'format_flexpage_region_radios'));
+
+        return html_writer::tag('fieldset', $output, array('class' => 'format_flexpage_region_selector'));
+    }
+
+    /**
      * Pads a page's name with spaces and a hyphen based on hierarchy depth or passed amount
      *
      * @param course_format_flexpage_model_page $page
@@ -379,8 +391,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
                html_writer::input_hidden_params($url).
                html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'region', 'value' => '')).
                html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'addurl', 'value' => '')).
-               html_writer::tag('div', get_string('addto', 'format_flexpage'), array('class' => 'format_flexpage_addactivity_heading')).
-               html_writer::tag('div', '', array('id' => 'format_flexpage_region_radios')).
+               $this->region_selector().
                $this->render($box).
                html_writer::end_tag('form');
     }
@@ -411,8 +422,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
         return html_writer::start_tag('form', array('method' => 'post', 'action' => $url->out_omit_querystring())).
                html_writer::input_hidden_params($url).
                html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'region', 'value' => '')).
-               html_writer::tag('div', get_string('addto', 'format_flexpage'), array('class' => 'format_flexpage_addactivity_heading')).
-               html_writer::tag('div', '', array('id' => 'format_flexpage_region_radios')).
+               $this->region_selector().
                html_writer::tag('div', $checkboxes, array('class' => 'format_flexpage_existing_activity_list')).
                html_writer::end_tag('form');
     }
@@ -429,8 +439,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
                 html_writer::input_hidden_params($url).
                 html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'region', 'value' => '')).
                 html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'blockname', 'value' => '')).
-                html_writer::tag('div', get_string('addto', 'format_flexpage'), array('class' => 'format_flexpage_addactivity_heading')).
-                html_writer::tag('div', '', array('id' => 'format_flexpage_region_radios')).
+                $this->region_selector().
                 html_writer::end_tag('form');
 
         $title = html_writer::tag('div', get_string('block', 'format_flexpage').':', array('class' => 'format_flexpage_addactivity_heading'));
