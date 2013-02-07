@@ -106,6 +106,18 @@ class format_flexpage_renderer extends plugin_renderer_base {
     }
 
     /**
+     * Markup for region selector, JS builds out the rest
+     *
+     * @return string
+     */
+    public function region_selector() {
+        $output  = html_writer::tag('legend', get_string('addto', 'format_flexpage'), array('class' => 'format_flexpage_addactivity_heading'));
+        $output .= html_writer::tag('div', '', array('id' => 'format_flexpage_region_radios'));
+
+        return html_writer::tag('fieldset', $output, array('class' => 'format_flexpage_region_selector'));
+    }
+
+    /**
      * Pads a page's name with spaces and a hyphen based on hierarchy depth or passed amount
      *
      * @param course_format_flexpage_model_page $page
@@ -217,11 +229,13 @@ class format_flexpage_renderer extends plugin_renderer_base {
         } else {
             $nextpage = '';
         }
-        $jumptopage = $this->output->single_select(
+        $jumpselect = new single_select(
             new moodle_url('/course/view.php', array('id' => $currentpage->get_courseid())),
             'pageid', $options, $currentpage->get_id(), array(), 'jumptopageid'
         );
-        $jumptopage = html_writer::tag('span', $jumptopage, array('id' => 'format_flexpage_jumptopage'));
+        $jumpselect->set_label(get_string('jumptoflexpage', 'format_flexpage'), array('class' => 'accesshide'));
+
+        $jumptopage = html_writer::tag('span', $this->output->render($jumpselect), array('id' => 'format_flexpage_jumptopage'));
         $helpicon   = $this->pix_icon('help', get_string('help'), 'moodle', array('id' => 'format_flexpage_actionbar_help'));
         $helpicon   = html_writer::tag('span', $helpicon);
 
@@ -370,7 +384,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
                 } else {
                     $title = '';
                 }
-                $icon    = $this->output->pix_icon('icon', $module['label'], $module['module']);
+                $icon    = $this->output->pix_icon('icon', '', $module['module']);
                 $items[] = html_writer::link(
                     new moodle_url($addurl),
                     $icon.' '.$module['label'],
@@ -394,8 +408,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
                html_writer::input_hidden_params($url).
                html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'region', 'value' => '')).
                html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'addurl', 'value' => '')).
-               html_writer::tag('div', get_string('addto', 'format_flexpage'), array('class' => 'format_flexpage_addactivity_heading')).
-               html_writer::tag('div', '', array('id' => 'format_flexpage_region_radios')).
+               $this->region_selector().
                $this->render($box).
                html_writer::end_tag('form');
     }
@@ -426,8 +439,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
         return html_writer::start_tag('form', array('method' => 'post', 'action' => $url->out_omit_querystring())).
                html_writer::input_hidden_params($url).
                html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'region', 'value' => '')).
-               html_writer::tag('div', get_string('addto', 'format_flexpage'), array('class' => 'format_flexpage_addactivity_heading')).
-               html_writer::tag('div', '', array('id' => 'format_flexpage_region_radios')).
+               $this->region_selector().
                html_writer::tag('div', $checkboxes, array('class' => 'format_flexpage_existing_activity_list')).
                html_writer::end_tag('form');
     }
@@ -444,8 +456,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
                 html_writer::input_hidden_params($url).
                 html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'region', 'value' => '')).
                 html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'blockname', 'value' => '')).
-                html_writer::tag('div', get_string('addto', 'format_flexpage'), array('class' => 'format_flexpage_addactivity_heading')).
-                html_writer::tag('div', '', array('id' => 'format_flexpage_region_radios')).
+                $this->region_selector().
                 html_writer::end_tag('form');
 
         $title = html_writer::tag('div', get_string('block', 'format_flexpage').':', array('class' => 'format_flexpage_addactivity_heading'));
