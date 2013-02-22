@@ -21,6 +21,10 @@
  * @author Mark Nielsen
  */
 
+defined('MOODLE_INTERNAL') || die();
+
+require_once(dirname(dirname(dirname(__FILE__))).'/format/lib.php');
+
 /**
  * Main class for the Flexpage course format
  *
