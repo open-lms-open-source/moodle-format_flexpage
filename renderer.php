@@ -88,6 +88,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
                 array('savechanges'),
                 array('cancel'),
                 array('choosedots'),
+                array('close', 'form'),
                 array('close', 'format_flexpage'),
                 array('addpages', 'format_flexpage'),
                 array('genericasyncfail', 'format_flexpage'),
