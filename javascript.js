@@ -637,7 +637,7 @@ M.format_flexpage.init_region_buttons = function(Y, buttons) {
     var buttonGroup = new Y.YUI2.widget.ButtonGroup({
         id: "format_flexpage_region_radios_id",
         name: "region",
-        container: YAHOO.util.Dom.get("format_flexpage_region_radios")
+        container: Y.YUI2.util.Dom.get("format_flexpage_region_radios")
     });
     buttonGroup.addButtons(buttons);
 
