@@ -80,6 +80,10 @@ class course_format_flexpage_lib_condition extends condition_info_base {
         self::prevent_usage(__FUNCTION__);
     }
 
+    protected function get_context() {
+        return context_course::instance($this->item->course);
+    }
+
     /**
      * We do not use a lot of features from this class, so prevent
      * ones that would break anyways.
