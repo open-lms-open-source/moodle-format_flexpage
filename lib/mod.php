@@ -43,7 +43,6 @@ class course_format_flexpage_lib_mod {
         if (is_null($course)) {
             $course = $COURSE;
         }
-        $sectionlink   = '&section=0';
         $stractivities = get_string('activities');
         $strresources  = get_string('resources');
         $options       = array(
@@ -52,46 +51,26 @@ class course_format_flexpage_lib_mod {
         );
 
         $modnames = get_module_types_names();
-        $modules = get_module_metadata($course, $modnames);
+        $modules  = get_module_metadata($course, $modnames);
 
         foreach ($modules as $module) {
-            if (isset($module->types)) {
-                // This module has a subtype
-                // NOTE: this is legacy stuff, module subtypes are very strongly discouraged!!
-                $subtypes = array();
-                foreach ($module->types as $subtype) {
-                    $subtypes[$subtype->link.$sectionlink] = array(
-                        'module' => $module->name,
-                        'label'  => $module->title,
-                    );
-                }
-
-                // Sort module subtypes into the list
-                if (!empty($module->title)) {
-                    $options[$module->title] = $subtypes;
-                } else {
-                    // This grouping does not have a name
-                    if ($module->archetype == MOD_CLASS_RESOURCE) {
-                        $options[$strresources] = array_merge($options[$strresources], $subtypes);
-                    } else {
-                        $options[$stractivities] = array_merge($options[$stractivities], $subtypes);
+            if ($module->archetype != MOD_ARCHETYPE_RESOURCE and $module->archetype != MOD_ARCHETYPE_SYSTEM) {
+                if (!empty($module->types)) {
+                    if (!array_key_exists($module->title, $options)) {
+                        $options[$module->title] = array();
                     }
-                }
-            } else {
-                // This module has no subtypes
-                $option = array('module' => $module->name, 'label'  => $module->title);
-                if ($module->archetype == MOD_ARCHETYPE_RESOURCE) {
-                    $options[$strresources][$module->link.$sectionlink] = $option;
-                } else if ($module->archetype === MOD_ARCHETYPE_SYSTEM) {
-                    // System modules cannot be added by user, do not add to dropdown
+                    foreach ($module->types as $type) {
+                        if (empty($type->icon)) {
+                            $type->icon = $module->icon;
+                        }
+                        $options[$module->title][] = $type;
+                    }
                 } else {
-                    $options[$stractivities][$module->link.$sectionlink] = $option;
+                    $options[$stractivities][] = $module;
                 }
+            } else if ($module->archetype == MOD_ARCHETYPE_RESOURCE) {
+                $options[$strresources][] = $module;
             }
-        }
-        foreach ($options as $groupname => $activities) {
-            uasort($activities, 'course_format_flexpage_lib_mod::sort_options');
-            $options[$groupname] = $activities;
         }
         return $options;
     }
