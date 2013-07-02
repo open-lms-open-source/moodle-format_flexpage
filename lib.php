@@ -165,7 +165,7 @@ class format_flexpage extends format_base {
              WHERE f.cmid = ?
                AND i.parentcontextid = ?
                AND i.subpagepattern IS NOT NULL
-        ', array($context->id, $page->cm->id));
+        ', array($page->cm->id, $context->id));
 
         if ($records->valid()) {
             $cache   = format_flexpage_cache($page->cm->course);
