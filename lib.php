@@ -134,6 +134,9 @@ class format_flexpage extends format_base {
         }
         require_once($CFG->dirroot.'/course/format/flexpage/locallib.php');
 
+        if ($page->pagelayout == 'admin') {
+            return; // This is for block editing.
+        }
         if (format_flexpage_set_pagelayout($page)) {
             // Hack alert - we call this to "freeze" the page layout et al
             // See format_flexpage_renderer::__construct for the rest of the hack
@@ -162,7 +165,7 @@ class format_flexpage extends format_base {
              WHERE f.cmid = ?
                AND i.parentcontextid = ?
                AND i.subpagepattern IS NOT NULL
-        ', array($context->id, $page->cm->id));
+        ', array($page->cm->id, $context->id));
 
         if ($records->valid()) {
             $cache   = format_flexpage_cache($page->cm->course);
