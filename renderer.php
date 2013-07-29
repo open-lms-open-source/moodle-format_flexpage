@@ -845,14 +845,16 @@ class format_flexpage_renderer extends plugin_renderer_base {
      * @param string $type Basically next or previous
      * @param null|course_format_flexpage_model_page $page
      * @param null|string $label
+     * @param array $attributes
      * @return string
      */
-    public function navigation_link($type, course_format_flexpage_model_page $page = null, $label = null) {
+    public function navigation_link($type, course_format_flexpage_model_page $page = null, $label = null, $attributes = array()) {
         if ($page) {
             if (is_null($label)) {
                 $label = get_string("{$type}page", 'format_flexpage', format_string($page->get_name()));
             }
-            return html_writer::link($page->get_url(), $label, array('id' => "format_flexpage_{$type}_page"));
+            $attributes = array_merge(array('id' => "format_flexpage_{$type}_page"), $attributes);
+            return html_writer::link($page->get_url(), $label, $attributes);
         }
         return '';
     }

@@ -163,6 +163,9 @@ function format_flexpage_run_frontpage() {
 function format_flexpage_add_frontpage_block($content) {
     global $PAGE;
 
+    if (trim($content) == '<br />') {
+        return;
+    }
     $fake = new block_contents(array('class' => 'site-index-content'));
     $fake->content = $content;
 
@@ -361,22 +364,24 @@ function format_flexpage_next_url() {
  * Get the previous page link
  *
  * @param null|string $label The label for the link
+ * @param array $attributes
  * @return string
  */
-function format_flexpage_previous_link($label = null) {
+function format_flexpage_previous_link($label = null, $attributes = array()) {
     global $PAGE;
-    return $PAGE->get_renderer('format_flexpage')->navigation_link('previous', format_flexpage_previous_page(), $label);
+    return $PAGE->get_renderer('format_flexpage')->navigation_link('previous', format_flexpage_previous_page(), $label, $attributes);
 }
 
 /**
  * Get the next page link
  *
  * @param null|string $label The label for the link
+ * @param array $attributes
  * @return string
  */
-function format_flexpage_next_link($label = null) {
+function format_flexpage_next_link($label = null, $attributes = array()) {
     global $PAGE;
-    return $PAGE->get_renderer('format_flexpage')->navigation_link('next', format_flexpage_next_page(), $label);
+    return $PAGE->get_renderer('format_flexpage')->navigation_link('next', format_flexpage_next_page(), $label, $attributes);
 }
 
 /**
