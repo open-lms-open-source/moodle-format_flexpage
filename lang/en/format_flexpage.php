@@ -111,6 +111,8 @@ $string['hidefromothers'] = 'Hide flexpage';
 $string['showfromothers'] = 'Show flexpage';
 $string['jumptoflexpage'] = 'Jump to a flexpage';
 $string['preventactivityview'] = 'You cannot access this activity yet because it is on a flexpage that is currently not available to you.';
+$string['showavailability_hide'] = 'Hide flexpage entirely';
+$string['showavailability_show'] = 'Show flexpage greyed-out, with restriction information';
 
 $string['display_help'] = 'Configure if this flexpage is:
 <ol>

@@ -70,5 +70,38 @@ function xmldb_format_flexpage_upgrade($oldversion = 0) {
         // flexpage savepoint reached
         upgrade_plugin_savepoint(true, 2013020400, 'format', 'flexpage');
     }
+
+    if ($oldversion < 2013080200) {
+
+        // Define table format_flexpage_field to be created
+        $table = new xmldb_table('format_flexpage_field');
+
+        // Adding fields to table format_flexpage_field
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('pageid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('userfield', XMLDB_TYPE_CHAR, '50', null, null, null, null);
+        $table->add_field('customfieldid', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+        $table->add_field('operator', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('value', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
+
+        // Adding keys to table format_flexpage_field
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        $table->add_key('pageid', XMLDB_KEY_FOREIGN, array('pageid'), 'format_flexpage_page', array('id'));
+
+        // Conditionally launch create table for format_flexpage_field
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // flexpage savepoint reached
+        upgrade_plugin_savepoint(true, 2013080200, 'format', 'flexpage');
+    }
+
+    if ($oldversion < 2013080201) {
+        $cacherepo->clear_all_cache();
+
+        // flexpage savepoint reached
+        upgrade_plugin_savepoint(true, 2013080201, 'format', 'flexpage');
+    }
     return true;
 }

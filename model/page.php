@@ -22,16 +22,9 @@
  */
 
 require_once($CFG->libdir.'/conditionlib.php');
-
-/**
- * @see course_format_flexpage_model_abstract
- */
 require_once(__DIR__.'/abstract.php');
-
-/**
- * @see course_format_flexpage_model_condition_completion
- */
 require_once(__DIR__.'/condition/grade.php');
+require_once(__DIR__.'/condition/field.php');
 require_once(__DIR__.'/condition/completion.php');
 
 /**
@@ -165,7 +158,7 @@ class course_format_flexpage_model_page extends course_format_flexpage_model_abs
     protected $regionwidths = array();
 
     /**
-     * @var course_format_flexpage_model_condition_completion[]|course_format_flexpage_model_condition_grade[]
+     * @var course_format_flexpage_model_condition_completion[]|course_format_flexpage_model_condition_grade[]|course_format_flexpage_model_condition_field[]
      */
     protected $conditions = array();
 
@@ -382,7 +375,7 @@ class course_format_flexpage_model_page extends course_format_flexpage_model_abs
     /**
      * Get grade and completion conditions
      *
-     * @return course_format_flexpage_model_condition_completion[]|course_format_flexpage_model_condition_grade[]
+     * @return course_format_flexpage_model_condition_completion[]|course_format_flexpage_model_condition_grade[]|course_format_flexpage_model_condition_field[]
      */
     public function get_conditions() {
         return $this->conditions;
@@ -391,7 +384,7 @@ class course_format_flexpage_model_page extends course_format_flexpage_model_abs
     /**
      * Set grade and completion conditions
      *
-     * @param course_format_flexpage_model_condition_completion[]|course_format_flexpage_model_condition_grade[] $conditions
+     * @param course_format_flexpage_model_condition_completion[]|course_format_flexpage_model_condition_grade[]|course_format_flexpage_model_condition_field[] $conditions
      * @return course_format_flexpage_model_page
      */
     public function set_conditions(array $conditions) {

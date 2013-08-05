@@ -173,6 +173,14 @@ M.format_flexpage.init_editpage = function(Y, url) {
             e.target.removeClass('format_flexpage_error_bg');
         });
 
+        if (Y.one('#condition_field_add_button')) {
+            var buttonField = new Y.YUI2.widget.Button('condition_field_add_button');
+            buttonField.on("click", function () {
+                Y.one('#condition_fields').appendChild(
+                    Y.one('#format_flexpage_condition_templates .format_flexpage_condition_field').cloneNode(true)
+                );
+            });
+        }
         if (Y.one('#condition_grade_add_button')) {
             var buttonGrade = new Y.YUI2.widget.Button('condition_grade_add_button');
             buttonGrade.on("click", function () {

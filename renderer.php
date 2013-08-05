@@ -667,6 +667,11 @@ class format_flexpage_renderer extends plugin_renderer_base {
 
             $templates = $this->condition_grade();
 
+            $box->add_new_row()->add_new_cell($this->flexpage_help_icon('userfield', 'condition'))
+                ->add_new_cell($this->page_conditions($page, 'course_format_flexpage_model_condition_field'));
+
+            $templates .= $this->condition_field();
+
             $completion = new completion_info($COURSE);
             if ($completion->is_enabled()) {
                 $box->add_new_row()->add_new_cell($this->flexpage_help_icon('completioncondition', 'condition'))
@@ -675,8 +680,8 @@ class format_flexpage_renderer extends plugin_renderer_base {
                 $templates .= $this->condition_completion();
             }
             $showopts = array(
-                CONDITION_STUDENTVIEW_SHOW => get_string('showavailability_show', 'condition'),
-                CONDITION_STUDENTVIEW_HIDE => get_string('showavailability_hide', 'condition')
+                CONDITION_STUDENTVIEW_SHOW => get_string('showavailability_show', 'format_flexpage'),
+                CONDITION_STUDENTVIEW_HIDE => get_string('showavailability_hide', 'format_flexpage')
             );
             $box->add_new_row()->add_new_cell(html_writer::label($this->flexpage_help_icon('showavailability'), 'id_showavailability'))
                                ->add_new_cell(html_writer::select($showopts, 'showavailability', $page->get_showavailability(), false, array('id' => 'id_showavailability')));
@@ -710,6 +715,8 @@ class format_flexpage_renderer extends plugin_renderer_base {
         }
         if ($conditionclass == 'course_format_flexpage_model_condition_grade') {
             $rendermethod = 'condition_grade';
+        } else if ($conditionclass == 'course_format_flexpage_model_condition_field') {
+            $rendermethod = 'condition_field';
         } else {
             $rendermethod = 'condition_completion';
         }
@@ -770,6 +777,47 @@ class format_flexpage_renderer extends plugin_renderer_base {
                     '%';
 
         return html_writer::tag('div', $elements, array('class' => 'format_flexpage_condition_grade'));
+    }
+
+    /**
+     * Grade condition specific UI
+     *
+     * @param course_format_flexpage_model_condition_field|null $condition
+     * @return string
+     */
+    public function condition_field(course_format_flexpage_model_condition_field $condition = null) {
+        // Static so we only build it once...
+        static $operators   = null;
+        static $useroptions = null;
+
+        if (is_null($condition)) {
+            $field    = 0;
+            $operator = '';
+            $value    = '';
+        } else {
+            $field    = $condition->get_field();
+            $operator = $condition->get_operator();
+            $value    = $condition->get_value();
+        }
+        if (is_null($operators) || is_null($useroptions)) {
+            $operators   = condition_info::get_condition_user_field_operators();
+            $useroptions = condition_info::get_condition_user_fields(array('context' => $this->page->context));
+            asort($useroptions);
+
+            $useroptions = array(0 => get_string('none', 'condition')) + $useroptions;
+        }
+        $fieldid    = html_writer::random_id('field');
+        $operatorid = html_writer::random_id('field');
+        $valueid    = html_writer::random_id('field');
+
+        $elements = html_writer::label(get_string('userfield', 'format_flexpage'), $fieldid, false, array('class' => 'accesshide')).
+            html_writer::select($useroptions, 'fields[]', $field, false, array('id' => $fieldid)).
+            html_writer::label(get_string('operator', 'format_flexpage'), $operatorid, false, array('class' => 'accesshide')).
+            html_writer::select($operators, 'operators[]', $operator, false, array('id' => $operatorid)).
+            html_writer::label(get_string('fieldvalue', 'format_flexpage'), $valueid, false, array('class' => 'accesshide')).
+            html_writer::empty_tag('input', array('type' => 'text', 'name' => 'values[]', 'value' => $value, 'id' => $valueid));
+
+        return html_writer::tag('div', $elements, array('class' => 'format_flexpage_condition_field'));
     }
 
     /**

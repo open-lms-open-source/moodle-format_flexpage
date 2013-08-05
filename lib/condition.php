@@ -59,6 +59,12 @@ class course_format_flexpage_lib_condition extends condition_info_base {
                     'max'  => $condition->get_max(),
                     'name' => $condition->get_name(),
                 );
+            } else if ($condition instanceof course_format_flexpage_model_condition_field) {
+                $item->conditionsfield[$condition->get_field()] = (object) array(
+                    'fieldname' => $condition->get_fieldname(),
+                    'operator'  => $condition->get_operator(),
+                    'value'     => $condition->get_value(),
+                );
             }
         }
         parent::__construct($item, 'format_flexpage', 'pageid', CONDITION_MISSING_NOTHING, true);
