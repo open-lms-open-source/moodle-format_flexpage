@@ -381,6 +381,23 @@ class course_format_flexpage_controller_ajax extends mr_controller {
                 }
                 $condrepo->save_page_grade_conditions($page, $conditions);
 
+                $conditions = array();
+                $fields     = optional_param_array('fields', array(), PARAM_ALPHANUM);
+                $operators  = optional_param_array('operators', array(), PARAM_ALPHA);
+                $values     = optional_param_array('values', array(), PARAM_RAW);
+
+                foreach ($fields as $key => $field) {
+                    if (empty($field) || empty($operators[$key])) {
+                        continue;
+                    }
+                    $value = '';
+                    if (array_key_exists($key, $values)) {
+                        $value = $values[$key];
+                    }
+                    $conditions[] = new course_format_flexpage_model_condition_field($field, null, $operators[$key], $value);
+                }
+                $condrepo->save_page_field_conditions($page, $conditions);
+
                 $completion = new completion_info($COURSE);
                 if ($completion->is_enabled()) {
                     $conditions = array();

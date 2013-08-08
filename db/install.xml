@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="course/format/flexpage/db" VERSION="20110628" COMMENT="XMLDB file for Moodle format/flexpage"
+<XMLDB PATH="course/format/flexpage/db" VERSION="20130802" COMMENT="XMLDB file for Moodle format/flexpage"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
     <TABLE NAME="format_flexpage_page" COMMENT="Flexpage pages" NEXT="format_flexpage_region">
       <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" COMMENT="id of the table" NEXT="courseid"/>
-        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="Course ID" PREVIOUS="id" NEXT="name"/>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" COMMENT="id of the table" NEXT="courseid"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Course ID" PREVIOUS="id" NEXT="name"/>
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="This is the primary page name" PREVIOUS="courseid" NEXT="display"/>
-        <FIELD NAME="display" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="Used to determine the display properties" PREVIOUS="name" NEXT="navigation"/>
-        <FIELD NAME="navigation" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="Determines if we show navigational elements on the page" PREVIOUS="display" NEXT="availablefrom"/>
-        <FIELD NAME="availablefrom" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="Availability based on date" PREVIOUS="navigation" NEXT="availableuntil"/>
-        <FIELD NAME="availableuntil" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="Availability based on date" PREVIOUS="availablefrom" NEXT="releasecode"/>
+        <FIELD NAME="display" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Used to determine the display properties" PREVIOUS="name" NEXT="navigation"/>
+        <FIELD NAME="navigation" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Determines if we show navigational elements on the page" PREVIOUS="display" NEXT="availablefrom"/>
+        <FIELD NAME="availablefrom" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Availability based on date" PREVIOUS="navigation" NEXT="availableuntil"/>
+        <FIELD NAME="availableuntil" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Availability based on date" PREVIOUS="availablefrom" NEXT="releasecode"/>
         <FIELD NAME="releasecode" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false" COMMENT="Availability based on a release code" PREVIOUS="availableuntil" NEXT="showavailability"/>
-        <FIELD NAME="showavailability" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="Show availability information or not when not available" PREVIOUS="releasecode" NEXT="parentid"/>
-        <FIELD NAME="parentid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="pageid of the parent page 0 if no parent" PREVIOUS="showavailability" NEXT="weight"/>
-        <FIELD NAME="weight" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="The sort order of the pages" PREVIOUS="parentid"/>
+        <FIELD NAME="showavailability" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Show availability information or not when not available" PREVIOUS="releasecode" NEXT="parentid"/>
+        <FIELD NAME="parentid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="pageid of the parent page 0 if no parent" PREVIOUS="showavailability" NEXT="weight"/>
+        <FIELD NAME="weight" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The sort order of the pages" PREVIOUS="parentid"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="Primary key" NEXT="courseid"/>
@@ -29,8 +29,8 @@
     </TABLE>
     <TABLE NAME="format_flexpage_region" COMMENT="Suggested theme region widths for pages" PREVIOUS="format_flexpage_page" NEXT="format_flexpage_completion">
       <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="pageid"/>
-        <FIELD NAME="pageid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" PREVIOUS="id" NEXT="region"/>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="pageid"/>
+        <FIELD NAME="pageid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" PREVIOUS="id" NEXT="region"/>
         <FIELD NAME="region" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The theme region name" PREVIOUS="pageid" NEXT="width"/>
         <FIELD NAME="width" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false" COMMENT="The region size recommendation" PREVIOUS="region"/>
       </FIELDS>
@@ -41,10 +41,10 @@
     </TABLE>
     <TABLE NAME="format_flexpage_completion" COMMENT="Determines page availability based on activity completion conditions" PREVIOUS="format_flexpage_region" NEXT="format_flexpage_grade">
       <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="pageid"/>
-        <FIELD NAME="pageid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" PREVIOUS="id" NEXT="cmid"/>
-        <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="The course module ID that the condition as based" PREVIOUS="pageid" NEXT="requiredcompletion"/>
-        <FIELD NAME="requiredcompletion" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="The required completion state" PREVIOUS="cmid"/>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="pageid"/>
+        <FIELD NAME="pageid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" PREVIOUS="id" NEXT="cmid"/>
+        <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The course module ID that the condition as based" PREVIOUS="pageid" NEXT="requiredcompletion"/>
+        <FIELD NAME="requiredcompletion" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" COMMENT="The required completion state" PREVIOUS="cmid"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="pageid"/>
@@ -52,13 +52,13 @@
         <KEY NAME="cmid" TYPE="foreign" FIELDS="cmid" REFTABLE="course_modules" REFFIELDS="id" PREVIOUS="pageid"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="format_flexpage_grade" COMMENT="Determines page availability based on grade conditions" PREVIOUS="format_flexpage_completion" NEXT="format_flexpage_cache">
+    <TABLE NAME="format_flexpage_grade" COMMENT="Determines page availability based on grade conditions" PREVIOUS="format_flexpage_completion" NEXT="format_flexpage_field">
       <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="pageid"/>
-        <FIELD NAME="pageid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" PREVIOUS="id" NEXT="gradeitemid"/>
-        <FIELD NAME="gradeitemid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="The grade item to compare" PREVIOUS="pageid" NEXT="grademin"/>
-        <FIELD NAME="grademin" TYPE="number" LENGTH="10" NOTNULL="true" UNSIGNED="false" SEQUENCE="false" DECIMALS="5" COMMENT="The lower bound of the grade condition" PREVIOUS="gradeitemid" NEXT="grademax"/>
-        <FIELD NAME="grademax" TYPE="number" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" DECIMALS="5" COMMENT="The upper bound of the grade condition" PREVIOUS="grademin"/>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="pageid"/>
+        <FIELD NAME="pageid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" PREVIOUS="id" NEXT="gradeitemid"/>
+        <FIELD NAME="gradeitemid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The grade item to compare" PREVIOUS="pageid" NEXT="grademin"/>
+        <FIELD NAME="grademin" TYPE="number" LENGTH="10" NOTNULL="true" SEQUENCE="false" DECIMALS="5" COMMENT="The lower bound of the grade condition" PREVIOUS="gradeitemid" NEXT="grademax"/>
+        <FIELD NAME="grademax" TYPE="number" LENGTH="10" NOTNULL="true" SEQUENCE="false" DECIMALS="5" COMMENT="The upper bound of the grade condition" PREVIOUS="grademin"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="pageid"/>
@@ -66,13 +66,27 @@
         <KEY NAME="gradeitemid" TYPE="foreign" FIELDS="gradeitemid" REFTABLE="grade_items" REFFIELDS="id" PREVIOUS="pageid"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="format_flexpage_cache" COMMENT="Flexpage course cache" PREVIOUS="format_flexpage_grade">
+    <TABLE NAME="format_flexpage_field" COMMENT="User field availability conditions" PREVIOUS="format_flexpage_grade" NEXT="format_flexpage_cache">
       <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="courseid"/>
-        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" PREVIOUS="id" NEXT="pages"/>
-        <FIELD NAME="pages" TYPE="text" LENGTH="big" NOTNULL="false" SEQUENCE="false" COMMENT="Page cache" PREVIOUS="courseid" NEXT="buildcode"/>
-        <FIELD NAME="buildcode" TYPE="int" LENGTH="3" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="A code to know how the cache was built" PREVIOUS="pages" NEXT="timemodified"/>
-        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="The last time the cache was rebuilt" PREVIOUS="buildcode"/>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="pageid"/>
+        <FIELD NAME="pageid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Flexpage ID" PREVIOUS="id" NEXT="userfield"/>
+        <FIELD NAME="userfield" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false" COMMENT="User record field name" PREVIOUS="pageid" NEXT="customfieldid"/>
+        <FIELD NAME="customfieldid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="User custom profile field ID" PREVIOUS="userfield" NEXT="operator"/>
+        <FIELD NAME="operator" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false" COMMENT="Used to compare field value" PREVIOUS="customfieldid" NEXT="value"/>
+        <FIELD NAME="value" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Field comparison value" PREVIOUS="operator"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="pageid"/>
+        <KEY NAME="pageid" TYPE="foreign" FIELDS="pageid" REFTABLE="format_flexpage_page" REFFIELDS="id" PREVIOUS="primary"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="format_flexpage_cache" COMMENT="Flexpage course cache" PREVIOUS="format_flexpage_field">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="courseid"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" PREVIOUS="id" NEXT="pages"/>
+        <FIELD NAME="pages" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Page cache" PREVIOUS="courseid" NEXT="buildcode"/>
+        <FIELD NAME="buildcode" TYPE="int" LENGTH="3" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="A code to know how the cache was built" PREVIOUS="pages" NEXT="timemodified"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The last time the cache was rebuilt" PREVIOUS="buildcode"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="courseid"/>
