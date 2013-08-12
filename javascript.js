@@ -598,7 +598,7 @@ M.format_flexpage.init_error_dialog = function(Y, errorMessage) {
  * Init calendar
  *
  * @param Y
- * @param url
+ * @param name
  */
 M.format_flexpage.init_calendar = function(Y, name) {
 
@@ -608,10 +608,12 @@ M.format_flexpage.init_calendar = function(Y, name) {
     var renderingNode = Y.one('#' + renderingId);
 
     if (renderingNode) {
-        var input    = Y.one('input[name="' + name + '"]');
-        var checkbox = Y.one('input[name="' + checkboxName + '"]');
+        var input     = Y.one('input[name="' + name + '"]');
+        var checkbox  = Y.one('input[name="' + checkboxName + '"]');
+        var dateParts = input.get('value').split('/'); // MM/DD/YYYY
 
         var calendar = new Y.YUI2.widget.Calendar(calendarId, renderingId, {
+            pagedate: dateParts[0] + '/' + dateParts[2], // MM/YYYY - Initial calendar view
             selected: input.get('value')
         });
         calendar.selectEvent.subscribe(function(type, args, obj) {
