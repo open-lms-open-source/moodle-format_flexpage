@@ -81,7 +81,7 @@ class course_format_flexpage_lib_actionbar implements renderable {
         global $COURSE;
 
         $cache       = format_flexpage_cache($COURSE->id);
-        $context     = get_context_instance(CONTEXT_COURSE, $COURSE->id);
+        $context     = context_course::instance($COURSE->id);
         $haspagecap  = has_capability('format/flexpage:managepages', $context);
         $hasblockcap = (has_capability('moodle/site:manageblocks', $context) and $haspagecap);
         $hasmodcap   = (has_capability('moodle/course:manageactivities', $context) and $haspagecap);

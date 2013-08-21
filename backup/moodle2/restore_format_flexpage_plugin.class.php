@@ -148,7 +148,7 @@ class restore_format_flexpage_plugin extends restore_format_plugin {
         require_once($CFG->dirroot.'/course/format/flexpage/locallib.php');
         require_once($CFG->dirroot.'/course/format/flexpage/lib/moodlepage.php');
 
-        $context = get_context_instance(CONTEXT_COURSE, $this->task->get_courseid());
+        $context = context_course::instance($this->task->get_courseid());
         $course  = $DB->get_record('course', array('id' => $context->instanceid), 'id, category', MUST_EXIST);
 
         // Remap parentids

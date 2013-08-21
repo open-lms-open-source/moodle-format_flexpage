@@ -247,7 +247,7 @@ class course_format_flexpage_lib_moodlepage {
      */
     public static function copy_page_blocks(course_format_flexpage_model_page $frompage, course_format_flexpage_model_page $destpage) {
 
-        $context    = get_context_instance(CONTEXT_COURSE, $frompage->get_courseid());
+        $context    = context_course::instance($frompage->get_courseid());
         $moodlepage = self::new_moodle_page($frompage);
 
         /** @var $bm block_manager */
@@ -290,7 +290,7 @@ class course_format_flexpage_lib_moodlepage {
     public static function delete_blocks(course_format_flexpage_model_page $page) {
         global $DB;
 
-        $context   = get_context_instance(CONTEXT_COURSE, $page->get_courseid());
+        $context   = context_course::instance($page->get_courseid());
         $instances = $DB->get_recordset('block_instances', array(
             'parentcontextid' => $context->id,
             'subpagepattern'  => $page->get_id(),
@@ -341,7 +341,7 @@ class course_format_flexpage_lib_moodlepage {
 
         $moodlepage = new moodle_page();
         $moodlepage->set_course($course);
-        $moodlepage->set_context(get_context_instance(CONTEXT_COURSE, $course->id));
+        $moodlepage->set_context(context_course::instance($course->id));
         $moodlepage->set_url('/course/view.php', array('id' => $course->id));
         $moodlepage->set_pagelayout(self::LAYOUT);
         $moodlepage->set_subpage($page->get_id());

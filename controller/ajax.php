@@ -100,8 +100,8 @@ class course_format_flexpage_controller_ajax extends mr_controller {
         if (optional_param('add', 0, PARAM_BOOL)) {
             require_sesskey();
 
-            $names = optional_param_array('name', array(), PARAM_MULTILANG);
-            $moves = optional_param_array('move', array(), PARAM_ACTION);
+            $names = optional_param_array('name', array(), PARAM_TEXT);
+            $moves = optional_param_array('move', array(), PARAM_ALPHANUMEXT);
             $copypageids = optional_param_array('copypageid', array(), PARAM_INT);
             $referencepageids = optional_param_array('referencepageid', array(), PARAM_INT);
 
@@ -179,7 +179,7 @@ class course_format_flexpage_controller_ajax extends mr_controller {
         if (optional_param('confirmmove', 0, PARAM_BOOL)) {
             require_sesskey();
 
-            $move = required_param('move', PARAM_ACTION);
+            $move = required_param('move', PARAM_ALPHANUMEXT);
             $referencepageid = required_param('referencepageid', PARAM_INT);
 
             $repo->move_page($movepage, $move, $referencepageid)
@@ -222,7 +222,7 @@ class course_format_flexpage_controller_ajax extends mr_controller {
             require_sesskey();
 
             $url    = required_param('addurl', PARAM_URL);
-            $region = optional_param('region', false, PARAM_ACTION);
+            $region = optional_param('region', false, PARAM_ALPHANUMEXT);
 
             $SESSION->format_flexpage_mod_region = $region;
 
@@ -252,7 +252,7 @@ class course_format_flexpage_controller_ajax extends mr_controller {
             require_sesskey();
 
             $cmids  = optional_param_array('cmids', array(), PARAM_INT);
-            $region = optional_param('region', false, PARAM_ACTION);
+            $region = optional_param('region', false, PARAM_ALPHANUMEXT);
 
             if (!is_array($cmids)) {
                 $cmids = array($cmids);
@@ -284,8 +284,8 @@ class course_format_flexpage_controller_ajax extends mr_controller {
         if (optional_param('add', 0, PARAM_BOOL)) {
             require_sesskey();
 
-            $blockname = optional_param('blockname', '', PARAM_ACTION);
-            $region    = optional_param('region', false, PARAM_ACTION);
+            $blockname = optional_param('blockname', '', PARAM_ALPHANUMEXT);
+            $region    = optional_param('region', false, PARAM_ALPHANUMEXT);
 
             if (!empty($blockname)) {
                 course_format_flexpage_lib_moodlepage::add_block($page, $blockname, $region);
@@ -318,7 +318,7 @@ class course_format_flexpage_controller_ajax extends mr_controller {
         if (optional_param('edit', 0, PARAM_BOOL)) {
             require_sesskey();
 
-            $name = required_param('name', PARAM_MULTILANG);
+            $name = required_param('name', PARAM_TEXT);
             $name = trim($name);
 
             if (empty($name)) {

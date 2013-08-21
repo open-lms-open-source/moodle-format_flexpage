@@ -416,7 +416,7 @@ class xmldb_format_flexpage_install_migration {
                     // For modules, insert flexpagemod or flexpagenav instance
                     if (!$context or $context->instanceid != $record->courseid) {
                         /** @var $context stdClass */
-                        $context = get_context_instance(CONTEXT_COURSE, $record->courseid);
+                        $context = context_course::instance($record->courseid);
                     }
                     list($pagepattern, $bppagepattern) = $this->get_page_patterns(($record->coursecat == 0));
 
@@ -457,7 +457,7 @@ class xmldb_format_flexpage_install_migration {
                         list($pagepattern, $bppagepattern) = $this->get_page_patterns(($record->coursecat == 0));
 
                         if (!$context or $context->instanceid != $record->courseid) {
-                            $context = get_context_instance(CONTEXT_COURSE, $record->courseid);
+                            $context = context_course::instance($record->courseid);
                         }
                         $bp = new stdClass;
                         $bp->blockinstanceid = $instance->id;
