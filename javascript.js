@@ -744,19 +744,7 @@ M.format_flexpage.init_actionbar_help_icon = function(Y) {
  * @param Y
  */
 M.format_flexpage.init_help_icons = function(Y) {
-    Y.all('span.format_flexpage_helpicon').each(function(node) {
-        // Prevent re-processing help icons
-        if (!node.hasClass('format_flexpage_helpicon_processed')) {
-            node.addClass('format_flexpage_helpicon_processed');
-
-            var atag = node.one('a');
-
-            M.util.help_icon.add(Y, {
-                id: atag.get('id'),
-                url: atag.get('href')
-            })
-        }
-    });
+    M.core.init_popuphelp([]);
 };
 
 /**

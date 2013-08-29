@@ -83,6 +83,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
                 'yui2-container',
                 'yui2-menu',
                 'yui2-calendar',
+                'moodle-core-popuphelp'
             ),
             'strings' => array(
                 array('savechanges'),
