@@ -230,10 +230,7 @@ class format_flexpage_renderer extends plugin_renderer_base {
         } else {
             $nextpage = '';
         }
-        $jumpselect = new single_select(
-            new moodle_url('/course/view.php', array('id' => $currentpage->get_courseid())),
-            'pageid', $options, $currentpage->get_id(), array(), 'jumptopageid'
-        );
+        $jumpselect = new single_select($this->page->url, 'pageid', $options, $currentpage->get_id(), array(), 'jumptopageid');
         $jumpselect->set_label(get_string('jumptoflexpage', 'format_flexpage'), array('class' => 'accesshide'));
 
         $jumptopage = html_writer::tag('span', $this->output->render($jumpselect), array('id' => 'format_flexpage_jumptopage'));
