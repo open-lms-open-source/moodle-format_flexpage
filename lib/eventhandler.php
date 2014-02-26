@@ -21,6 +21,9 @@
  * @author Mark Nielsen
  */
 
+use core\event\course_module_created;
+use core\event\course_module_deleted;
+
 /**
  * Event Handler Class
  *
@@ -54,10 +57,10 @@ class course_format_flexpage_lib_eventhandler {
      * new activities as a block to the current page.
      *
      * @static
-     * @param object $eventdata Event data object
+     * @param course_module_created $event
      * @return void
      */
-    public static function mod_created($eventdata) {
+    public static function mod_created(course_module_created $event) {
         global $CFG, $SESSION;
 
         if (!empty($SESSION->format_flexpage_mod_region)) {
@@ -67,13 +70,13 @@ class course_format_flexpage_lib_eventhandler {
         }
         unset($SESSION->format_flexpage_mod_region);
 
-        if (self::is_flexpage_format($eventdata->courseid)) {
+        if (self::is_flexpage_format($event->courseid)) {
             require_once($CFG->dirroot.'/course/format/flexpage/locallib.php');
             require_once($CFG->dirroot.'/course/format/flexpage/lib/moodlepage.php');
 
             try {
                 $page = format_flexpage_cache()->get_current_page();
-                course_format_flexpage_lib_moodlepage::add_activity_block($page, $eventdata->cmid, $region);
+                course_format_flexpage_lib_moodlepage::add_activity_block($page, $event->objectid, $region);
             } catch (Exception $e) {
             }
         }
@@ -87,15 +90,15 @@ class course_format_flexpage_lib_eventhandler {
      * deleted activity.
      *
      * @static
-     * @param object $eventdata Event data object
+     * @param course_module_deleted $event
      * @return void
      */
-    public static function mod_deleted($eventdata) {
+    public static function mod_deleted(course_module_deleted $event) {
         global $CFG;
 
-        if (self::is_flexpage_format($eventdata->courseid)) {
+        if (self::is_flexpage_format($event->courseid)) {
             require_once($CFG->dirroot.'/course/format/flexpage/lib/moodlepage.php');
-            course_format_flexpage_lib_moodlepage::delete_mod_blocks($eventdata->cmid);
+            course_format_flexpage_lib_moodlepage::delete_mod_blocks($event->objectid);
         }
     }
 }
