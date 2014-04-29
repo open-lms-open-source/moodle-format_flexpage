@@ -86,6 +86,11 @@ M.format_flexpage.init_actionbar = function(Y) {
  * @param Y
  */
 M.format_flexpage.init_edit = function(Y) {
+    // Prevent core duplication handler as we do not want to duplicate inline.
+    Y.all('.editing .commands a.editing_duplicate').on('click', function(e) {
+        e.stopPropagation();
+    });
+
     // Add a warning when the delete widget is click for a module
     Y.all('.editing .commands a.editing_delete').on('click', function(e) {
         if (e.target.test('a')) {
