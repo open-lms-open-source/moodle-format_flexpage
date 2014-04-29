@@ -499,6 +499,11 @@ M.format_flexpage.populate_panel = function(Y, panel, url, onsuccess) {
                     panel.setFooter(response.footer);
                 }
                 panel.render(document.body);
+
+                if (panel.element) {
+                    // Add this class so Moodle knows the zIndex for calculating dialog zIndex.
+                    Y.YUI2.util.Dom.addClass(panel.element, 'moodle-has-zindex');
+                }
                 panel.center();
                 panel.show();
 
