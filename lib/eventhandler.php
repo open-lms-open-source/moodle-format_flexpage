@@ -70,7 +70,7 @@ class course_format_flexpage_lib_eventhandler {
         }
         unset($SESSION->format_flexpage_mod_region);
 
-        if (self::is_flexpage_format($event->courseid)) {
+        if (self::is_flexpage_format($event->courseid) && !PHPUNIT_TEST) {
             require_once($CFG->dirroot.'/course/format/flexpage/locallib.php');
             require_once($CFG->dirroot.'/course/format/flexpage/lib/moodlepage.php');
 
@@ -96,7 +96,7 @@ class course_format_flexpage_lib_eventhandler {
     public static function mod_deleted(course_module_deleted $event) {
         global $CFG;
 
-        if (self::is_flexpage_format($event->courseid)) {
+        if (self::is_flexpage_format($event->courseid) && !PHPUNIT_TEST) {
             require_once($CFG->dirroot.'/course/format/flexpage/lib/moodlepage.php');
             course_format_flexpage_lib_moodlepage::delete_mod_blocks($event->objectid);
         }
