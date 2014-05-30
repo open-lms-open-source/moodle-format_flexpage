@@ -195,13 +195,58 @@ class format_flexpage_renderer extends plugin_renderer_base {
                 }
                 $menuitem->add($action->get_name(), $action->get_url());
             }
-            $content .= $this->render($menuitem);
+            $content .= $this->custom_menu_item($menuitem);
         }
         $content .= html_writer::end_tag('ul');
         $content .= html_writer::end_tag('div');
         $content .= html_writer::end_tag('div');
         $content .= html_writer::end_tag('div');
 
+        return $content;
+    }
+
+    /**
+     * Copied from renderer_base - currently we require
+     * this to be YUI3, don't allow themes to override.
+     *
+     * This has been modified slighty.
+     *
+     * @param custom_menu_item $menunode
+     * @return string
+     */
+    protected function custom_menu_item(custom_menu_item $menunode) {
+        if ($menunode->has_children()) {
+            $id = html_writer::random_id('cm_submenu_');
+            // If the child has menus render it as a sub menu
+            $content = html_writer::start_tag('li');
+            if ($menunode->get_url() !== null) {
+                $url = $menunode->get_url();
+            } else {
+                $url = '#'.$id;
+            }
+            $content .= html_writer::link($url, $menunode->get_text(), array('class' => 'yui3-menu-label', 'title' => $menunode->get_title()));
+            $content .= html_writer::start_tag('div', array('id' => $id, 'class' => 'yui3-menu custom_menu_submenu'));
+            $content .= html_writer::start_tag('div', array('class' => 'yui3-menu-content'));
+            $content .= html_writer::start_tag('ul');
+            foreach ($menunode->get_children() as $menunode) {
+                $content .= $this->custom_menu_item($menunode);
+            }
+            $content .= html_writer::end_tag('ul');
+            $content .= html_writer::end_tag('div');
+            $content .= html_writer::end_tag('div');
+            $content .= html_writer::end_tag('li');
+        } else {
+            // The node doesn't have children so produce a final menuitem
+            $content = html_writer::start_tag('li', array('class' => 'yui3-menuitem'));
+            if ($menunode->get_url() !== null) {
+                $url = $menunode->get_url();
+            } else {
+                $url = '#';
+            }
+            $content .= html_writer::link($url, $menunode->get_text(), array('class' => 'yui3-menuitem-content', 'title' => $menunode->get_title()));
+            $content .= html_writer::end_tag('li');
+        }
+        // Return the sub menu
         return $content;
     }
 
