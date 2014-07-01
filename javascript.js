@@ -86,6 +86,11 @@ M.format_flexpage.init_actionbar = function(Y) {
  * @param Y
  */
 M.format_flexpage.init_edit = function(Y) {
+    // Prevent core duplication handler as we do not want to duplicate inline.
+    Y.all('.editing .commands a.editing_duplicate').on('click', function(e) {
+        e.stopPropagation();
+    });
+
     // Add a warning when the delete widget is click for a module
     Y.all('.editing .commands a.editing_delete').on('click', function(e) {
         if (e.target.test('a')) {
@@ -499,6 +504,11 @@ M.format_flexpage.populate_panel = function(Y, panel, url, onsuccess) {
                     panel.setFooter(response.footer);
                 }
                 panel.render(document.body);
+
+                if (panel.element) {
+                    // Add this class so Moodle knows the zIndex for calculating dialog zIndex.
+                    Y.YUI2.util.Dom.addClass(panel.element, 'moodle-has-zindex');
+                }
                 panel.center();
                 panel.show();
 

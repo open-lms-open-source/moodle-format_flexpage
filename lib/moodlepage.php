@@ -145,7 +145,7 @@ class course_format_flexpage_lib_moodlepage {
                     $options[$block->name] = $blockobject->get_title();
                 }
             }
-            collatorlib::asort($options);
+            core_collator::asort($options);
         }
         return $options;
     }

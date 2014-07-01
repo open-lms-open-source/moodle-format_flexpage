@@ -104,7 +104,7 @@ function format_flexpage_is_installed() {
 
     if (!property_exists($SESSION, 'format_flexpage_is_installed')) {
         $version = get_config('format_flexpage', 'version');
-        if (!empty($version)) {
+        if (!empty($version) && (!is_callable('mr_on') or mr_on('flexpage', 'format'))) {
             $SESSION->format_flexpage_is_installed = true;
         } else {
             $SESSION->format_flexpage_is_installed = false;

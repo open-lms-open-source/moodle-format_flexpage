@@ -27,15 +27,16 @@
  * @author Mark Nielsen
  * @package format_flexpage
  **/
-$handlers = array(
-    'mod_created' => array(
-        'handlerfile'     => '/course/format/flexpage/lib/eventhandler.php',
-        'handlerfunction' => array('course_format_flexpage_lib_eventhandler', 'mod_created'),
-        'schedule'        => 'instant'
+$observers = array(
+    array(
+        'eventname'   => '\core\event\course_module_created',
+        'includefile' => '/course/format/flexpage/lib/eventhandler.php',
+        'callback'    => 'course_format_flexpage_lib_eventhandler::mod_created',
     ),
-    'mod_deleted' => array(
-        'handlerfile'     => '/course/format/flexpage/lib/eventhandler.php',
-        'handlerfunction' => array('course_format_flexpage_lib_eventhandler', 'mod_deleted'),
-        'schedule'        => 'instant'
+
+    array(
+        'eventname'   => '\core\event\course_module_deleted',
+        'includefile' => '/course/format/flexpage/lib/eventhandler.php',
+        'callback'    => 'course_format_flexpage_lib_eventhandler::mod_deleted',
     ),
 );
