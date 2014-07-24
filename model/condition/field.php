@@ -44,6 +44,16 @@ class course_format_flexpage_model_condition_field {
     protected $fieldname;
 
     /**
+     * This is the custom profile field's
+     * short name.  This was added in at a
+     * much later date to support the new
+     * condition API.
+     *
+     * @var string
+     */
+    protected $shortname;
+
+    /**
      * @var string
      */
     protected $operator;
@@ -53,11 +63,12 @@ class course_format_flexpage_model_condition_field {
      */
     protected $value;
 
-    function __construct($field, $fieldname, $operator, $value) {
+    function __construct($field, $fieldname, $operator, $value, $shortname = null) {
         $this->field     = $field;
         $this->fieldname = $fieldname;
         $this->operator  = $operator;
         $this->value     = $value;
+        $this->shortname = $shortname;
 
         if (empty($this->fieldname)) {
             $this->fieldname = '!missing';
@@ -76,6 +87,19 @@ class course_format_flexpage_model_condition_field {
      */
     public function get_fieldname() {
         return $this->fieldname;
+    }
+
+    /**
+     * The custom profile field's
+     * short name.
+     *
+     * @return null|string
+     */
+    public function get_shortname() {
+        if ($this->is_custom()) {
+            return $this->shortname;
+        }
+        return null;
     }
 
     /**

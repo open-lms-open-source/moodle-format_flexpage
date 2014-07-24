@@ -705,19 +705,19 @@ class format_flexpage_renderer extends plugin_renderer_base {
                                    ->add_new_cell(html_writer::empty_tag('input', array('id' => 'id_releasecode', 'type' => 'text', 'name' => 'releasecode', 'maxlength' => 50, 'size' => 50, 'value' => $page->get_releasecode())));
             }
 
-            $box->add_new_row()->add_new_cell($this->flexpage_help_icon('gradecondition', 'condition'))
+            $box->add_new_row()->add_new_cell($this->flexpage_help_icon('gradecondition'))
                                ->add_new_cell($this->page_conditions($page, 'course_format_flexpage_model_condition_grade'));
 
             $templates = $this->condition_grade();
 
-            $box->add_new_row()->add_new_cell($this->flexpage_help_icon('userfield', 'condition'))
+            $box->add_new_row()->add_new_cell($this->flexpage_help_icon('userfield'))
                 ->add_new_cell($this->page_conditions($page, 'course_format_flexpage_model_condition_field'));
 
             $templates .= $this->condition_field();
 
             $completion = new completion_info($COURSE);
             if ($completion->is_enabled()) {
-                $box->add_new_row()->add_new_cell($this->flexpage_help_icon('completioncondition', 'condition'))
+                $box->add_new_row()->add_new_cell($this->flexpage_help_icon('completioncondition'))
                                    ->add_new_cell($this->page_conditions($page, 'course_format_flexpage_model_condition_completion'));
 
                 $templates .= $this->condition_completion();
@@ -810,12 +810,12 @@ class format_flexpage_renderer extends plugin_renderer_base {
                 }
             }
             asort($gradeoptions);
-            $gradeoptions = array(0 => get_string('none', 'condition')) + $gradeoptions;
+            $gradeoptions = array(0 => get_string('none', 'format_flexpage')) + $gradeoptions;
         }
         $elements = html_writer::select($gradeoptions, 'gradeitemids[]', $gradeitemid, false).
-                    ' '.get_string('grade_atleast','condition').' '.
+                    ' '.get_string('grade_atleast','format_flexpage').' '.
                     html_writer::empty_tag('input', array('name' => 'mins[]', 'size' => 3, 'type' => 'text', 'value' => $min)).
-                    '% '.get_string('grade_upto','condition').' '.
+                    '% '.get_string('grade_upto','format_flexpage').' '.
                     html_writer::empty_tag('input', array('name' => 'maxes[]', 'size' => 3, 'type' => 'text', 'value' => $max)).
                     '%';
 
@@ -829,6 +829,8 @@ class format_flexpage_renderer extends plugin_renderer_base {
      * @return string
      */
     public function condition_field(course_format_flexpage_model_condition_field $condition = null) {
+        global $DB;
+
         // Static so we only build it once...
         static $operators   = null;
         static $useroptions = null;
@@ -843,11 +845,45 @@ class format_flexpage_renderer extends plugin_renderer_base {
             $value    = $condition->get_value();
         }
         if (is_null($operators) || is_null($useroptions)) {
-            $operators   = condition_info::get_condition_user_field_operators();
-            $useroptions = condition_info::get_condition_user_fields(array('context' => $this->page->context));
-            asort($useroptions);
+            $operators = array(
+                OP_CONTAINS         => get_string('contains', 'format_flexpage'),
+                OP_DOES_NOT_CONTAIN => get_string('doesnotcontain', 'format_flexpage'),
+                OP_IS_EQUAL_TO      => get_string('isequalto', 'format_flexpage'),
+                OP_STARTS_WITH      => get_string('startswith', 'format_flexpage'),
+                OP_ENDS_WITH        => get_string('endswith', 'format_flexpage'),
+                OP_IS_EMPTY         => get_string('isempty', 'format_flexpage'),
+                OP_IS_NOT_EMPTY     => get_string('isnotempty', 'format_flexpage'),
+            );
+            $useroptions = array(
+                'firstname'   => get_user_field_name('firstname'),
+                'lastname'    => get_user_field_name('lastname'),
+                'email'       => get_user_field_name('email'),
+                'city'        => get_user_field_name('city'),
+                'country'     => get_user_field_name('country'),
+                'url'         => get_user_field_name('url'),
+                'icq'         => get_user_field_name('icq'),
+                'skype'       => get_user_field_name('skype'),
+                'aim'         => get_user_field_name('aim'),
+                'yahoo'       => get_user_field_name('yahoo'),
+                'msn'         => get_user_field_name('msn'),
+                'idnumber'    => get_user_field_name('idnumber'),
+                'institution' => get_user_field_name('institution'),
+                'department'  => get_user_field_name('department'),
+                'phone1'      => get_user_field_name('phone1'),
+                'phone2'      => get_user_field_name('phone2'),
+                'address'     => get_user_field_name('address')
+            );
 
-            $useroptions = array(0 => get_string('none', 'condition')) + $useroptions;
+            // Go through the custom profile fields now
+            if ($user_info_fields = $DB->get_records('user_info_field')) {
+                foreach ($user_info_fields as $userfield) {
+                    $useroptions[$userfield->id] = format_string(
+                        $userfield->name, true, array('context' => $this->page->context)
+                    );
+                }
+            }
+            asort($useroptions);
+            $useroptions = array(0 => get_string('none', 'format_flexpage')) + $useroptions;
         }
         $fieldid    = html_writer::random_id('field');
         $operatorid = html_writer::random_id('field');
@@ -890,13 +926,13 @@ class format_flexpage_renderer extends plugin_renderer_base {
                 }
             }
             asort($completionoptions);
-            $completionoptions = array(0 => get_string('none', 'condition')) + $completionoptions;
+            $completionoptions = array(0 => get_string('none', 'format_flexpage')) + $completionoptions;
         }
         $completionvalues=array(
-            COMPLETION_COMPLETE      => get_string('completion_complete','condition'),
-            COMPLETION_INCOMPLETE    => get_string('completion_incomplete','condition'),
-            COMPLETION_COMPLETE_PASS => get_string('completion_pass','condition'),
-            COMPLETION_COMPLETE_FAIL => get_string('completion_fail','condition'),
+            COMPLETION_COMPLETE      => get_string('completion_complete','format_flexpage'),
+            COMPLETION_INCOMPLETE    => get_string('completion_incomplete','format_flexpage'),
+            COMPLETION_COMPLETE_PASS => get_string('completion_pass','format_flexpage'),
+            COMPLETION_COMPLETE_FAIL => get_string('completion_fail','format_flexpage'),
         );
         $elements = html_writer::select($completionoptions, 'cmids[]', $cmid, false).'&nbsp;'.
                     html_writer::select($completionvalues, 'requiredcompletions[]', $requiredcompletion, false);

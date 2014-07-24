@@ -167,3 +167,29 @@ $string['actionbar_help'] = '
         drop-down menu. From this window you can create menus, as well as quickly edit menus, delete menus, and manage links within the menus.</li>
     </ul>
 </p>';
+
+// These are here for legacy support of old condition UI.
+$string['none']           = '(none)';
+$string['grade_atleast']  = 'must be at least';
+$string['grade_upto']     = 'and less than';
+$string['contains']       = 'contains';
+$string['doesnotcontain'] = 'doesn\'t contain';
+$string['isempty']        = 'is empty';
+$string['isequalto']      = 'is equal to';
+$string['isnotempty']     = 'is not empty';
+$string['endswith']       = 'ends with';
+$string['startswith']     = 'starts with';
+$string['completion_complete']   = 'must be marked complete';
+$string['completion_fail']       = 'must be complete with fail grade';
+$string['completion_incomplete'] = 'must not be marked complete';
+$string['completion_pass']       = 'must be complete with pass grade';
+$string['completioncondition'] = 'Activity completion condition';
+$string['completioncondition_help'] = 'This setting determines any activity completion conditions which must be met in order to access the flexpage. Note that completion tracking must first be set before an activity completion condition can be set.
+
+Multiple activity completion conditions may be set if desired.  If so, access to the flexpage will only be permitted when ALL activity completion conditions are met.';
+$string['gradecondition'] = 'Grade condition';
+$string['gradecondition_help'] = 'This setting determines any grade conditions which must be met in order to access the flexpage.
+
+Multiple grade conditions may be set if desired. If so, the flexpage will only allow access when ALL grade conditions are met.';
+$string['userfield'] = 'User field';
+$string['userfield_help'] = 'You can restrict access based on any field from the users profile.';

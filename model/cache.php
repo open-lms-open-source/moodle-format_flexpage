@@ -657,8 +657,8 @@ class course_format_flexpage_model_cache extends course_format_flexpage_model_ab
 
             // #3: Based on conditions, it is available to the user?  If not, see if we still show it...
             if (!$available) {
-                // #4: Not available, but if we have info and we are to show it, return it
-                if (!empty($info) and $conditionlib->show_availability()) {
+                // #4: Not available, but if we have info, return it
+                if (!empty($info)) {
                     return $info;
                 }
                 // #5: Not available and no info to show
