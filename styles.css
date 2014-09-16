@@ -27,6 +27,11 @@
     display: none;
 }
 
+/* Show admin block on participants page */
+#page-course-view-flexpage.path-user .block_adminblock {
+    display: inherit;
+}
+
 /* Prevents actionbar sub-menus from displaying until the menu is ready */
 .format_flexpage_actionbar .javascript-disabled .yui3-menu {
     display: none;
