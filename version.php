@@ -29,13 +29,13 @@
  */
 
 $plugin->version      = 2014093000;
-$plugin->requires     = 2013111803;
+$plugin->requires     = 2014051201;
 $plugin->component    = 'format_flexpage';
 $plugin->release      = '2.6.0 (Build: 20140603)';
 $plugin->maturity     = MATURITY_STABLE;
 $plugin->dependencies = array(
-    'block_flexpagenav' => 2013030500,
-    'block_flexpagemod' => 2013030500,
-    'theme_flexpage'    => 2012062800,
+    'block_flexpagenav' => 2014093000,
+    'block_flexpagemod' => 2014093000,
+    'theme_flexpage'    => 2014093000,
     'local_mr'          => 2010090201,
 );
