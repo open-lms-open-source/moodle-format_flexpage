@@ -193,3 +193,5 @@ $string['gradecondition_help'] = 'This setting determines any grade conditions w
 Multiple grade conditions may be set if desired. If so, the flexpage will only allow access when ALL grade conditions are met.';
 $string['userfield'] = 'User field';
 $string['userfield_help'] = 'You can restrict access based on any field from the users profile.';
+$string['releasecode'] = 'Release code';
+$string['releasecode_help'] = 'This course item will not be available to students until the student acquires the release code entered here.';

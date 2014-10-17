@@ -700,8 +700,8 @@ class format_flexpage_renderer extends plugin_renderer_base {
             $box->add_new_row()->add_new_cell($this->flexpage_help_icon('availableuntil'))
                                ->add_new_cell($this->calendar('availableuntil', $page->get_availableuntil()));
 
-            if (class_exists('local_mrooms_lib_condition_releasecode')) {
-                $box->add_new_row()->add_new_cell(html_writer::label($this->flexpage_help_icon('releasecode', 'local_mrooms'), 'id_releasecode'))
+            if (array_key_exists('releasecode', core_component::get_plugin_list('availability'))) {
+                $box->add_new_row()->add_new_cell(html_writer::label($this->flexpage_help_icon('releasecode'), 'id_releasecode'))
                                    ->add_new_cell(html_writer::empty_tag('input', array('id' => 'id_releasecode', 'type' => 'text', 'name' => 'releasecode', 'maxlength' => 50, 'size' => 50, 'value' => $page->get_releasecode())));
             }
 
