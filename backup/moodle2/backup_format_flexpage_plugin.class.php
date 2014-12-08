@@ -62,6 +62,9 @@ class backup_format_flexpage_plugin extends backup_format_plugin {
         $completions = new backup_nested_element('completions');
         $completion  = new backup_nested_element('completion', array('id'), array('cmid', 'requiredcompletion'));
 
+        $fields = new backup_nested_element('fields');
+        $field  = new backup_nested_element('field', array('id'), array('userfield', 'operator', 'value', 'customfield', 'customfieldtype'));
+
         $grades = new backup_nested_element('grades');
         $grade  = new backup_nested_element('grade', array('id'), array('gradeitemid', 'grademin', 'grademax'));
 
@@ -87,6 +90,9 @@ class backup_format_flexpage_plugin extends backup_format_plugin {
         $page->add_child($grades);
         $grades->add_child($grade);
 
+        $page->add_child($fields);
+        $fields->add_child($field);
+
         $pluginwrapper->add_child($menus);
         $menus->add_child($menu);
 
@@ -104,6 +110,12 @@ class backup_format_flexpage_plugin extends backup_format_plugin {
         $menu->set_source_table('block_flexpagenav_menu', array('courseid' => backup::VAR_COURSEID));
         $link->set_source_table('block_flexpagenav_link', array('menuid' => backup::VAR_PARENTID));
         $config->set_source_table('block_flexpagenav_config', array('linkid' => backup::VAR_PARENTID));
+        $field->set_source_sql('
+            SELECT f.*, uf.shortname AS customfield, uf.datatype AS customfieldtype
+              FROM {format_flexpage_field} f
+         LEFT JOIN {user_info_field} uf ON uf.id = f.customfieldid
+             WHERE f.pageid = ?
+        ', array('pageid' => backup::VAR_PARENTID));
 
         // Annotate ids
         $grade->annotate_ids('grade_item', 'gradeitemid');
