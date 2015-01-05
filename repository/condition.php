@@ -183,7 +183,7 @@ class course_format_flexpage_repository_condition {
             $params   = array($courseid);
         }
         $rs = $DB->get_recordset_sql(
-            "SELECT f.*, uf.name
+            "SELECT f.*, uf.name, uf.shortname
                FROM {format_flexpage_page} p
          INNER JOIN {format_flexpage_field} f ON p.id = f.pageid
           LEFT JOIN {user_info_field} uf ON f.customfieldid =  uf.id
@@ -196,12 +196,14 @@ class course_format_flexpage_repository_condition {
             if (!empty($record->customfieldid)) {
                 $field     = $record->customfieldid;
                 $fieldname = $record->name; // Might be null, means field deleted.
+                $shortname = $record->shortname; // Might be null, means field deleted.
             } else {
                 $field     = $record->userfield;
                 $fieldname = $record->userfield;
+                $shortname = null;
             }
             $conditions[$record->pageid][] = new course_format_flexpage_model_condition_field(
-                $field, $fieldname, $record->operator, $record->value
+                $field, $fieldname, $record->operator, $record->value, $shortname
             );
         }
         return $conditions;
@@ -251,7 +253,7 @@ class course_format_flexpage_repository_condition {
      * Save an array of conditions
      *
      * @param course_format_flexpage_model_page $page
-     * @param local_mrooms_lib_condition_abstract[] $conditions
+     * @param array $conditions
      * @return course_format_flexpage_repository_condition
      */
     public function save_page_conditions(course_format_flexpage_model_page $page, array $conditions) {

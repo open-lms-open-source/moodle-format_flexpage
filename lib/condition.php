@@ -21,84 +21,103 @@
  * @author Mark Nielsen
  */
 
+use core_availability\info;
+
 require_once($CFG->libdir.'/conditionlib.php');
 
 /**
  * @author Mark Nielsen
  * @package format_flexpage
  */
-class course_format_flexpage_lib_condition extends condition_info_base {
+class course_format_flexpage_lib_condition extends info {
+    /**
+     * @var course_format_flexpage_model_page
+     */
+    protected $page;
+
     /**
      * @param course_format_flexpage_model_page $page
      */
     public function __construct(course_format_flexpage_model_page $page) {
-        // Generate an $item that this class likes
+        $this->page = $page;
+
+        $rec = (object) array(
+            'id'               => $page->get_id(),
+            'course'           => $page->get_courseid(),
+            'availablefrom'    => $page->get_availablefrom(),
+            'availableuntil'   => $page->get_availableuntil(),
+            'releasecode'      => $page->get_releasecode(),
+            'showavailability' => $page->get_showavailability(),
+        );
+
+        $availability = self::convert_legacy_fields($rec, true);
+
+        $show = $page->get_showavailability();
+        foreach ($page->get_conditions() as $condition) {
+            if ($condition instanceof course_format_flexpage_model_condition_completion) {
+                $completion   = (object) array(
+                    'sourcecmid'         => $condition->get_cmid(),
+                    'requiredcompletion' => $condition->get_requiredcompletion(),
+                );
+                $availability = self::add_legacy_availability_condition($availability, $completion, $show);
+            } else if ($condition instanceof course_format_flexpage_model_condition_grade) {
+                $completion   = (object) array(
+                    'grademin'    => $condition->get_min(),
+                    'grademax'    => $condition->get_max(),
+                    'gradeitemid' => $condition->get_gradeitemid(),
+                );
+                $availability = self::add_legacy_availability_condition($availability, $completion, $show);
+            } else if ($condition instanceof course_format_flexpage_model_condition_field) {
+                $field = (object) array(
+                    'operator' => $condition->get_operator(),
+                    'value'    => $condition->get_value(),
+                );
+                if ($condition->is_custom()) {
+                    if ($condition->get_shortname() === null) {
+                        continue; // Cannot use, field no longer exists.
+                    }
+                    $field->shortname = $condition->get_shortname();
+                } else {
+                    $field->userfield = $condition->get_field();
+                }
+                $availability = self::add_legacy_availability_field_condition($availability, $field, $show);
+            }
+        }
         if ($page->get_display() == course_format_flexpage_model_page::DISPLAY_HIDDEN) {
             $visible = 0;
         } else {
             $visible = 1;
         }
-        $item = (object) array(
-            'id'                   => $page->get_id(),
-            'course'               => $page->get_courseid(),
-            'visible'              => $visible,
-            'availablefrom'        => $page->get_availablefrom(),
-            'availableuntil'       => $page->get_availableuntil(),
-            'releasecode'          => $page->get_releasecode(),
-            'showavailability'     => $page->get_showavailability(),
-            'conditionscompletion' => array(),
-            'conditionsgrade'      => array(),
-            'conditionsfield'      => array(),
-        );
-        foreach ($page->get_conditions() as $condition) {
-            if ($condition instanceof course_format_flexpage_model_condition_completion) {
-                $item->conditionscompletion[$condition->get_cmid()] = $condition->get_requiredcompletion();
-            } else if ($condition instanceof course_format_flexpage_model_condition_grade) {
-                $item->conditionsgrade[$condition->get_gradeitemid()] = (object) array(
-                    'min'  => $condition->get_min(),
-                    'max'  => $condition->get_max(),
-                    'name' => $condition->get_name(),
-                );
-            } else if ($condition instanceof course_format_flexpage_model_condition_field) {
-                $item->conditionsfield[$condition->get_field()] = (object) array(
-                    'fieldname' => $condition->get_fieldname(),
-                    'operator'  => $condition->get_operator(),
-                    'value'     => $condition->get_value(),
-                );
-            }
-        }
-        parent::__construct($item, 'format_flexpage', 'pageid', CONDITION_MISSING_NOTHING, true);
-    }
-
-    public static function fill_availability_conditions($page) {
-        self::prevent_usage(__FUNCTION__);
-    }
-
-    public function add_completion_condition($cmid, $requiredcompletion) {
-        self::prevent_usage(__FUNCTION__);
-    }
-
-    public function add_grade_condition($gradeitemid, $min, $max, $updateinmemory = false) {
-        self::prevent_usage(__FUNCTION__);
-    }
-
-    public function wipe_conditions() {
-        self::prevent_usage(__FUNCTION__);
-    }
-
-    protected function get_context() {
-        return context_course::instance($this->item->course);
+        parent::__construct(get_course($page->get_courseid()), $visible, $availability);
     }
 
     /**
-     * We do not use a lot of features from this class, so prevent
-     * ones that would break anyways.
+     * Gets context used for checking capabilities for this item.
      *
-     * @static
-     * @param string $function
-     * @throws coding_exception
+     * @return \context Context for this item
      */
-    protected static function prevent_usage($function) {
-        throw new coding_exception("The '$function' method cannot be called on this class'");
+    public function get_context() {
+        return \context_course::instance($this->get_course()->id);
+    }
+
+    /**
+     * Obtains the name of the item (cm_info or section_info, at present) that
+     * this is controlling availability of. Name should be formatted ready
+     * for on-screen display.
+     *
+     * @return string Name of item
+     */
+    protected function get_thing_name() {
+        return format_string($this->page->get_name());
+    }
+
+    /**
+     * Stores an updated availability tree JSON structure into the relevant
+     * database table.
+     *
+     * @param string $availabilty New JSON value
+     */
+    protected function set_in_database($availabilty) {
+        throw new coding_exception('The set_in_database method has not been implemented for Flexpage');
     }
 }

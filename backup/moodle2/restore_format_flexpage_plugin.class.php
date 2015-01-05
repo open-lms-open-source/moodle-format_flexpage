@@ -37,6 +37,7 @@ class restore_format_flexpage_plugin extends restore_format_plugin {
             new restore_path_element('flexpage_region', $this->get_pathfor('/pages/page/regions/region')),
             new restore_path_element('flexpage_completion', $this->get_pathfor('/pages/page/completions/completion')),
             new restore_path_element('flexpage_grade', $this->get_pathfor('/pages/page/grades/grade')),
+            new restore_path_element('flexpage_field', $this->get_pathfor('/pages/page/fields/field')),
             new restore_path_element('flexpage_menu', $this->get_pathfor('/menus/menu')),
             new restore_path_element('flexpage_link', $this->get_pathfor('/menus/menu/links/link')),
             new restore_path_element('flexpage_config', $this->get_pathfor('/menus/menu/links/link/configs/config')),
@@ -94,6 +95,41 @@ class restore_format_flexpage_plugin extends restore_format_plugin {
         $data->pageid = $this->get_new_parentid('flexpage_page');
 
         $DB->insert_record('format_flexpage_grade', $data);
+    }
+
+    /**
+     * Restore a page field condition
+     */
+    public function process_flexpage_field($data) {
+        global $DB;
+
+        $data          = (object) $data;
+        $passed        = true;
+        $customfieldid = null;
+
+        // If a customfield has been used in order to pass we must be able to match an existing
+        // customfield by name (data->customfield) and type (data->customfieldtype)
+        if (is_null($data->customfield) xor is_null($data->customfieldtype)) {
+            // xor is sort of uncommon. If either customfield is null or customfieldtype is null BUT not both.
+            // If one is null but the other isn't something clearly went wrong and we'll skip this condition.
+            $passed = false;
+        } else {
+            if (!is_null($data->customfield)) {
+                $params        = array('shortname' => $data->customfield, 'datatype' => $data->customfieldtype);
+                $customfieldid = $DB->get_field('user_info_field', 'id', $params);
+                $passed        = ($customfieldid !== false);
+            }
+        }
+
+        if ($passed) {
+            $DB->insert_record('format_flexpage_field', (object) array(
+                'pageid'        => $this->get_new_parentid('flexpage_page'),
+                'userfield'     => $data->userfield,
+                'customfieldid' => $customfieldid,
+                'operator'      => $data->operator,
+                'value'         => $data->value,
+            ));
+        }
     }
 
     /**

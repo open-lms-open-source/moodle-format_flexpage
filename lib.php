@@ -195,15 +195,6 @@ class format_flexpage extends format_base {
 }
 
 /**
- * Don't show the add block UI
- *
- * @return bool
- */
-function callback_flexpage_add_block_ui() {
-    return false;
-}
-
-/**
  * Cleanup all things flexpage on course deletion
  *
  * @param int $courseid
