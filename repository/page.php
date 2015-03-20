@@ -339,24 +339,18 @@ class course_format_flexpage_repository_page {
         global $DB;
 
         $DB->execute('
-            DELETE c
-              FROM {format_flexpage_page} p
-        INNER JOIN {format_flexpage_completion} c ON p.id = c.pageid
-             WHERE p.courseid = ?
+            DELETE FROM {format_flexpage_completion}
+                  WHERE pageid IN (SELECT id FROM {format_flexpage_page} WHERE courseid = ?)
         ', array($courseid));
 
         $DB->execute('
-            DELETE g
-              FROM {format_flexpage_page} p
-        INNER JOIN {format_flexpage_grade} g ON p.id = g.pageid
-             WHERE p.courseid = ?
+            DELETE FROM {format_flexpage_grade}
+                  WHERE pageid IN (SELECT id FROM {format_flexpage_page} WHERE courseid = ?)
         ', array($courseid));
 
         $DB->execute('
-            DELETE r
-              FROM {format_flexpage_page} p
-        INNER JOIN {format_flexpage_region} r ON p.id = r.pageid
-             WHERE p.courseid = ?
+            DELETE FROM {format_flexpage_region}
+                  WHERE pageid IN (SELECT id FROM {format_flexpage_page} WHERE courseid = ?)
         ', array($courseid));
 
         $DB->delete_records('format_flexpage_page', array('courseid' => $courseid));
