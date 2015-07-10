@@ -342,9 +342,11 @@ class format_flexpage_renderer extends plugin_renderer_base {
         foreach ($pages as $page) {
             $info = $cache->is_page_available($page);
             if (is_string($info)) {
+                $formattedinfo = \core_availability\info::format_info($info, $page->get_courseid());
+
                 $box->add_new_row()->add_new_cell(
-                    html_writer::tag('div', format_string($page->get_name()), array('class' => 'format_flexpage_pagename')).
-                    html_writer::tag('div', $info, array('class' => 'availabilityinfo'))
+                    html_writer::div(format_string($page->get_name()), 'format_flexpage_pagename').
+                    html_writer::div($formattedinfo, 'availabilityinfo')
                 );
             }
         }
@@ -623,7 +625,11 @@ class format_flexpage_renderer extends plugin_renderer_base {
 
             if (!empty($CFG->enableavailability)) {
                 $conditionlib = new course_format_flexpage_lib_condition($page);
-                $pagename .= html_writer::tag('div', $conditionlib->get_full_information(), array('class' => 'availabilityinfo'));
+                $fullinfo     = $conditionlib->get_full_information();
+                if ($fullinfo) {
+                    $formattedinfo = \core_availability\info::format_info($fullinfo, $page->get_courseid());
+                    $pagename .= html_writer::div($formattedinfo, 'availabilityinfo');
+                }
             }
             $row = $box->add_new_row(array('pageid' => $page->get_id()));
             $row->add_new_cell($pagename, array('class' => 'format_flexpage_name_cell'))
