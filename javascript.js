@@ -109,7 +109,7 @@ M.format_flexpage.init_edit = function(Y) {
                 modal: true,
                 visible: false,
                 underlay: "none",
-                close: true,
+                close: false, // workaround bug in SimpleDialog causing multiple close buttons
                 text: M.str.format_flexpage.deletemodwarn,
                 icon: Y.YUI2.widget.SimpleDialog.ICON_WARN,
                 buttons: [
