@@ -27,9 +27,15 @@
     display: none;
 }
 
-/* Show admin block on participants page */
-#page-course-view-flexpage.path-user .block_adminblock {
+/* Show admin block on participants and course category admin pages */
+#page-course-view-flexpage.path-user .block_adminblock,
+#page-course-index-category .block_adminblock {
     display: inherit;
+}
+
+#page-course-index-category #moodle-blocks {
+    visibility: visible;
+    height: auto;
 }
 
 /* Prevents actionbar sub-menus from displaying until the menu is ready */
