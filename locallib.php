@@ -266,7 +266,7 @@ function format_flexpage_default_width_styles($sidepredefault = 200, $sidepostde
     if ($widths['side-top']) {
         $othercss .= "\n    #page-content #region-top { width: {$widths['side-top']}px; }";
     }
-    if (!is_null($widths['main'])) {
+    if (isset($widths['main']) && !is_null($widths['main'])) {
         $othercss .= "\n    #page-content #region-main-box { width: ".(($regionmain + $widths['main']) * 2).'px; }';
     }
     return <<<EOT
