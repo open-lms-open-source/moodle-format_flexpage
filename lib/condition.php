@@ -23,8 +23,6 @@
 
 use core_availability\info;
 
-require_once($CFG->libdir.'/conditionlib.php');
-
 /**
  * @author Mark Nielsen
  * @package format_flexpage

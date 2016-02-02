@@ -63,6 +63,10 @@ class course_format_flexpage_lib_eventhandler {
     public static function mod_created(course_module_created $event) {
         global $CFG, $SESSION;
 
+        if (PHPUNIT_TEST || defined('BEHAT_SITE_RUNNING')) {
+            return;  // Disable for testing.
+        }
+
         if (!empty($SESSION->format_flexpage_mod_region)) {
             $region = $SESSION->format_flexpage_mod_region;
         } else {
@@ -95,6 +99,10 @@ class course_format_flexpage_lib_eventhandler {
      */
     public static function mod_deleted(course_module_deleted $event) {
         global $CFG;
+
+        if (PHPUNIT_TEST || defined('BEHAT_SITE_RUNNING')) {
+            return;  // Disable for testing.
+        }
 
         if (self::is_flexpage_format($event->courseid) && !PHPUNIT_TEST) {
             require_once($CFG->dirroot.'/course/format/flexpage/lib/moodlepage.php');

@@ -729,8 +729,8 @@ class format_flexpage_renderer extends plugin_renderer_base {
                 $templates .= $this->condition_completion();
             }
             $showopts = array(
-                CONDITION_STUDENTVIEW_SHOW => get_string('showavailability_show', 'format_flexpage'),
-                CONDITION_STUDENTVIEW_HIDE => get_string('showavailability_hide', 'format_flexpage')
+                1 => get_string('showavailability_show', 'format_flexpage'),
+                0 => get_string('showavailability_hide', 'format_flexpage')
             );
             $box->add_new_row()->add_new_cell(html_writer::label($this->flexpage_help_icon('showavailability'), 'id_showavailability'))
                                ->add_new_cell(html_writer::select($showopts, 'showavailability', $page->get_showavailability(), false, array('id' => 'id_showavailability')));

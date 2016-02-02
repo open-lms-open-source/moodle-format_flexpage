@@ -21,7 +21,6 @@
  * @author Mark Nielsen
  */
 
-require_once($CFG->libdir.'/conditionlib.php');
 require_once(__DIR__.'/abstract.php');
 require_once(__DIR__.'/condition/grade.php');
 require_once(__DIR__.'/condition/field.php');
@@ -148,7 +147,7 @@ class course_format_flexpage_model_page extends course_format_flexpage_model_abs
      *
      * @var int
      */
-    protected $showavailability;
+    protected $showavailability = 1;
 
     /**
      * Page region widths
@@ -163,7 +162,6 @@ class course_format_flexpage_model_page extends course_format_flexpage_model_abs
     protected $conditions = array();
 
     public function __construct($options = array()) {
-        $this->showavailability = CONDITION_STUDENTVIEW_SHOW;
         $this->set_options($options);
     }
 

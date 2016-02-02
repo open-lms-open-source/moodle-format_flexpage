@@ -87,8 +87,16 @@ class course_format_flexpage_lib_moodlepage {
         $regions = $PAGE->theme->get_all_block_regions();
 
         $return = array();
+
+        // Ignore the old 'main' region in Snap theme in preference for the 'side-main-box' region.
+        if (array_key_exists('side-main-box', $regions) && array_key_exists('main', $regions)) {
+            unset($regions['main']);
+        }
+
         foreach ($layout['regions'] as $region) {
-            $return[$region] = $regions[$region];
+            if (isset($regions[$region])) {
+                $return[$region] = $regions[$region];
+            }
         }
         return $return;
     }

@@ -22,7 +22,6 @@
  */
 
 require_once($CFG->libdir.'/completionlib.php');
-require_once($CFG->libdir.'/conditionlib.php');
 require_once($CFG->libdir.'/gradelib.php');
 
 /**
