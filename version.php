@@ -28,14 +28,14 @@
  * @package format_flexpage
  */
 
-$plugin->version      = 2016012600;
-$plugin->requires     = 2015111604; // Requires this Moodle version (3.0.4).
+$plugin->version      = 2016121300;
+$plugin->requires     = 2016052300;
 $plugin->component    = 'format_flexpage';
-$plugin->release      = '3.0.4 (Build: 20160509)';
+$plugin->release      = '3.1.3';
 $plugin->maturity     = MATURITY_STABLE;
 $plugin->dependencies = array(
-    'block_flexpagenav' => 2016012600,
-    'block_flexpagemod' => 2016012600,
-    'theme_flexpage'    => 2016012600,
-    'local_mr'          => 2016012600,
+    'block_flexpagenav' => 2016121300,
+    'block_flexpagemod' => 2016121300,
+    'theme_flexpage'    => 2016121300,
+    'local_mr'          => 2016121300,
 );
