@@ -193,26 +193,3 @@ class format_flexpage extends format_base {
         $records->close();
     }
 }
-
-/**
- * Cleanup all things flexpage on course deletion
- *
- * @param int $courseid
- * @return void
- */
-function format_flexpage_delete_course($courseid) {
-    global $CFG;
-
-    require_once($CFG->dirroot.'/blocks/flexpagenav/repository/menu.php');
-    require_once($CFG->dirroot.'/course/format/flexpage/repository/page.php');
-    require_once($CFG->dirroot.'/course/format/flexpage/repository/cache.php');
-
-    $menurepo = new block_flexpagenav_repository_menu();
-    $menurepo->delete_course_menus($courseid);
-
-    $pagerepo = new course_format_flexpage_repository_page();
-    $pagerepo->delete_course_pages($courseid);
-
-    $cacherepo = new course_format_flexpage_repository_cache();
-    $cacherepo->delete_course_cache($courseid);
-}

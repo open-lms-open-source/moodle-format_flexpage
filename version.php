@@ -28,7 +28,7 @@
  * @package format_flexpage
  */
 
-$plugin->version      = 2016121300;
+$plugin->version      = 2017031000;
 $plugin->requires     = 2016120500;
 $plugin->component    = 'format_flexpage';
 $plugin->release      = '3.2.1';

@@ -39,4 +39,8 @@ $observers = array(
         'includefile' => '/course/format/flexpage/lib/eventhandler.php',
         'callback'    => 'course_format_flexpage_lib_eventhandler::mod_deleted',
     ),
+    array(
+        'eventname'   => '\core\event\course_content_deleted',
+        'callback'    => '\format_flexpage\observer::course_content_deleted',
+    ),
 );
