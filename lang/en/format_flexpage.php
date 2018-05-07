@@ -195,3 +195,4 @@ $string['userfield'] = 'User field';
 $string['userfield_help'] = 'You can restrict access based on any field from the users profile.';
 $string['releasecode'] = 'Release code';
 $string['releasecode_help'] = 'This course item will not be available to students until the student acquires the release code entered here.';
+$string['privacy:metadata'] = 'The Flexpage format plugin does not store any personal data.';
