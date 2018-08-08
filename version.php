@@ -28,14 +28,14 @@
  * @package format_flexpage
  */
 
-$plugin->version      = 2017120800;
+$plugin->version      = 2018080800;
 $plugin->requires     = 2017111300;
 $plugin->component    = 'format_flexpage';
-$plugin->release      = '3.4.1';
+$plugin->release      = '3.4.3';
 $plugin->maturity     = MATURITY_STABLE;
 $plugin->dependencies = array(
-    'block_flexpagenav' => 2017120800,
-    'block_flexpagemod' => 2017120800,
-    'theme_flexpage'    => 2017120800,
-    'local_mr'          => 2017120800,
+    'block_flexpagenav' => 2018080800,
+    'block_flexpagemod' => 2018080800,
+    'theme_flexpage'    => 2018080800,
+    'local_mr'          => 2018080800,
 );
